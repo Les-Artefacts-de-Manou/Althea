@@ -1,7 +1,9 @@
 ﻿# Althéa - Etat du projet
 
 > Document de synthèse vivant. Donne en un coup d'œil le statut réel du projet, les décisions actées, les dettes techniques connues et les prochaines étapes.
-> Dernière mise à jour : 07 juin 2026 (post-implémentation gestion utilisateurs complète).
+> Dernière mise à jour : 08 juin 2026 (post-cadrage métier : décisions de conception actées).
+
+> 📐 **Plan directeur de la phase métier** : [`Docs/Conception/Plan_Conception_Metier_Althea.md`](../Conception/Plan_Conception_Metier_Althea.md) — source de vérité détaillée des décisions de cadrage (D-Q1 à D-Q10).
 
 ---
 
@@ -49,12 +51,12 @@
 
 | Module | Statut | Notes |
 |--------|--------|-------|
-| Patients (recherche, fiche) | ⚠ | Tables DB prêtes ; UI et logique métier à créer |
-| Dossiers (statuts, cycle de vie) | ⚠ | |
-| Séances (saisie, historique) | ⚠ | |
+| Patients (recherche, fiche) | ⚠ | Tables DB prêtes ; UI et logique métier à créer. Réseau d'intervenants N-N acté (D-Q1bis) |
+| Dossiers (statuts, cycle de vie) | ⚠ | Réouverture si même domaine ; transfert inter-domaines actés (D-Q5, D-Q10) |
+| Séances (saisie, historique) | ⚠ | Créée dès planification du RDV lié, statut via `ref_statuts_seance` (D-Q6) |
 | Paiements (liaison séances) | ⚠ | |
-| Documents | 🧪 | POC Drive/DocIO validé ; intégration non faite |
-| Agenda | 🧪 | POC Google Calendar / Scheduler validé ; intégration non faite |
+| Documents | 🧪 → périmètre acté | POC Drive/DocIO validé ; **V1 actée** : fichiers hors DB, chemin déterministe, Word local **et** Google Docs (D-Q4/D-Q7) |
+| Agenda | 🧪 → périmètre acté | POC Google Calendar/Scheduler validé ; **V1 actée** : Google = pilier, sync bidirectionnelle, reprise assistée (D-Q8) |
 
 ### 🗄️ Base de données
 
@@ -62,7 +64,7 @@
 |-----------|--------|-------|
 | Tables techniques (`tec_*`) | ✓ | Paramètres, méta-schéma |
 | Tables sécurité (`sec_*`) | ✓ | `sec_utilisateurs` avec gestion complète des rôles, verrouillage, élévation |
-| Tables référentielles (`ref_*`) | ✓ | Statuts, types, volets |
+| Tables référentielles (`ref_*`) | ✓ schéma / ⚠ à migrer | Statuts, types, **domaines** (ex-`volets`, D-Q1) ; à créer : `ref_roles_intervenant` (D-Q1bis) |
 | Tables métier (patients, dossiers, séances, paiements, documents) | ✓ schéma / ⚠ branché | Schéma SQL existant ; modules applicatifs non connectés |
 | Scripts versionnés complets | ⚠ | Partie technique et sécurité OK ; partie métier à compléter |
 | Séquences MariaDB | ✓ | Gestion correcte via `LASTVAL(seq_sec_utilisateurs)` |
@@ -97,10 +99,15 @@
 | D-10 | Modes utilisateur distincts (Création/Modification/Consultation) | ✓ Actée |
 | D-11 | Remplacement complet de MessageBox par DialogChoix personnalisé | ✓ Actée |
 | D-12 | Centralisation des icônes d'état via UtilsIcons | ✓ Actée |
-| D-13 | Intégration documents V1 depuis POC (périmètre à définir) | ⚠ À décider |
-| D-14 | Intégration agenda V1 depuis POC (périmètre à définir) | ⚠ À décider |
+| D-13 | Intégration documents V1 : stockage **hors DB** (système de fichiers), chemin déterministe, flux Word local + Google Docs, export PDF | ✓ Actée |
+| D-14 | Intégration agenda V1 : Google Calendar comme pilier, synchronisation bidirectionnelle, reprise assistée | ✓ Actée |
+| D-15 | Composant `UC_RichTextEditor` + variante compacte `UC_RichTextEditorSimple` (double format) | ✓ Actée |
+| D-16 | Renommages métier : `volets`→`domaines`, `medecins`→`therapeutes`, réseau de suivi en N-N (`autres_suivis_patient` + `ref_roles_intervenant`) | ✓ Actée |
+| D-17 | Séance créée dès la planification du rendez-vous lié, statut piloté par `ref_statuts_seance` | ✓ Actée |
+| D-18 | UserControl dédié par référentiel sur une base commune (`UC_ReferentielBase`) | ✓ Actée |
+| D-19 | Anticipation multi-utilisateur / multi-agenda dès la V1 (modèle préparé, activation différée) | ✓ Actée |
 
-> ⚠ Détail et justification de chaque décision : voir [`ARCHITECTURE_DECISIONS.md`](./ARCHITECTURE_DECISIONS.md).
+> ⚠ Détail et justification de chaque décision : voir [`ARCHITECTURE_DECISIONS.md`](../Rules/ARCHITECTURE_DECISIONS.md) (ADR-13 à ADR-19) et le [plan de conception métier](../Conception/Plan_Conception_Metier_Althea.md).
 
 ---
 
@@ -112,9 +119,10 @@
 | DT-02 | ~~`UC_Utilisateurs` non finalisé~~ | ~~Haute~~ | ✓ **RÉSOLU** - Module complet et opérationnel |
 | DT-03 | Scripts SQL métier non entièrement versionnés pour les modules patients/dossiers/séances/paiements | Moyenne | Complexifie les mises à jour de schéma futures |
 | DT-04 | Scénarios d'exploitation (tests erreurs/permissions) non durcis pour modules métier | Moyenne | Risque de comportements inattendus aux limites |
-| DT-05 | Intégration des POC documents et agenda non planifiée précisément | Moyenne | Dépendance à une décision de périmètre (D-13, D-14) |
+| DT-05 | ~~Intégration des POC documents et agenda non planifiée~~ | ~~Moyenne~~ | ✓ **RÉSOLU** - Périmètre V1 acté (D-13, D-14) ; reste l'implémentation |
 | DT-06 | Absence de campagne de tests fonctionnels transverses | Haute | Requise avant tout gel de la V1 |
 | DT-07 | Documentation illustrations manquantes | Faible | Images à ajouter pour DialogChoix, UtilisateurEdition, UC_Utilisateurs |
+| DT-08 | Migration de schéma à réaliser (Lot 0) : `volets`→`domaines`, `medecins`→`therapeutes`, liaison N-N `autres_suivis_patient`, `ref_roles_intervenant`, `ref_statuts_seance` | Haute | Prérequis bloquant des modules métier ; à versionner avant tout codage Lot 1 |
 
 ---
 
@@ -126,25 +134,30 @@
 3. ~~Implémenter DialogChoix pour remplacer tous les MessageBox~~ ✓
 4. ~~Centraliser les icônes d'état via UtilsIcons~~ ✓
 
-### Priorité 2 - Premier lot métier (patients/dossiers)
-5. Créer les modules métier Patients (recherche + fiche multi-onglets)
-6. Créer la gestion des dossiers avec leurs statuts et transitions
+### Priorité 2 - Lot 0 : socle métier (migration de schéma) ⏳ **PRÉREQUIS BLOQUANT**
+5. Versionner et appliquer la migration : `volets`→`domaines`, `medecins`→`therapeutes`
+6. Créer la liaison N-N `autres_suivis_patient` + le référentiel `ref_roles_intervenant`
+7. Créer/aligner `ref_statuts_seance` (cycle de vie séance)
+8. Créer la base UI commune `UC_ReferentielBase` + composants `UC_RichTextEditor` / `UC_RichTextEditorSimple`
 
-### Priorité 3 - Suivi et paiements
-7. Implémenter la gestion des séances (saisie + historique)
-8. Implémenter la gestion des paiements (liaison séances + suivi financier minimal)
+### Priorité 3 - Lot 1 : Patients & dossiers
+9. Créer les modules métier Patients (recherche + fiche multi-onglets + réseau d'intervenants)
+10. Créer la gestion des dossiers avec leurs statuts, transitions, réouverture et transfert inter-domaines
 
-### Priorité 4 - Documents et agenda (intégration depuis POC)
-9. Définir le périmètre V1 minimal pour les documents
-10. Définir le périmètre V1 minimal pour l'agenda
-11. Intégrer les deux modules dans le code principal
+### Priorité 4 - Lot 2 : Suivi et paiements
+11. Implémenter la gestion des séances (création dès planification RDV + historique + statuts)
+12. Implémenter la gestion des paiements (liaison séances + suivi financier minimal)
 
-### Priorité 5 - Exploitation et stabilisation
-12. Industrialiser la sauvegarde/restauration DB + fichiers
-13. Préparer le package d'installation avec configuration initiale guidée
-14. Exécuter la campagne de tests fonctionnels transverses
-15. Effectuer les corrections UX finales et durcir les cas limites
-16. Clôturer le changelog et préparer la note de version V1
+### Priorité 5 - Lot 3 : Documents et agenda (intégration depuis POC)
+13. Intégrer le module documents V1 (fichiers hors DB, chemin déterministe, Word local + Google Docs, export PDF)
+14. Intégrer le module agenda V1 (Google Calendar pilier, sync bidirectionnelle, reprise assistée)
+
+### Priorité 6 - Exploitation et stabilisation
+15. Industrialiser la sauvegarde/restauration DB + fichiers
+16. Préparer le package d'installation avec configuration initiale guidée
+17. Exécuter la campagne de tests fonctionnels transverses
+18. Effectuer les corrections UX finales et durcir les cas limites
+19. Clôturer le changelog et préparer la note de version V1
 
 ---
 
@@ -160,6 +173,11 @@
 ---
 
 ## 6. Réalisations récentes (depuis audit 17/05/2026)
+
+### Cadrage de la phase métier ✓ (08/06/2026)
+- **Plan de conception métier** rédigé et validé : [`Plan_Conception_Metier_Althea.md`](../Conception/Plan_Conception_Metier_Althea.md)
+- **Décisions actées** (D-13 à D-19) : stockage documents hors DB à chemin déterministe, Google Docs/Drive/Calendar piliers V1, renommages `domaines`/`therapeutes`, réseau d'intervenants N-N, séance créée dès la planification, UC dédié par référentiel, anticipation multi-utilisateur
+- **ADR mis à jour** : ARCHITECTURE_DECISIONS.md (ADR-13 à ADR-19) et Rules.md (terminologie + double format éditeur de texte)
 
 ### Gestion utilisateurs complète ✓
 - **UC_Utilisateurs** : liste avec recherche/filtres avancés (nom, login, rôle, état, date), affichage icônes d'état (actif/inactif/verrouillé), actions admin complètes

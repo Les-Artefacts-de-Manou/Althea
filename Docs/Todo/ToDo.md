@@ -1,8 +1,9 @@
 # 📌 Althéa — ToDo opérationnel (backlog V1)
 
-> Backlog actionnable, aligné sur l'état réel du dépôt.  
-> Référence d'avancement détaillée : `Checklist_projet_V1.md`.  
-> >  *Dernière mise à jour : 07/06/2026*
+> Backlog actionnable, aligné sur l'état réel du dépôt.
+> Plan directeur de la phase métier : `../Conception/Plan_Conception_Metier_Althea.md` (décisions actées D-13 à D-19).
+> Référence d'avancement détaillée : `Checklist_projet_V1.md`.
+> >  *Dernière mise à jour : 08/06/2026*
 
 ---
 
@@ -42,38 +43,64 @@
 
 ---
 
-## B. Cœur métier V1 (objectif principal restant)
+## B. Lot 0 — Socle métier (migration de schéma) ⏳ **PRÉREQUIS BLOQUANT**
 
-### B1. Patients
+> À réaliser et versionner **avant** tout codage des modules métier (section C).
+> Référence : décisions D-16 à D-18 du plan de conception.
+
+### B0a. Migration de schéma
+
+- [ ] Versionner et appliquer le renommage `volets` → `domaines`
+- [ ] Versionner et appliquer le renommage `medecins` → `therapeutes`
+- [ ] Créer la table de liaison N-N `autres_suivis_patient` (patient ↔ thérapeute externe)
+- [ ] Créer le référentiel `ref_roles_intervenant`
+- [ ] Créer/aligner le référentiel `ref_statuts_seance` (cycle de vie séance)
+- [ ] Mettre à jour les scripts SQL versionnés et la documentation `Database`
+
+### B0b. Briques UI transverses
+
+- [ ] Créer la base commune `UC_ReferentielBase` (UserControl générique par référentiel)
+- [ ] Décliner un `UC_*` dédié par référentiel (domaines, types, statuts, rôles intervenant…)
+- [ ] Créer le composant riche `UC_RichTextEditor`
+- [ ] Créer la variante compacte `UC_RichTextEditorSimple`
+
+---
+
+## C. Cœur métier V1 (objectif principal restant)
+
+### C1. Patients
 
 - [ ] Créer module métier gestion patients (`GestionPatients.vb`)
 - [ ] Créer requêtes SQL patients (`QueryPatients.vb`)
 - [ ] Créer UI recherche patients (filtres + résultats)
 - [ ] Créer UI fiche patient (onglets : identité, administratif, famille, suivi, documents, facturation, archive)
+- [ ] Implémenter le réseau d'intervenants externes (N-N via `autres_suivis_patient` + `ref_roles_intervenant`)
 - [ ] Ajouter validations et règles de saisie
 - [ ] Implémenter recherche rapide depuis accueil
 
-### B2. Dossiers
+### C2. Dossiers
 
 - [ ] Créer module métier gestion dossiers (`GestionDossiers.vb`)
 - [ ] Créer requêtes SQL dossiers (`QueryDossiers.vb`)
 - [ ] Créer UI gestion dossiers liés au patient
 - [ ] Implémenter statuts dossier (actif/pause/clôturé/archivé)
 - [ ] Gérer transitions de statut sécurisées avec validation
-- [ ] Implémenter zone notes (format retenu) + historique lisible
-- [ ] Implémenter recherche et filtrage par statut/date
+- [ ] Gérer réouverture après clôture (même domaine) et transfert inter-domaines
+- [ ] Implémenter zone notes via `UC_RichTextEditor` + historique lisible
+- [ ] Implémenter recherche et filtrage par statut/date/domaine
 
-### B3. Séances
+### C3. Séances
 
 - [ ] Créer module métier gestion séances (`GestionSeances.vb`)
 - [ ] Créer requêtes SQL séances (`QuerySeances.vb`)
 - [ ] Créer UI gestion séances
+- [ ] Créer la séance dès la planification du rendez-vous lié (statut via `ref_statuts_seance`)
 - [ ] Ajouter historique lisible + tri/filtrage
-- [ ] Implémenter zone notes/synthèse par séance
+- [ ] Implémenter zone notes/synthèse par séance (`UC_RichTextEditorSimple`)
 - [ ] Lier séances aux dossiers
 - [ ] Implémenter saisie rapide de séance
 
-### B4. Paiements
+### C4. Paiements
 
 - [ ] Créer module métier gestion paiements (`GestionPaiements.vb`)
 - [ ] Créer requêtes SQL paiements (`QueryPaiements.vb`)
@@ -85,41 +112,42 @@
 
 ---
 
-## C. Documents et agenda (à intégrer depuis POC)
+## D. Documents et agenda (à intégrer depuis POC)
 
-### C1. Documents
+### D1. Documents
 
-- [ ] Définir périmètre d'intégration documents V1 (minimum viable)
-  - [ ] Upload/stockage local de documents (PDF, images, Word)
+- [ ] Implémenter le stockage **hors base de données** (système de fichiers, chemin déterministe calculé)
+  - [ ] Flux Word local + synchronisation Google Docs à la sauvegarde
+  - [ ] Export PDF
   - [ ] Catégorisation par type (rapport, synthèse, courrier, etc.)
-  - [ ] Liaison documents ↔ patients/dossiers
+  - [ ] Liaison documents ↔ patients/dossiers (chemin reconstituable)
 - [ ] Créer module métier gestion documents (`GestionDocuments.vb`)
 - [ ] Intégrer création/liaison documents dans code principal
 - [ ] Implémenter recherche documents par patient/dossier/type
 - [ ] Prévoir envoi documents par email (ex. synthèse de séance)
 - [ ] Historique des envois en lien avec le patient/dossier
 
-### C2. Agenda
+### D2. Agenda
 
-- [ ] Définir périmètre d'intégration agenda V1
+- [ ] Intégrer Google Calendar comme **pilier** (synchronisation bidirectionnelle, reprise assistée)
   - [ ] Gestion rendez-vous de base (date, heure, patient, type)
-  - [ ] Vue calendrier mensuelle/hebdomadaire
+  - [ ] Vue calendrier mensuelle/hebdomadaire (Scheduler)
   - [ ] Création rapide de rendez-vous depuis fiche patient
 - [ ] Créer module métier gestion agenda (`GestionAgenda.vb`)
-- [ ] Intégrer gestion rendez-vous/séances depuis le POC
 - [ ] Implémenter notifications/rappels rendez-vous
-- [ ] Lier rendez-vous ↔ séances réalisées
+- [ ] Lier rendez-vous ↔ séances réalisées (séance créée dès planification)
+- [ ] Préparer le modèle multi-utilisateur / multi-agenda (activation différée)
 
 ---
 
-## D. Technique & exploitation
+## E. Technique & exploitation
 
 - [ ] Finaliser scripts SQL versionnés pour modules métier restants
   - [ ] Scripts création/migration tables patients
   - [ ] Scripts création/migration tables dossiers
   - [ ] Scripts création/migration tables séances
   - [ ] Scripts création/migration tables paiements
-  - [ ] Scripts création/migration tables documents (si stockage DB)
+  - [ ] Scripts création/migration tables documents (métadonnées ; fichiers stockés hors DB)
   - [ ] Scripts création/migration tables agenda
 - [ ] Mettre en place procédure de sauvegarde DB + fichiers
   - [ ] Sauvegarde automatique quotidienne
@@ -136,16 +164,17 @@
 
 ---
 
-## E. Qualité & documentation
+## F. Qualité & documentation
 
 - [x] Base documentaire technique existante (README/Rules/Process/Database)
 - [x] Consolidation des documents de pilotage (`Checklist`, `ToDo`, `Planning`)
 - [x] Documentation UI complète (`Documentation_technique_UI_Althea.md`)
-- [ ] Ajouter illustrations manquantes dans `Documentation_technique_UI_Althea.md`
-  - [ ] DialogChoix (Information, Warning, Error, Success, Question)
-  - [ ] UtilisateurEdition (Création, Modification, Consultation)
-  - [ ] UC_Utilisateurs (vue Admin, vue SuperUser)
-- [ ] Construire checklist de tests fonctionnels V1 par parcours utilisateur
+- [x] Plan de conception métier rédigé et décisions actées (D-13 à D-19)
+- [x] Ajouter illustrations manquantes dans `Documentation_technique_UI_Althea.md`
+  - [x] DialogChoix (Information, Warning, Error, Success, Question)
+  - [x] UtilisateurEdition (Création, Modification, Consultation)
+  - [x] UC_Utilisateurs (vue Admin, vue SuperUser)
+- [] Construire checklist de tests fonctionnels V1 par parcours utilisateur
   - [ ] Tests parcours patients (création, recherche, modification)
   - [ ] Tests parcours dossiers (création, transitions statuts)
   - [ ] Tests parcours séances (saisie, historique)
@@ -157,7 +186,7 @@
 
 ---
 
-## F. Vue "fait / en cours / reste"
+## G. Vue "fait / en cours / reste"
 
 ### ✅ Déjà fait
 
@@ -173,14 +202,15 @@
 
 ### 🔜 Reste à faire
 
+- [ ] **Lot 0 : socle métier** (migration schéma `domaines`/`therapeutes`/N-N + UC référentiels + éditeurs de texte)
 - [ ] Domaine métier principal (patients, dossiers, séances, paiements)
-- [ ] Intégration POC documents/agenda dans l'application principale
+- [ ] Intégration POC documents/agenda dans l'application principale (stockage hors DB, Google Calendar pilier)
 - [ ] Sauvegarde/restauration/installation
 - [ ] Stabilisation et validation fonctionnelle V1
 
 ---
 
-## G. Idées pour la suite (post-V1)
+## H. Idées pour la suite (post-V1)
 
 **1. Sur l'accueil, on pourrait trouver des genres de Widgets** 
 - RV du jour

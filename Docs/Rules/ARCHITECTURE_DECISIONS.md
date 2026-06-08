@@ -4,7 +4,7 @@
 > Chaque ADR explique le **contexte**, les **options envisagées**, la **décision retenue** et ses **conséquences**.  
 > Une décision actée ne doit être remise en cause que via un nouvel ADR explicite.
 
->  *Dernière mise à jour : 07/06/2026*
+>  *Dernière mise à jour : 08/06/2026*
 ---
 
 ## Cadre d'utilisation (gouvernance ADR)
@@ -51,6 +51,10 @@ Ce document sert de référence pour :
 | [ADR-13](#adr-13--intégration-du-module-documents-v1-depuis-poc) | Intégration du module Documents V1 depuis POC | À instruire | `Docs/Poc/Gestion_documentaire_Althea.md`, `Docs/ETAT_DU_PROJET.md` |
 | [ADR-14](#adr-14--intégration-du-module-agenda-v1-depuis-poc) | Intégration du module Agenda V1 depuis POC | À instruire | `Docs/Poc/Gestion_Calendrier_Althea.md`, `Docs/ETAT_DU_PROJET.md` |
 | [ADR-15](#adr-15--composant-standard-uc_richtexteditor-pour-notes-formatées) | Composant standard UC_RichTextEditor pour notes formatées | Actée | `UI/Controls/Communs/UC_RichTextEditor.vb`, `Utils/Helpers/RichTextEditorHelper.vb`, `Docs/UC_RichTextEditor_Documentation.md` |
+| [ADR-16](#adr-16--stockage-des-fichiers-hors-base-chemin-déterministe) | Stockage des fichiers hors base, chemin déterministe | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §8, `Docs/Poc/Gestion_documentaire_Althea.md` |
+| [ADR-17](#adr-17--renommages-de-schéma-domaines-thérapeutes--réseau-dintervenants) | Renommages de schéma (domaines, thérapeutes) + réseau d'intervenants | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §3-§4 |
+| [ADR-18](#adr-18--référentiels-uc-physique--classe-de-base-uc_referentielbase) | Référentiels : UC physique + classe de base `UC_ReferentielBase` | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §7.3 |
+| [ADR-19](#adr-19--anticipation-multi-utilisateur-id_utilisateur-nullable) | Anticipation multi-utilisateur (`id_utilisateur` nullable) | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §12 BD-9 |
 
 ---
 
@@ -536,25 +540,21 @@ End If
 
 ## ADR-13 - Intégration du module Documents V1 depuis POC
 
-**Date :** mai 2026  
-**Statut :** À instruire
-
+**Date :** mai 2026 — **actée le 08/06/2026**  
+**Statut :** Actée
 ### Contexte
 
 Un POC documentaire existe déjà (Drive/Docs, génération de documents).  
 Le besoin V1 est d'intégrer un périmètre documentaire minimal et robuste dans le cœur applicatif sans casser les principes d'architecture existants.
 
-### Options envisagées (à instruire)
+### Décision
 
-| Option | Description | Risque principal |
-|--------|-------------|------------------|
-| Intégration cloud (Google) | Réutiliser la logique POC orientée services externes | Dépendance réseau/API externe |
-| Intégration locale V1 | Démarrer par un socle documentaire local (stockage et liens internes) | Fonctionnalités initiales plus limitées |
-| Approche hybride progressive | V1 local + extension cloud ultérieure | Complexité de transition/interopérabilité |
+Périmètre V1 **acté** (cf. `Plan_Conception_Metier_Althea.md` §8, D-Q4/D-Q7) :
 
-### Décision (prévue)
-
-Décision finale à acter avant implémentation du module Documents en production.
+- **Stockage 100 % fichiers, jamais en base** : la DB ne stocke que le **nom de fichier** ; le **chemin est déterministe**, reconstruit depuis *(nature du document, `id_patient`, `id_dossier`)* + racine paramétrée (`tec_parametres`). Voir **ADR-16**.
+- **Deux flux d'édition de premier plan** : **Flow 1 — Word local** (synchro Drive dès la sauvegarde + export PDF) **et Flow 2 — Google Docs** (mobilité, l'appli n'étant pas encore web). Autres applications : hors V1.
+- **PDF = dérivé reconstructible** (jamais source), **images métier = données** (jamais remplacées par leur PDF), miniatures **locales uniquement**.
+- Documents **niveau patient** (photo d'identité) **et** niveau dossier → `documents.id_patient` + `id_dossier` nullable.
 
 ### Points de validation attendus
 
@@ -566,32 +566,17 @@ Décision finale à acter avant implémentation du module Documents en productio
 
 ## ADR-14 - Intégration du module Agenda V1 depuis POC
 
-**Date :** mai 2026  
-**Statut :** À instruire
+**Date :** mai 2026 — **actée le 08/06/2026**  
+**Statut :** Actée
 
-### Contexte
+### Décision
 
-Un POC agenda existe (Google Calendar / scheduler).  
-Le besoin V1 est de définir un périmètre d'agenda opérationnel, simple et maintenable, aligné avec le niveau de robustesse attendu pour Althéa.
+Périmètre V1 **acté** (cf. `Plan_Conception_Metier_Althea.md` §6, D-Q8) :
 
-### Options envisagées (à instruire)
-
-| Option | Description | Risque principal |
-|--------|-------------|------------------|
-| Agenda connecté Google | Synchronisation native avec services Google | Dépendance API externe/quotas/auth |
-| Agenda local intégré | Gestion agenda interne sans dépendance cloud | Périmètre fonctionnel initial plus restreint |
-| Modèle mixte | Agenda local + synchro optionnelle secondaire | Complexité d'état/synchronisation |
-
-### Décision (prévue)
-
-Décision finale à acter avant implémentation du module Agenda dans le code principal.
-
-### Points de validation attendus
-
-- Cohérence avec les règles de rôles et permissions (`User` / `SuperUser` / `Admin`)
-- Gestion claire des erreurs de synchronisation (si dépendance externe)
-- UX stable même en cas d'indisponibilité réseau
-
+- **Modèle connecté Google = pilier V1** : synchronisation **bidirectionnelle** Calendar (et Drive/Docs côté documents), non optionnelle.
+- **Robustesse** : file de synchro + retry + suivi via `statut_sync_google` ; **mode dégradé hors-ligne** avec resynchronisation différée.
+- **Reprise assistée** des RDV existants à l'installation : semi-automatique, **validée par l'utilisatrice**, avec liaison à un patient/dossier.
+- **Séparation stricte** : données métier dans `Tag`, présentation dans `Content` ; ne jamais faire dépendre la logique de la couleur/du titre d'un événement.
 ---
 
 ## ADR-15 - Composant standard UC_RichTextEditor pour notes formatées
@@ -786,6 +771,116 @@ SyncfusionLicenseProvider.RegisterLicense("VOTRE-CLE-SYNCFUSION")
 | Règles | `Docs/Rules/Rules.md` §21 |
 | ADR | `Docs/Rules/ARCHITECTURE_DECISIONS.md` ADR-15 |
 
+---
+
+## ADR-16 - Stockage des fichiers hors base, chemin déterministe
+
+**Date :** 08 juin 2026  
+**Statut :** Actée
+
+### Contexte
+
+Les documents et images (photos d'identité, bilans, courriers, pièces externes) doivent être stockés de façon fiable, sauvegardable et synchronisable avec Google Drive, sans alourdir la base.
+
+### Options envisagées
+
+| Option | Description | Inconvénient |
+|--------|-------------|--------------|
+| Contenu binaire en DB (BLOB) | Tout en base | DB volumineuse, sauvegardes lourdes, sync Drive complexe |
+| Chemin absolu en DB | Stocker le chemin complet | Fragile (déplacement de racine = liens cassés) |
+| **Fichiers sur disque + nom seul en DB** | Chemin **reconstruit** depuis la nature + IDs | Nécessite un helper de chemins centralisé |
+
+### Décision
+
+**Aucun fichier en base.** Fichiers sur **disque** (+ miroir Google Drive). La DB stocke le **nom de fichier** ; le **chemin est déterministe**, recalculé depuis *(nature, `id_patient`, `id_dossier`)* + racine paramétrée (`tec_parametres`, clé `DOC_RACINE_STOCKAGE`).
+
+- **Nommage** : `{Type}_{id_patient}_{id_dossier}_{yyyyMMdd_HHmmss}[_index].{ext}` ; exception **photo d'identité** = nom fixe (`Identite`, sans timestamp, écrase la précédente).
+- **Le nom de fichier n'est jamais un identifiant métier** : l'identité = `id_document` + `google_file_id`.
+
+### Conséquences
+
+- Sauvegardes DB légères ; fichiers sauvegardés séparément.
+- Robustesse au déplacement de racine (chemin recalculable).
+- Impact schéma : `documents.id_patient` + `id_dossier` nullable (BD-1).
+
+---
+
+## ADR-17 - Renommages de schéma (domaines, thérapeutes) + réseau d'intervenants
+
+**Date :** 08 juin 2026  
+**Statut :** Actée
+
+### Contexte
+
+Le vocabulaire initial (`volets`, `medecins`) est trop restrictif. « Volet » prête à confusion ; « médecin » exclut les autres intervenants (logopèdes, kinés, adresseurs…). Le suivi externe (`autres_suivis_patient`) était dénormalisé (texte libre).
+
+### Décision
+
+Réalisé **tôt** (Lot 0), car aucun code métier n'en dépend encore :
+
+- `ref_volets → ref_domaines` (+ `id_volet → id_domaine`, code, libellé, séquence, FK, index). `domaine` n'est pas réservé en MariaDB lorsqu'il est préfixé.
+- `medecins → therapeutes` (`id_therapeute`, code `TH`, ajout `profession`). `dossiers.id_medecin_traitant → id_therapeute_traitant`.
+- **Nouveau référentiel `ref_roles_intervenant`** (adresseur, médecin traitant, logopède…).
+- `autres_suivis_patient` **devient la liaison N-N** `patient ↔ therapeute ↔ ref_roles_intervenant` (rôle porté par la liaison).
+- **Tarifs par domaine** : ajout `ref_types_seance.id_domaine`. Un dossier transféré de domaine conserve documents/notes/séances ; tarifs passés **figés**.
+
+### Conséquences
+
+- Migrations **versionnées** (BD-0, BD-6, BD-7) + reprise des données + régénération des diagrammes.
+- Vocabulaire officiel projet : **Domaine** et **Thérapeute**.
+
+---
+
+## ADR-18 - Référentiels : UC physique + classe de base `UC_ReferentielBase`
+
+**Date :** 08 juin 2026  
+**Statut :** Actée
+
+### Contexte
+
+Les référentiels simples partagent la même structure (`id/code/libelle/actif/ordre_affichage`). Un composant 100 % générique réduirait la maintenance mais retirerait la **maîtrise du design** de chaque écran, à laquelle la praticienne tient.
+
+### Décision
+
+**Un UserControl physique par référentiel** (design libre, `.Designer.vb` propre à chaque écran), **mais** logique mutualisée dans une **classe de base non visuelle `UC_ReferentielBase`** (hérite de `UserControl`) : chargement, CRUD via `GestionReferentiel`, binding, validation, droits, journalisation.
+
+### Conséquences
+
+- Liberté visuelle totale **sans** dupliquer la logique 9 fois.
+- Chaque `UC_Ref<X>` hérite de la base et ne gère que son visuel.
+- Ne jamais recopier intégralement `UC_Parametres` (visuel + logique).
+
+---
+
+## ADR-19 - Anticipation multi-utilisateur (`id_utilisateur` nullable)
+
+**Date :** 08 juin 2026  
+**Statut :** Actée
+
+### Contexte
+
+La V1 cible une praticienne **seule**, mais un usage multi-utilisateur / multi-agenda est probable à terme. Une migration tardive (ajout d'attribution sur des données existantes) serait coûteuse.
+
+### Décision
+
+Anticipation **à coût minimal**, sans implémenter le partage en V1 :
+
+- Ajout `id_utilisateur` **nullable** sur `rendez_vous` et `dossiers` (FK `sec_utilisateurs`).
+- Prévoir un `google_calendar_id` **par utilisateur** côté configuration.
+- Aucun mécanisme de droits par enregistrement / partage en V1.
+
+### Conséquences
+
+- Bascule multi-user future **sans migration douloureuse**.
+- Colonnes inertes en V1 (toujours l'utilisateur unique).
+
+---
+
+
+
+
+
+---
 ---
 
 ## Processus de mise à jour ADR

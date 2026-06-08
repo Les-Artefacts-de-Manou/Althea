@@ -1,6 +1,6 @@
 # Althéa - README
 
->  *Dernière mise à jour : 07/06/2026*
+>  *Dernière mise à jour : 08/06/2026*
 
 ## Application de gestion des dossiers patients
 
@@ -49,16 +49,20 @@ Ce nom incarne parfaitement l'objectif de l'application : accompagner le travail
 Le modèle repose sur une structure claire :
 
 - **Patient** → personne
-- **Dossier** → contexte (psychologie, graphothérapie…)
-- **Séance** → unité de suivi
+- **Dossier** → contexte rattaché à un **domaine** (psychologie, graphothérapie…)
+- **Séance** → unité de suivi (créée dès la planification du rendez-vous lié)
 - **Paiement** → encaissement
-- **Document** → fichier externe lié
+- **Document** → fichier externe lié (stocké hors base de données, à chemin déterministe)
+- **Thérapeute / réseau d'intervenants** → suivis externes associés au patient (relation N-N)
 
 Relations :
 
 - 1 patient → n dossiers  
 - 1 dossier → n séances  
 - 1 paiement → n séances  
+- 1 patient ↔ n intervenants externes (réseau de suivi)
+
+> 📐 Le cadrage détaillé de la phase métier (modèle de données, cycle de vie des dossiers, intégration documents/agenda) est figé dans le [plan de conception métier](Docs/Conception/Plan_Conception_Metier_Althea.md) et les [décisions d'architecture](Docs/Rules/ARCHITECTURE_DECISIONS.md).
 
 ---
 

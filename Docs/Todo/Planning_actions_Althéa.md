@@ -1,10 +1,13 @@
 # 🗓️ Althéa — Planning d'actions V1 (roadmap consolidée)
 
-> Planning macro par phases, synchronisé avec :
+> Planning macro par lots, synchronisé avec :
+> - `Plan_Conception_Metier_Althea.md` (plan directeur de la phase métier, source de vérité)
 > - `Checklist_projet_V1.md` (référence détaillée)
 > - `ToDo.md` (actions opérationnelles)
-> 
-> Dernière mise à jour : 07 juin 2026
+>
+> Dernière mise à jour : 08 juin 2026
+>
+> ℹ️ **Rythme de travail** : développement solo, **sans cadence imposée**. La progression se mesure « fait / pas fait » par lot, chaque lot étant clôturé par sa documentation. Aucune estimation en semaines ni jalon daté pour les travaux à venir.
 
 ---
 
@@ -55,7 +58,24 @@
 
 ---
 
-## Phase 2 — Cœur métier patients/dossiers
+## Phase 2 — Lot 0 : socle métier (migration de schéma)
+
+**Statut : 🔜 À lancer — ⏳ prérequis bloquant des lots suivants**
+
+**Périmètre :**
+- Migration versionnée `volets` → `domaines`
+- Migration versionnée `medecins` → `therapeutes`
+- Liaison N-N `autres_suivis_patient` + référentiel `ref_roles_intervenant`
+- Référentiel `ref_statuts_seance` (cycle de vie séance)
+- Base UI commune `UC_ReferentielBase`
+- Composants `UC_RichTextEditor` + variante compacte `UC_RichTextEditorSimple`
+
+**Objectif de sortie de phase :**
+- Schéma et briques UI transverses alignés avec le plan de conception, prêts pour le codage métier
+
+---
+
+## Phase 3 — Lot 1 : cœur métier patients/dossiers
 
 **Statut : 🔜 À lancer**
 
@@ -63,24 +83,24 @@
 - Module métier `GestionPatients` + `QueryPatients`
 - Recherche patients (filtres avancés)
 - Fiche patient multi-onglets (identité, administratif, famille, suivi, documents, facturation, archive)
+- Réseau d'intervenants externes (N-N via `autres_suivis_patient` + `ref_roles_intervenant`)
 - Module métier `GestionDossiers` + `QueryDossiers`
 - Gestion dossiers + statuts (actif/pause/clôturé/archivé)
-- Transitions de statuts sécurisées
+- Transitions de statuts sécurisées, réouverture (même domaine) et transfert inter-domaines
 
 **Objectif de sortie de phase :**
 - Parcours patient opérationnel minimal en production interne
-- Gestion de base des dossiers avec cycle de vie
-
-**Estimation : 3-4 semaines**
+- Gestion de base des dossiers avec cycle de vie complet
 
 ---
 
-## Phase 3 — Suivi clinique et paiements
+## Phase 4 — Lot 2 : suivi clinique et paiements
 
 **Statut : 🔜 À lancer**
 
 **Périmètre :**
 - Module métier `GestionSeances` + `QuerySeances`
+- Séance créée dès la planification du rendez-vous lié, statut piloté par `ref_statuts_seance`
 - Gestion des séances (saisie, notes, synthèse)
 - Historique de suivi avec tri/filtrage
 - Module métier `GestionPaiements` + `QueryPaiements`
@@ -92,17 +112,16 @@
 - Parcours de suivi complet du patient (hors documents/agenda avancés)
 - Gestion financière opérationnelle
 
-**Estimation : 2-3 semaines**
-
 ---
 
-## Phase 4 — Intégration documents et agenda (depuis POC)
+## Phase 5 — Lot 3 : intégration documents et agenda (depuis POC)
 
 **Statut : 🔜 À lancer**
 
 **Périmètre documents :**
 - Module métier `GestionDocuments`
-- Upload/stockage local de documents (PDF, images, Word)
+- Stockage **hors base de données** (système de fichiers), chemin déterministe calculé
+- Flux Word local **et** Google Docs, synchronisation à la sauvegarde, export PDF
 - Catégorisation par type (rapport, synthèse, courrier)
 - Liaison documents ↔ patients/dossiers
 - Recherche documents
@@ -110,21 +129,21 @@
 
 **Périmètre agenda :**
 - Module métier `GestionAgenda`
+- Google Calendar comme **pilier** (synchronisation bidirectionnelle, reprise assistée)
 - Gestion rendez-vous de base (date, heure, patient, type)
-- Vue calendrier mensuelle/hebdomadaire
+- Vue calendrier mensuelle/hebdomadaire (Scheduler)
 - Création rapide depuis fiche patient
 - Notifications/rappels
 - Liaison rendez-vous ↔ séances
+- Modèle préparé pour le multi-utilisateur / multi-agenda (activation différée)
 
 **Objectif de sortie de phase :**
 - Couverture fonctionnelle globale V1 avec modules historiques prioritaires
 - Intégration POC dans application principale
 
-**Estimation : 3-4 semaines**
-
 ---
 
-## Phase 5 — Exploitation, installation, stabilisation
+## Phase 6 — Exploitation, installation, stabilisation
 
 **Statut : 🔜 À lancer**
 
@@ -149,20 +168,20 @@
 - Version V1 stabilisée, installable, maintenable
 - Application prête pour déploiement production
 
-**Estimation : 2-3 semaines**
-
 ---
 
 ## Jalons de pilotage
 
-| Jalon | Description | Statut | Date |
-|-------|-------------|--------|------|
-| **J0** | Socle technique complet | ✅ Atteint | 17/05/2026 |
-| **J1** | Administration complète | ✅ Atteint | 07/06/2026 |
-| **J2** | Patient minimal viable | 🔜 À lancer | T3 2026 |
-| **J3** | Suivi métier complet | 🔜 À lancer | T3 2026 |
-| **J4** | Couverture transverse | 🔜 À lancer | T4 2026 |
-| **J5** | Go V1 interne | 🔜 À lancer | T4 2026 |
+| Jalon | Description | Statut |
+|-------|-------------|--------|
+| **J0** | Socle technique complet | ✅ Atteint (17/05/2026) |
+| **J1** | Administration complète | ✅ Atteint (07/06/2026) |
+| **J2** | Cadrage de la phase métier (décisions actées) | ✅ Atteint (08/06/2026) |
+| **J3** | Lot 0 : socle métier migré (schéma + UC transverses) | 🔜 À lancer |
+| **J4** | Lot 1 : patient/dossier minimal viable | 🔜 À lancer |
+| **J5** | Lot 2 : suivi métier complet (séances + paiements) | 🔜 À lancer |
+| **J6** | Lot 3 : couverture transverse (documents + agenda) | 🔜 À lancer |
+| **J7** | Go V1 interne | 🔜 À lancer |
 
 ---
 
@@ -175,18 +194,19 @@
 - ✅ Administration (paramètres, utilisateurs)
 - ✅ UI cohérente (DialogChoix, UtilsIcons)
 - ✅ Documentation exhaustive
-- 🔜 Patients
-- 🔜 Dossiers
+- 🔜 Lot 0 : socle métier (migration schéma + UC référentiels)
+- 🔜 Patients + Dossiers
 - 🔜 Séances + Paiements
 - 🔜 Documents + Agenda
 
 ### Documentation : 100%
 
 - ✅ README, Rules, Process, Database, Standards
-- ✅ Architecture Decisions (14 ADR)
+- ✅ Architecture Decisions (19 ADR)
+- ✅ Plan de conception métier (décisions D-13 à D-19 actées)
 - ✅ Documentation UI complète
 - ✅ CHANGELOG détaillé
-- ✅ Plans de pilotage (Checklist, ToDo, Planning)
+- ✅ Plans de pilotage (Checklist, ToDo, Planning, État du projet)
 
 ### Tests : 20%
 
@@ -200,9 +220,11 @@
 ## Notes de suivi
 
 - **Phase 1 achevée avec succès** : Le module d'administration est complet, documenté et validé.
-- **Priorité suivante** : Lancement de la Phase 2 (patients/dossiers) dès que possible.
+- **Cadrage métier acté (08/06/2026)** : décisions D-13 à D-19 figées dans le [plan de conception](../Conception/Plan_Conception_Metier_Althea.md), les ADR et Rules.
+- **Priorité suivante** : Lot 0 (migration de schéma + UC référentiels), prérequis bloquant avant tout codage métier.
+- **Rythme** : travail solo sans cadence ; chaque lot est clôturé par sa documentation avant de passer au suivant.
 - **Contrainte connue** : Build/test .NET bloqués sur Linux pour ce projet WinForms cible Windows (à prendre en compte pour CI et validation).
-- **Risque feature creep** : Gel du périmètre V1 recommandé avant de démarrer chaque phase métier.
+- **Risque feature creep** : Gel du périmètre V1 recommandé avant de démarrer chaque lot métier.
 
 ---
 

@@ -1,6 +1,6 @@
 # Rules – Althéa
 
->  *Dernière mise à jour : 07/06/2026*
+>  *Dernière mise à jour : 08/06/2026*
 
 ## Objectif
 Ce document fixe les règles de conception et de développement pour maintenir une application fiable, lisible et reprise facilement.
@@ -478,7 +478,7 @@ ORDER BY score DESC, b.date_bilan DESC;
 3. Mettre à jour la classe métier pour exposer les deux propriétés
 4. Documenter l'usage dans la documentation technique du module
 
-**Règle** : Aucun `UC_RichTextEditor` ne doit être intégré dans un écran sans vérification préalable de la structure base de données.
+**Règle** : Aucun `UC_RichTextEditor` **ni `UC_RichTextEditorSimple`** ne doit être intégré dans un écran sans vérification préalable de la structure base de données (présence des colonnes `*_rtf` **et** `*_txt`). Les champs `commentaire` enrichis (`famille_contacts`, `autres_suivis_patient`) suivent la même règle double format (cf. ADR-15, D-Q7bis).
 
 ## 22. Nommage & discipline projet
 ### Nommage
@@ -497,6 +497,15 @@ ORDER BY score DESC, b.date_bilan DESC;
 - Documentation tenue à jour.
 - Règles évolutives, mais validées et contrôlées.
 
+### Vocabulaire métier officiel
+- **Domaine** (et non « volet ») : domaine d'activité (Psychologie, Graphothérapie, Realism…). Tables : `ref_domaines`, `id_domaine`.
+- **Thérapeute** (et non « médecin ») : tout intervenant (médecin traitant, logopède, adresseur…). Table : `therapeutes`.
+
+### Référentiels (UC physique + classe de base)
+- Un **UserControl physique par référentiel** (design libre).
+- Logique mutualisée dans `UC_ReferentielBase` ; chaque écran héritier nommé `UC_Ref<Entité>` (ex. `UC_RefDomaines`, `UC_RefTypesSeance`).
+- Cf. ADR-18.
+- 
 ---
 
 > **Contact**: **Joëlle (Manou) - Les Artefacts de Manou**  
