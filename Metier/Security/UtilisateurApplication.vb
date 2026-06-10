@@ -14,7 +14,7 @@
 '
 ' Table source : sec_utilisateurs
 '
-' Remarques   :
+' Important   :
 ' - Classe de données (DTO-like) sans logique métier complexe
 ' - Ne contient aucun accès base de données
 ' - Ne contient aucune logique UI

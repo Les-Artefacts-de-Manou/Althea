@@ -3,7 +3,7 @@
 > Backlog actionnable, aligné sur l'état réel du dépôt.
 > Plan directeur de la phase métier : `../Conception/Plan_Conception_Metier_Althea.md` (décisions actées D-13 à D-19).
 > Référence d'avancement détaillée : `Checklist_projet_V1.md`.
-> >  *Dernière mise à jour : 08/06/2026*
+> >  *Dernière mise à jour : 10/06/2026*
 
 ---
 
@@ -43,26 +43,36 @@
 
 ---
 
-## B. Lot 0 — Socle métier (migration de schéma) ⏳ **PRÉREQUIS BLOQUANT**
+## B. ~~Lot 0 — Socle métier (migration de schéma)~~ ✅ **TERMINÉ**
 
-> À réaliser et versionner **avant** tout codage des modules métier (section C).
+> Réalisé et versionné. Prérequis bloquant des lots suivants : levé.
 > Référence : décisions D-16 à D-18 du plan de conception.
 
-### B0a. Migration de schéma
+### B0a. Migration de schéma ✅
 
-- [ ] Versionner et appliquer le renommage `volets` → `domaines`
-- [ ] Versionner et appliquer le renommage `medecins` → `therapeutes`
-- [ ] Créer la table de liaison N-N `autres_suivis_patient` (patient ↔ thérapeute externe)
-- [ ] Créer le référentiel `ref_roles_intervenant`
-- [ ] Créer/aligner le référentiel `ref_statuts_seance` (cycle de vie séance)
-- [ ] Mettre à jour les scripts SQL versionnés et la documentation `Database`
+- [x] Versionner et appliquer le renommage `volets` → `domaines`
+- [x] Versionner et appliquer le renommage `medecins` → `therapeutes`
+- [x] Créer la table de liaison N-N `autres_suivis_patient` (patient ↔ thérapeute externe)
+- [x] Créer le référentiel `ref_roles_intervenant`
+- [x] Créer/aligner le référentiel `ref_statuts_seance` (cycle de vie séance)
+- [x] Mettre à jour les scripts SQL versionnés et la documentation `Database`
 
-### B0b. Briques UI transverses
+### B0b. Briques UI transverses ✅
 
-- [ ] Créer la base commune `UC_ReferentielBase` (UserControl générique par référentiel)
-- [ ] Décliner un `UC_*` dédié par référentiel (domaines, types, statuts, rôles intervenant…)
-- [ ] Créer le composant riche `UC_RichTextEditor`
-- [ ] Créer la variante compacte `UC_RichTextEditorSimple`
+- [x] Créer la base commune `UC_ReferentielBase` (UserControl générique par référentiel) avec hooks champ supplémentaire
+- [x] Créer `UC_ReferentielHome` (hub 9 tuiles, droits SuperUser/Admin, navigation)
+- [x] Décliner 9 UC référentiels concrets :
+  - [x] `UC_Domaines` (ref_domaines, code max 10)
+  - [x] `UC_LiensPatient` (ref_liens_patient, code max 50)
+  - [x] `UC_RolesIntervenant` (ref_roles_intervenant, code max 30)
+  - [x] `UC_SituationsFamiliales` (ref_situations_familiales, code max 50)
+  - [x] `UC_StatutsDossier` (ref_statuts_dossier, code max 30)
+  - [x] `UC_StatutsSeance` (ref_statuts_seance, code max 30)
+  - [x] `UC_TypesDocuments` (ref_types_documents, code max 30)
+  - [x] `UC_TypesRendezVous` (ref_types_rendez_vous, code max 30)
+  - [x] `UC_TypesSeance` (ref_types_seance, code max 30, **+ tarif_defaut via hook**)
+- [x] Créer le composant riche `UC_RichTextEditor` (30 boutons, impression Win32, exports PDF/Word Syncfusion)
+- [x] Créer la variante compacte `UC_RichTextEditorSimple` (7 boutons, double format RTF+TXT, contexte optionnel)
 
 ---
 
@@ -199,10 +209,14 @@
 - [x] **UtilsIcons centralisé** (icônes d'état avec priorités)
 - [x] **Documentation complète administration** (tous les documents de référence à jour)
 - [x] POC documents et agenda réalisés
+- [x] **Lot 0 : socle métier complet**
+  - [x] Migration schéma `domaines`/`therapeutes`/N-N
+  - [x] 9 UC référentiels déployés (piles complètes Query/Modèle/Gestion/UC)
+  - [x] `UC_ReferentielBase` avec hooks extensibles
+  - [x] `UC_RichTextEditor` (complet) + `UC_RichTextEditorSimple` (allégé)
 
 ### 🔜 Reste à faire
 
-- [ ] **Lot 0 : socle métier** (migration schéma `domaines`/`therapeutes`/N-N + UC référentiels + éditeurs de texte)
 - [ ] Domaine métier principal (patients, dossiers, séances, paiements)
 - [ ] Intégration POC documents/agenda dans l'application principale (stockage hors DB, Google Calendar pilier)
 - [ ] Sauvegarde/restauration/installation

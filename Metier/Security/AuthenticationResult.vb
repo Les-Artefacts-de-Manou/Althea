@@ -15,7 +15,7 @@
 ' - Transmettre le nombre d'essais restants avant verrouillage
 ' - Transmettre l'état de verrouillage du compte
 '
-' Remarques   :
+' Important   :
 ' - Aucun mot de passe stocké
 ' - Aucun détail sensible exposé (messages génériques)
 '

@@ -1,6 +1,6 @@
 # 📘 **Documentation technique – Forms Althéa**
 
->  *Dernière mise à jour : 07/06/2026*
+>  *Dernière mise à jour : 10/06/2026*
 ---
 
 ## **Vue d'ensemble – Écrans, classes et niveau de complétude**
@@ -19,7 +19,19 @@ Ce tableau récapitule l'ensemble des écrans de l'application, leur classe corr
 | Gestion des paramètres             | `UC_Parametres`          | UserControl     | ✅ Complet                            |
 | Hub d'administration               | `UC_AdminHome`           | UserControl     | ✅ Complet                            |
 | **Gestion des utilisateurs**       | **`UC_Utilisateurs`**    | **UserControl** | **✅ Complet**                        |
-| **Éditeur de texte riche**         | **`UC_RichTextEditor`**  | **UserControl** | **✅ Complet**                        |
+| **Éditeur de texte riche (complet)** | **`UC_RichTextEditor`** | **UserControl** | **✅ Complet**                       |
+| **Éditeur de texte riche (simple)** | **`UC_RichTextEditorSimple`** | **UserControl** | **✅ Complet**                  |
+| **Hub référentiels**               | **`UC_ReferentielHome`** | **UserControl** | **✅ Complet**                        |
+| **Base commune référentiels**      | **`UC_ReferentielBase`** | **UserControl** | **✅ Complet** (héritable)            |
+| **Référentiel Domaines**           | **`UC_Domaines`**        | **UserControl** | **✅ Complet**                        |
+| **Référentiel Liens patient**      | **`UC_LiensPatient`**    | **UserControl** | **✅ Complet**                        |
+| **Référentiel Rôles intervenant**  | **`UC_RolesIntervenant`** | **UserControl** | **✅ Complet**                       |
+| **Référentiel Situations familiales** | **`UC_SituationsFamiliales`** | **UserControl** | **✅ Complet**                |
+| **Référentiel Statuts dossier**    | **`UC_StatutsDossier`**  | **UserControl** | **✅ Complet**                        |
+| **Référentiel Statuts séance**     | **`UC_StatutsSeance`**   | **UserControl** | **✅ Complet**                        |
+| **Référentiel Types documents**    | **`UC_TypesDocuments`**  | **UserControl** | **✅ Complet**                        |
+| **Référentiel Types rendez-vous**  | **`UC_TypesRendezVous`** | **UserControl** | **✅ Complet**                        |
+| **Référentiel Types séance**       | **`UC_TypesSeance`**     | **UserControl** | **✅ Complet** (+ tarif_defaut)       |
 | Écran d'accueil                    | `UC_Accueil`             | UserControl     | ⬜ Prévu – classe vide, à implémenter |
 
 > [!NOTE]
@@ -2379,10 +2391,206 @@ dans les limites prévues par son compte.
 
 La gestion permanente des rôles appartient au futur `UC_Utilisateurs`.
 
+---
 
+## **UserControl : UC_RichTextEditorSimple**
 
+### Rôle général
 
+`UC_RichTextEditorSimple` est la variante allégée de `UC_RichTextEditor`. Elle est destinée aux zones de commentaires et notes courtes embarquées dans d'autres UserControls ou Forms (référentiels, fiches patient, dossiers, contacts…). Elle réutilise `RichTextEditorHelper` à 100 % sans dupliquer de logique.
 
+### Responsabilités
+
+- Fournir une toolbar minimale de 7 boutons : Gras, Italique, Souligné, Annuler, Rétablir, Effacer formatage, Insérer date/heure
+- Exposer `RtfContent` et `TextContent` pour sauvegarde en double format (RTF + TXT brut)
+- Gérer le mode lecture seule (`ReadOnlyMode`)
+- Permettre d'afficher/masquer la toolbar (`ShowToolbar`)
+- Notifier les modifications via l'événement `ContentChanged`
+- Recevoir optionnellement le contexte UI via `IContextAwareUserControl`
+
+### Dépendances
+
+| Élément | Type | Rôle |
+|---|---|---|
+| `RichTextEditorHelper` | Module | Toute la logique métier partagée (formatage, insertion date) |
+| `IContextAwareUserControl` | Interface | Contexte UI partagé (optionnel — fonctionne sans contexte) |
+| `UserControlContext` | Classe | Contexte injecté par Home si disponible |
+| `UITheme` | Module | Couleurs charte graphique |
+
+### Propriétés publiques principales
+
+| Propriété | Type | Rôle |
+|---|---|---|
+| `RtfContent` | String | Lecture/écriture du contenu RTF (formatage préservé) |
+| `TextContent` | String | Lecture du texte brut (pour recherche full-text SQL) |
+| `ReadOnlyMode` | Boolean | Active/désactive le mode lecture seule |
+| `ShowToolbar` | Boolean | Affiche/masque la toolbar |
+
+### Événement
+
+| Événement | Déclencheur |
+|---|---|
+| `ContentChanged` | À chaque modification de contenu dans le RichTextBox |
+
+### Différences avec UC_RichTextEditor
+
+| Fonctionnalité | UC_RichTextEditor | UC_RichTextEditorSimple |
+|---|---|---|
+| Toolbar | 30 boutons | 7 boutons |
+| Police / Taille | ✅ | ❌ |
+| Alignement, puces, retraits | ✅ | ❌ |
+| Couleurs texte / fond | ✅ | ❌ |
+| Couper/Copier/Coller | ✅ boutons | ✅ raccourcis OS natifs |
+| Impression Win32 | ✅ | ❌ |
+| Export PDF / Word | ✅ Syncfusion | ❌ |
+| Double format RTF + TXT | ✅ | ✅ |
+| ReadOnly / ShowToolbar | ✅ | ✅ |
+| Contexte UI | ✅ obligatoire | ✅ optionnel |
+| Taille | Fixe (grande) | Pilotée par le parent |
+
+### Règles importantes
+
+- La **sauvegarde reste obligatoirement en double format** (règle 21 de `Rules.md`) : `RtfContent` (formatage) + `TextContent` (texte brut pour recherche full-text SQL).
+- Ne jamais intégrer ce composant dans un écran sans vérifier que la table cible possède les deux champs `*_rtf` et `*_txt`.
+- La taille est entièrement pilotée par le parent (Dock ou Anchor) ; ne pas fixer de taille dans le Designer.
+- `IContextAwareUserControl` est implémenté de façon **optionnelle** : appeler `SetContext()` si disponible, mais le composant fonctionne sans.
+
+---
+
+## **Module : UC_ReferentielBase + Architecture référentiels**
+
+### Rôle général
+
+`UC_ReferentielBase` est la **classe de base héritable** pour tous les écrans de gestion de référentiels (`ref_*`). Elle centralise : chargement, modes (Consultation / Création / Modification), CRUD via points d'extension, validation (unicité code + libellé, longueur max, format), droits, journalisation, activation/désactivation (soft-delete).
+
+Chaque référentiel concret **hérite** de `UC_ReferentielBase` et n'implémente que ses spécificités métier (métadonnées + branchement couche métier). Aucune logique n'est dupliquée.
+
+### Responsabilités de UC_ReferentielBase
+
+- Afficher la liste des éléments dans une grille générique (`dgvReferentiel`)
+- Gérer la recherche et le filtre « Afficher inactifs »
+- Orchestrer les modes et l'état des boutons
+- Valider les saisies (champs requis, longueur code, unicité code et libellé)
+- Appliquer les droits d'accès selon le rôle (`RoleMinimum`)
+- Journaliser via `GestionLog`
+- Fournir des **hooks champ supplémentaire** pour les référentiels avec champ additionnel (ex. `tarif_defaut`)
+
+### Points d'extension (Overridable)
+
+#### Métadonnées
+
+| Propriété | Rôle |
+|---|---|
+| `TitreReferentiel` | Titre affiché dans l'en-tête |
+| `SousTitreReferentiel` | Sous-titre descriptif |
+| `CheminContexte` | Fil d'Ariane (`Référentiels > X`) |
+| `RoleMinimum` | Rôle minimal requis pour modifier |
+| `LongueurMaxCode` | Longueur max du code (selon la table) |
+| `RemplacerEspacesParUnderscore` | Remplace les espaces par `_` dans le code (défaut : True) |
+
+#### Données
+
+| Méthode | Rôle |
+|---|---|
+| `ChargerElements(afficherInactifs)` | Retourne les éléments sous forme de `List(Of ReferentielLigne)` |
+| `CodeExisteDeja(code, idExclu)` | Vérifie l'unicité du code |
+| `LibelleExisteDeja(libelle, idExclu)` | Vérifie l'unicité du libellé |
+| `InsererElement(code, libelle, ordre, actif)` | Insère un nouvel élément |
+| `MettreAJourElement(id, code, libelle, ordre, actif)` | Met à jour un élément existant |
+| `DefinirActivation(id, actif)` | Active ou désactive (soft-delete) |
+
+#### Hooks champ supplémentaire
+
+| Méthode | Rôle |
+|---|---|
+| `ConfigurerChampSupplementaire()` | Crée et ajoute le contrôle additionnel au panneau d'édition (appelé au Load) |
+| `AfficherChampSupplementaire(ligne)` | Affiche la valeur depuis la `ReferentielLigne` sélectionnée |
+| `ViderChampSupplementaire()` | Réinitialise le champ (mode création / vidage) |
+| `ActiverChampSupplementaire(enEdition)` | Active/désactive selon le mode |
+| `ValiderChampSupplementaire()` | Valide avant enregistrement (retourne Boolean) |
+
+> 💡 Ces hooks ont des implémentations vides par défaut (no-op / retour `True`). Seul `UC_TypesSeance` les surcharge pour gérer `tarif_defaut`.
+
+### UC_ReferentielHome
+
+Hub d'accueil de la section Référentiels. Présente 9 tuiles navigables.
+
+#### Responsabilités
+
+- Afficher les 9 tuiles de référentiels
+- Activer/désactiver les tuiles selon le rôle (SuperUser / Admin uniquement)
+- Gérer l'élévation temporaire et le retour au rôle de base
+- Naviguer vers chaque UC référentiel via `Home.NavigateToReferentielView()`
+
+#### Méthodes principales
+
+| Méthode | Rôle |
+|---|---|
+| `AppliquerDroitsUtilisateur()` | Configure les tuiles et boutons selon le rôle courant |
+| `ActiverReferentielsDisponibles()` | Active les 9 tuiles (rôle SuperUser/Admin) |
+| `DesactiverTousLesReferentiels()` | Désactive toutes les tuiles (rôle insuffisant) |
+| `btnXxx_Click()` | Navigue vers le UC référentiel correspondant |
+
+### Les 9 référentiels concrets
+
+Chaque UC référentiel hérite de `UC_ReferentielBase` et ne contient que :
+1. Les **métadonnées** (titre, sous-titre, fil d'Ariane, rôle minimum, longueur code)
+2. Le **branchement métier** (implémentation des 6 points d'extension Données)
+3. Optionnellement : les **hooks champ supplémentaire** (`UC_TypesSeance` uniquement)
+
+| UC | Table | Code max | Couche métier | Particularité |
+|---|---|---|---|---|
+| `UC_Domaines` | `ref_domaines` | 10 | `GestionDomaines` / `Domaine` | `RemplacerEspacesParUnderscore = False` |
+| `UC_LiensPatient` | `ref_liens_patient` | 50 | `GestionLiensPatient` / `LienPatient` | — |
+| `UC_RolesIntervenant` | `ref_roles_intervenant` | 30 | `GestionRolesIntervenant` / `RoleIntervenant` | — |
+| `UC_SituationsFamiliales` | `ref_situations_familiales` | 50 | `GestionSituationsFamiliales` / `SituationFamiliale` | — |
+| `UC_StatutsDossier` | `ref_statuts_dossier` | 30 | `GestionStatutsDossier` / `StatutDossier` | — |
+| `UC_StatutsSeance` | `ref_statuts_seance` | 30 | `GestionStatutsSeance` / `StatutSeance` | — |
+| `UC_TypesDocuments` | `ref_types_documents` | 30 | `GestionTypesDocuments` / `TypeDocument` | — |
+| `UC_TypesRendezVous` | `ref_types_rendez_vous` | 30 | `GestionTypesRendezVous` / `TypeRendezVous` | — |
+| `UC_TypesSeance` | `ref_types_seance` | 30 | `GestionTypesSeance` / `TypeSeance` | ⭐ `tarif_defaut decimal(10,2)` via hooks |
+
+### Modèle de présentation générique : ReferentielLigne
+
+```vb
+Public Class ReferentielLigne
+    Public Property IdReferentiel As ULong
+    Public Property Code         As String
+    Public Property Libelle      As String
+    Public Property OrdreAffichage As Integer
+    Public Property Actif        As Boolean
+    Public Property Tarif        As Decimal?   ' Optionnel : renseigné uniquement par UC_TypesSeance
+End Class
+```
+
+### Cas spécial : UC_TypesSeance et tarif_defaut
+
+`ref_types_seance` est le seul référentiel avec un champ additionnel (`tarif_defaut decimal(10,2) NOT NULL`). Ce champ est géré **sans modifier `UC_ReferentielBase`** :
+
+1. `UC_TypesSeance.ConfigurerChampSupplementaire()` crée un `Label` + `NumericUpDown` et les ajoute dynamiquement dans `pnlEdition` (Y=262, sous le champ État).
+2. `AfficherChampSupplementaire(ligne)` charge `ligne.Tarif` dans le NumericUpDown.
+3. `InsererElement` et `MettreAJourElement` lisent `_numTarif.Value` et le transmettent à `GestionTypesSeance`.
+4. `ReferentielLigne.Tarif As Decimal?` transporte la valeur entre la couche métier et l'affichage.
+
+### Architecture complète d'une pile référentiel
+
+```
+Core\Database\Queries\Query<X>.vb          → SQL (SELECT actifs/tous, COUNT code/libellé/usage,
+                                              UPDATE, INSERT, DELETE soft+hard)
+Metier\Referentiels\<X>.vb                 → Modèle (id, code, libelle, actif, ordre [+ tarif])
+Metier\Referentiels\Gestion<X>.vb          → Service CRUD + unicité + <X>EstUtilise()
+UI\Controls\Referentiels\UC_<X>.vb         → UserControl concret héritant UC_ReferentielBase
+```
+
+### Règles importantes
+
+- **Un UC par référentiel** : jamais de logique partagée dans l'UC, toujours déléguée à la couche métier.
+- **Nommage réel** : `UC_Domaines`, `UC_LiensPatient`, `UC_RolesIntervenant`… (sans préfixe supplémentaire).
+- **Soft-delete prioritaire** : si `<X>EstUtilise()` retourne `True`, désactiver via `Desactiver<X>()` ; suppression physique uniquement si non utilisé.
+- **Unicité vérifiée avant écriture** : `CodeExisteDeja` et `LibelleExisteDeja` sont appelés par `UC_ReferentielBase.SaisieValide()` avant tout INSERT/UPDATE.
+- **Aucun accès DB dans l'UC** : tout passe par la couche `Gestion<X>`.
+
+---
 
 
 ...

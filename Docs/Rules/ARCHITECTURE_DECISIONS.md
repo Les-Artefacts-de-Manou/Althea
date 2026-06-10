@@ -4,7 +4,7 @@
 > Chaque ADR explique le **contexte**, les **options envisagées**, la **décision retenue** et ses **conséquences**.  
 > Une décision actée ne doit être remise en cause que via un nouvel ADR explicite.
 
->  *Dernière mise à jour : 08/06/2026*
+> *Dernière mise à jour : 10/06/2026*
 ---
 
 ## Cadre d'utilisation (gouvernance ADR)
@@ -579,10 +579,10 @@ Périmètre V1 **acté** (cf. `Plan_Conception_Metier_Althea.md` §6, D-Q8) :
 - **Séparation stricte** : données métier dans `Tag`, présentation dans `Content` ; ne jamais faire dépendre la logique de la couleur/du titre d'un événement.
 ---
 
-## ADR-15 - Composant standard UC_RichTextEditor pour notes formatées
+## ADR-15 - Composants standard UC_RichTextEditor / UC_RichTextEditorSimple pour notes formatées
 
-**Date :** 06-07 juin 2026  
-**Statut :** Actée
+**Date :** 06-10 juin 2026  
+**Statut :** Actée – Implémentée (V1.0 complète + variante Simple)
 
 ### Contexte
 
@@ -757,13 +757,24 @@ SyncfusionLicenseProvider.RegisterLicense("VOTRE-CLE-SYNCFUSION")
 - **[PLAN_TESTS_UC_RICHTEXTEDITOR.md](../Tests/PLAN_TESTS_UC_RICHTEXTEDITOR.md)** : Plan de tests exhaustif (479 lignes)
 - **[Guide_Licence_Syncfusion.md](../Guide_Licence_Syncfusion.md)** : Obtention licence Community gratuite
 
+#### Variante allégée : UC_RichTextEditorSimple (ajout 10/06/2026)
+
+Pour les zones de notes courtes embarquées dans d'autres UserControls, une variante allégée a été créée :
+- **7 boutons** (Gras, Italique, Souligné, Annuler, Rétablir, Effacer format, Date/Heure)
+- Réutilise 100 % `RichTextEditorHelper` (aucune logique dupliquée)
+- Sauvegarde double format **identique** (RTF + TXT — règle inchangée)
+- `IContextAwareUserControl` **optionnel** (fonctionne sans contexte)
+- Taille pilotée entièrement par le parent (Dock/Anchor)
+- Pas d'impression, pas d'export PDF/Word
+
 ### Traçabilité
 
 | Élément | Fichier |
 |---------|---------|
-| UserControl | `UI/Controls/Communs/UC_RichTextEditor.vb` |
-| Designer | `UI/Controls/Communs/UC_RichTextEditor.Designer.vb` |
-| Helper | `Utils/Helpers/RichTextEditorHelper.vb` |
+| UserControl complet | `UI/Controls/Communs/UC_RichTextEditor.vb` |
+| Designer complet | `UI/Controls/Communs/UC_RichTextEditor.Designer.vb` |
+| UserControl simple | `UI/Controls/Communs/UC_RichTextEditorSimple.vb` |
+| Helper partagé | `Utils/Helpers/RichTextEditorHelper.vb` |
 | Form test | `UI/Forms/Test/TestRichTextEditor.vb` |
 | Documentation | `Docs/UC_RichTextEditor_Documentation.md` |
 | Historique | `Docs/Historique_Implementation_RichTextEditor.md` |
@@ -833,8 +844,8 @@ Réalisé **tôt** (Lot 0), car aucun code métier n'en dépend encore :
 
 ## ADR-18 - Référentiels : UC physique + classe de base `UC_ReferentielBase`
 
-**Date :** 08 juin 2026  
-**Statut :** Actée
+**Date :** 08 juin 2026 — Implémentée 09/06/2026 (Lot 0 complet)  
+**Statut :** Actée – Implémentée
 
 ### Contexte
 
@@ -847,8 +858,30 @@ Les référentiels simples partagent la même structure (`id/code/libelle/actif/
 ### Conséquences
 
 - Liberté visuelle totale **sans** dupliquer la logique 9 fois.
-- Chaque `UC_Ref<X>` hérite de la base et ne gère que son visuel.
-- Ne jamais recopier intégralement `UC_Parametres` (visuel + logique).
+- Chaque UC hérite de la base et ne gère que ses spécificités métier (métadonnées + branchement `Gestion<X>`).
+- Les noms réels des UCs sont `UC_Domaines`, `UC_LiensPatient`, etc. (pas de préfixe `Ref` dans le nom de fichier).
+- `UC_ReferentielBase` expose des **hooks champ supplémentaire** (`ConfigurerChampSupplementaire`, `AfficherChampSupplementaire`, `ViderChampSupplementaire`, `ActiverChampSupplementaire`, `ValiderChampSupplementaire`) pour les référentiels avec champ additionnel (`UC_TypesSeance` → `tarif_defaut`).
+- `ReferentielLigne` est le modèle de présentation générique (transporte id/code/libellé/actif/ordre + `Tarif?` optionnel).
+
+### Traçabilité
+
+| Élément | Fichier |
+|---------|---------|
+| Base héritable | `UI/Controls/Referentiels/UC_ReferentielBase.vb` |
+| Hub accueil | `UI/Controls/Referentiels/UC_ReferentielHome.vb` |
+| UC_Domaines | `UI/Controls/Referentiels/UC_Domaines.vb` |
+| UC_LiensPatient | `UI/Controls/Referentiels/UC_LiensPatient.vb` |
+| UC_RolesIntervenant | `UI/Controls/Referentiels/UC_RolesIntervenant.vb` |
+| UC_SituationsFamiliales | `UI/Controls/Referentiels/UC_SituationsFamiliales.vb` |
+| UC_StatutsDossier | `UI/Controls/Referentiels/UC_StatutsDossier.vb` |
+| UC_StatutsSeance | `UI/Controls/Referentiels/UC_StatutsSeance.vb` |
+| UC_TypesDocuments | `UI/Controls/Referentiels/UC_TypesDocuments.vb` |
+| UC_TypesRendezVous | `UI/Controls/Referentiels/UC_TypesRendezVous.vb` |
+| UC_TypesSeance (⭐ tarif) | `UI/Controls/Referentiels/UC_TypesSeance.vb` |
+| Modèle générique | `Metier/Referentiels/ReferentielLigne.vb` |
+| Services métier | `Metier/Referentiels/Gestion<X>.vb` (×9) |
+| Requêtes SQL | `Core/Database/Queries/Query<X>.vb` (×9) |
+| ADR | `Docs/Rules/ARCHITECTURE_DECISIONS.md` ADR-18 |
 
 ---
 
@@ -914,3 +947,6 @@ Mettre à jour ce fichier à chaque évolution structurante, idéalement dans la
 > - GitHub public : https://github.com/Les-Artefacts-de-Manou/Althea.git
 >
 > ---
+
+[TOC]
+

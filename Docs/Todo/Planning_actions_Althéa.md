@@ -5,7 +5,7 @@
 > - `Checklist_projet_V1.md` (référence détaillée)
 > - `ToDo.md` (actions opérationnelles)
 >
-> Dernière mise à jour : 08 juin 2026
+> Dernière mise à jour : 10 juin 2026
 >
 > ℹ️ **Rythme de travail** : développement solo, **sans cadence imposée**. La progression se mesure « fait / pas fait » par lot, chaque lot étant clôturé par sa documentation. Aucune estimation en semaines ni jalon daté pour les travaux à venir.
 
@@ -58,20 +58,31 @@
 
 ---
 
-## Phase 2 — Lot 0 : socle métier (migration de schéma)
+## Phase 2 — Lot 0 : socle métier (migration de schéma + UC transverses)
 
-**Statut : 🔜 À lancer — ⏳ prérequis bloquant des lots suivants**
+**Statut : ✅ Réalisé (complet)**
 
-**Périmètre :**
-- Migration versionnée `volets` → `domaines`
-- Migration versionnée `medecins` → `therapeutes`
-- Liaison N-N `autres_suivis_patient` + référentiel `ref_roles_intervenant`
-- Référentiel `ref_statuts_seance` (cycle de vie séance)
-- Base UI commune `UC_ReferentielBase`
-- Composants `UC_RichTextEditor` + variante compacte `UC_RichTextEditorSimple`
+- Migration versionnée `volets` → `domaines` : ✅
+- Migration versionnée `medecins` → `therapeutes` : ✅
+- Liaison N-N `autres_suivis_patient` + référentiel `ref_roles_intervenant` : ✅
+- Référentiel `ref_statuts_seance` (cycle de vie séance) : ✅
+- Base UI commune `UC_ReferentielBase` (classe héritable + hooks champ supplémentaire) : ✅
+- Hub `UC_ReferentielHome` (9 tuiles, droits, navigation) : ✅
+- 9 UC référentiels concrets (Domaines, LiensPatient, RolesIntervenant, SituationsFamiliales, StatutsDossier, StatutsSeance, TypesDocuments, TypesRendezVous, TypesSeance) : ✅
+- Composant `UC_RichTextEditor` (éditeur complet 30 boutons, impression, PDF/Word) : ✅
+- Composant `UC_RichTextEditorSimple` (variante allégée 7 boutons, double format) : ✅
 
-**Objectif de sortie de phase :**
+**Objectif de sortie de phase :** ✅ **ATTEINT**
 - Schéma et briques UI transverses alignés avec le plan de conception, prêts pour le codage métier
+
+**Date de clôture : 10/06/2026**
+
+**Livrables :**
+- 9 piles applicatives référentiels complètes (Query / Modèle / Gestion / UC)
+- Architecture générique extensible (`UC_ReferentielBase` + hooks)
+- Cas spécial `UC_TypesSeance` avec `tarif_defaut` géré par hook sans modifier la base
+- Deux éditeurs de texte riche réutilisables (`UC_RichTextEditor` + `UC_RichTextEditorSimple`)
+- Build complet validé sans erreur
 
 ---
 
@@ -177,7 +188,7 @@
 | **J0** | Socle technique complet | ✅ Atteint (17/05/2026) |
 | **J1** | Administration complète | ✅ Atteint (07/06/2026) |
 | **J2** | Cadrage de la phase métier (décisions actées) | ✅ Atteint (08/06/2026) |
-| **J3** | Lot 0 : socle métier migré (schéma + UC transverses) | 🔜 À lancer |
+| **J3** | Lot 0 : socle métier migré (schéma + UC transverses + référentiels) | ✅ Atteint (10/06/2026) |
 | **J4** | Lot 1 : patient/dossier minimal viable | 🔜 À lancer |
 | **J5** | Lot 2 : suivi métier complet (séances + paiements) | 🔜 À lancer |
 | **J6** | Lot 3 : couverture transverse (documents + agenda) | 🔜 À lancer |
@@ -187,14 +198,14 @@
 
 ## Indicateurs d'avancement
 
-### Modules implémentés : 5/9 (56%)
+### Modules implémentés : 6/9 (67%)
 
 - ✅ Socle technique (démarrage, config, DB, logs, sécurité)
 - ✅ Navigation et shell UI
 - ✅ Administration (paramètres, utilisateurs)
 - ✅ UI cohérente (DialogChoix, UtilsIcons)
 - ✅ Documentation exhaustive
-- 🔜 Lot 0 : socle métier (migration schéma + UC référentiels)
+- ✅ Lot 0 : socle métier (migration schéma + UC référentiels + éditeurs de texte)
 - 🔜 Patients + Dossiers
 - 🔜 Séances + Paiements
 - 🔜 Documents + Agenda
@@ -221,10 +232,25 @@
 
 - **Phase 1 achevée avec succès** : Le module d'administration est complet, documenté et validé.
 - **Cadrage métier acté (08/06/2026)** : décisions D-13 à D-19 figées dans le [plan de conception](../Conception/Plan_Conception_Metier_Althea.md), les ADR et Rules.
-- **Priorité suivante** : Lot 0 (migration de schéma + UC référentiels), prérequis bloquant avant tout codage métier.
+- **Lot 0 achevé (10/06/2026)** : schéma migré, 9 référentiels déployés (piles complètes), `UC_ReferentielBase` avec hooks extensibles, `UC_RichTextEditorSimple` ajouté. Build validé.
+- **Priorité suivante** : Lot 1 (patients + dossiers), le socle métier étant désormais prêt.
 - **Rythme** : travail solo sans cadence ; chaque lot est clôturé par sa documentation avant de passer au suivant.
 - **Contrainte connue** : Build/test .NET bloqués sur Linux pour ce projet WinForms cible Windows (à prendre en compte pour CI et validation).
 - **Risque feature creep** : Gel du périmètre V1 recommandé avant de démarrer chaque lot métier.
+
+---
+
+## Réalisations Phase 2 – Lot 0 (09-10/06/2026)
+
+### Référentiels complets ✅
+- `UC_ReferentielBase` : base générique héritable avec hooks champ supplémentaire
+- `UC_ReferentielHome` : hub 9 tuiles, droits, navigation
+- 9 UC référentiels concrets déployés avec pile complète (Query/Modèle/Gestion/UC)
+- Cas spécial `UC_TypesSeance` : `tarif_defaut` géré par hook sans modifier la base commune
+- Build validé sans erreur
+
+### Éditeur de texte simple ✅
+- `UC_RichTextEditorSimple` : variante allégée (7 boutons), double format RTF+TXT, contexte optionnel
 
 ---
 

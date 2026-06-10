@@ -13,7 +13,7 @@
 ' - Gérer les tentatives d'authentification
 ' - Gérer les comptes verrouillés
 '
-' Remarques   :
+' Important   :
 ' - Aucun accès UI direct (pas de MessageBox)
 ' - Aucun mot de passe en clair dans les logs
 ' - Retour de messages UI contrôlés via AuthenticationResult

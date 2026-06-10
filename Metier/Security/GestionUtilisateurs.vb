@@ -13,7 +13,7 @@
 ' - Réinitialiser les échecs après succès
 ' - Mapper les DataReader vers UtilisateurApplication
 '
-' Remarques   :
+' Important   :
 ' - Aucun accès UI direct (pas de MessageBox)
 ' - Aucun mot de passe en clair dans les logs
 ' - Retour de messages UI contrôlés via AuthenticationResult
@@ -64,7 +64,7 @@ Public Module GestionUtilisateurs
     ' Retour     :
     ' - Boolean : True si changement effectué, False sinon
     '
-    ' Remarques  :
+    ' Important  :
     ' - Aucun mot de passe en clair dans les logs
     ' - Vérifie l'ancien mot de passe avant modification
     ' - Génère un nouveau salt via PasswordSecurityHelper.GenerateSalt()
@@ -218,7 +218,7 @@ Public Module GestionUtilisateurs
     ' - Le rôle demandé ne peut pas dépasser RoleMaxElevation
     ' - Le rôle demandé doit être supérieur au rôle courant/base
     '
-    ' Remarques  :
+    ' Important  :
     ' - Aucun mot de passe loggué
     ' - Ne modifie PAS la session (responsabilité de l'appelant)
     ' - Ne modifie PAS la base de données (vérification uniquement)
@@ -811,7 +811,7 @@ Public Module GestionUtilisateurs
     ' - Login et nom d'affichage non vides
     ' - RoleMaxElevation >= RoleUtilisateur
     '
-    ' Remarques  :
+    ' Important  :
     ' - Génère automatiquement un code_utilisateur unique
     ' - Hash le mot de passe avec PBKDF2
     ' - Aucun mot de passe en clair dans les logs

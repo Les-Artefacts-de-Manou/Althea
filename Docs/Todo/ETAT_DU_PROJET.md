@@ -1,7 +1,7 @@
 ﻿# Althéa - Etat du projet
 
 > Document de synthèse vivant. Donne en un coup d'œil le statut réel du projet, les décisions actées, les dettes techniques connues et les prochaines étapes.
-> Dernière mise à jour : 08 juin 2026 (post-cadrage métier : décisions de conception actées).
+> Dernière mise à jour : 10 juin 2026 (Lot 0 socle métier terminé : référentiels + éditeurs de texte).
 
 > 📐 **Plan directeur de la phase métier** : [`Docs/Conception/Plan_Conception_Metier_Althea.md`](../Conception/Plan_Conception_Metier_Althea.md) — source de vérité détaillée des décisions de cadrage (D-Q1 à D-Q10).
 
@@ -46,6 +46,19 @@
 | Utilisateurs | `UC_Utilisateurs` | ✓ | Liste, recherche/filtres, création, modification, consultation, activation/désactivation |
 | Édition utilisateur | `UtilisateurEdition.vb` | ✓ | Form modale : création/modification/consultation, reset password, déverrouillage |
 | Utils UI centralisés | `UtilsIcons.vb`, `UtilsButtons.vb`, `UtilsDataGrid.vb` | ✓ | Centralisation icônes d'état, styles boutons, config grilles |
+| Éditeur texte riche complet | `UC_RichTextEditor.vb` | ✓ | 30 boutons, impression Win32 natif, exports PDF/Word Syncfusion |
+| Éditeur texte riche simple | `UC_RichTextEditorSimple.vb` | ✓ | Variante allégée (7 boutons), double format RTF+TXT, contexte optionnel |
+| Hub référentiels | `UC_ReferentielHome.vb` | ✓ | 9 tuiles, droits SuperUser/Admin, navigation vers chaque référentiel |
+| Base commune référentiels | `UC_ReferentielBase.vb` | ✓ | Classe de base héritable : CRUD, droits, validation, hooks champ supplémentaire |
+| Référentiel Domaines | `UC_Domaines.vb` | ✓ | Pile complète Query+Modèle+Gestion+UC |
+| Référentiel Liens patient | `UC_LiensPatient.vb` | ✓ | Pile complète |
+| Référentiel Rôles intervenant | `UC_RolesIntervenant.vb` | ✓ | Pile complète |
+| Référentiel Situations familiales | `UC_SituationsFamiliales.vb` | ✓ | Pile complète |
+| Référentiel Statuts dossier | `UC_StatutsDossier.vb` | ✓ | Pile complète |
+| Référentiel Statuts séance | `UC_StatutsSeance.vb` | ✓ | Pile complète |
+| Référentiel Types documents | `UC_TypesDocuments.vb` | ✓ | Pile complète |
+| Référentiel Types rendez-vous | `UC_TypesRendezVous.vb` | ✓ | Pile complète |
+| Référentiel Types séance | `UC_TypesSeance.vb` | ✓ | Pile complète + `tarif_defaut` via hook champ supplémentaire |
 
 ### 🧠 Cœur métier
 
@@ -64,10 +77,10 @@
 |-----------|--------|-------|
 | Tables techniques (`tec_*`) | ✓ | Paramètres, méta-schéma |
 | Tables sécurité (`sec_*`) | ✓ | `sec_utilisateurs` avec gestion complète des rôles, verrouillage, élévation |
-| Tables référentielles (`ref_*`) | ✓ schéma / ⚠ à migrer | Statuts, types, **domaines** (ex-`volets`, D-Q1) ; à créer : `ref_roles_intervenant` (D-Q1bis) |
-| Tables métier (patients, dossiers, séances, paiements, documents) | ✓ schéma / ⚠ branché | Schéma SQL existant ; modules applicatifs non connectés |
+| Tables référentielles (`ref_*`) | ✓ schéma + ✓ applicatif | 9 tables ref_* : schéma existant + piles applicatives complètes (Query+Modèle+Gestion+UC) |
+| Tables métier (patients, dossiers, séances, paiements, documents) | ✓ schéma / ⚠ branché | Schéma SQL existant avec champs RTF+TXT ; modules applicatifs non connectés |
 | Scripts versionnés complets | ⚠ | Partie technique et sécurité OK ; partie métier à compléter |
-| Séquences MariaDB | ✓ | Gestion correcte via `LASTVAL(seq_sec_utilisateurs)` |
+| Séquences MariaDB | ✓ | Tables métier/techniques via `LASTVAL(seq_*)` ; tables ref_* via `AUTO_INCREMENT` |
 
 ### 🧩 Qualité & exploitation
 
@@ -104,7 +117,7 @@
 | D-15 | Composant `UC_RichTextEditor` + variante compacte `UC_RichTextEditorSimple` (double format) | ✓ Actée |
 | D-16 | Renommages métier : `volets`→`domaines`, `medecins`→`therapeutes`, réseau de suivi en N-N (`autres_suivis_patient` + `ref_roles_intervenant`) | ✓ Actée |
 | D-17 | Séance créée dès la planification du rendez-vous lié, statut piloté par `ref_statuts_seance` | ✓ Actée |
-| D-18 | UserControl dédié par référentiel sur une base commune (`UC_ReferentielBase`) | ✓ Actée |
+| D-18 | UserControl dédié par référentiel sur une base commune (`UC_ReferentielBase`) — **9 UC concrets implémentés** | ✓ Actée + ✓ Implémentée |
 | D-19 | Anticipation multi-utilisateur / multi-agenda dès la V1 (modèle préparé, activation différée) | ✓ Actée |
 
 > ⚠ Détail et justification de chaque décision : voir [`ARCHITECTURE_DECISIONS.md`](../Rules/ARCHITECTURE_DECISIONS.md) (ADR-13 à ADR-19) et le [plan de conception métier](../Conception/Plan_Conception_Metier_Althea.md).
@@ -122,7 +135,7 @@
 | DT-05 | ~~Intégration des POC documents et agenda non planifiée~~ | ~~Moyenne~~ | ✓ **RÉSOLU** - Périmètre V1 acté (D-13, D-14) ; reste l'implémentation |
 | DT-06 | Absence de campagne de tests fonctionnels transverses | Haute | Requise avant tout gel de la V1 |
 | DT-07 | Documentation illustrations manquantes | Faible | Images à ajouter pour DialogChoix, UtilisateurEdition, UC_Utilisateurs |
-| DT-08 | Migration de schéma à réaliser (Lot 0) : `volets`→`domaines`, `medecins`→`therapeutes`, liaison N-N `autres_suivis_patient`, `ref_roles_intervenant`, `ref_statuts_seance` | Haute | Prérequis bloquant des modules métier ; à versionner avant tout codage Lot 1 |
+| DT-08 | ~~Migration de schéma à réaliser (Lot 0) : `volets`→`domaines`, `medecins`→`therapeutes`, liaison N-N `autres_suivis_patient`, `ref_roles_intervenant`, `ref_statuts_seance`~~ | ~~Haute~~ | ✓ **RÉSOLU** — Schéma migré + 9 piles applicatives référentiels complètes |
 
 ---
 
@@ -134,11 +147,12 @@
 3. ~~Implémenter DialogChoix pour remplacer tous les MessageBox~~ ✓
 4. ~~Centraliser les icônes d'état via UtilsIcons~~ ✓
 
-### Priorité 2 - Lot 0 : socle métier (migration de schéma) ⏳ **PRÉREQUIS BLOQUANT**
-5. Versionner et appliquer la migration : `volets`→`domaines`, `medecins`→`therapeutes`
-6. Créer la liaison N-N `autres_suivis_patient` + le référentiel `ref_roles_intervenant`
-7. Créer/aligner `ref_statuts_seance` (cycle de vie séance)
-8. Créer la base UI commune `UC_ReferentielBase` + composants `UC_RichTextEditor` / `UC_RichTextEditorSimple`
+### ~~Priorité 2 - Lot 0 : socle métier (migration de schéma)~~ ✓ **TERMINÉ**
+5. ~~Versionner et appliquer la migration : `volets`→`domaines`, `medecins`→`therapeutes`~~ ✓
+6. ~~Créer la liaison N-N `autres_suivis_patient` + le référentiel `ref_roles_intervenant`~~ ✓
+7. ~~Créer/aligner `ref_statuts_seance` (cycle de vie séance)~~ ✓
+8. ~~Créer la base UI commune `UC_ReferentielBase` + composants `UC_RichTextEditor` / `UC_RichTextEditorSimple`~~ ✓
+   - ~~9 UC référentiels concrets déployés (Domaines, LiensPatient, RolesIntervenant, SituationsFamiliales, StatutsDossier, StatutsSeance, TypesDocuments, TypesRendezVous, TypesSeance)~~ ✓
 
 ### Priorité 3 - Lot 1 : Patients & dossiers
 9. Créer les modules métier Patients (recherche + fiche multi-onglets + réseau d'intervenants)
@@ -174,6 +188,13 @@
 
 ## 6. Réalisations récentes (depuis audit 17/05/2026)
 
+### Lot 0 : socle métier terminé ✓ (09–10/06/2026)
+- **9 référentiels implémentés** (pile complète Query + Modèle + Gestion + UC) : Domaines, LiensPatient, RolesIntervenant, SituationsFamiliales, StatutsDossier, StatutsSeance, TypesDocuments, TypesRendezVous, TypesSeance
+- **`UC_ReferentielBase`** : classe de base héritable avec hooks champ supplémentaire (géré par `UC_TypesSeance` pour `tarif_defaut`)
+- **`UC_ReferentielHome`** : hub 9 tuiles, droits SuperUser/Admin, navigation activée
+- **`UC_RichTextEditorSimple`** : variante allégée (7 boutons), double format RTF+TXT, contexte optionnel, réutilise `RichTextEditorHelper` à 100%
+- **Build complet validé** : génération réussie sans erreur
+
 ### Cadrage de la phase métier ✓ (08/06/2026)
 - **Plan de conception métier** rédigé et validé : [`Plan_Conception_Metier_Althea.md`](../Conception/Plan_Conception_Metier_Althea.md)
 - **Décisions actées** (D-13 à D-19) : stockage documents hors DB à chemin déterministe, Google Docs/Drive/Calendar piliers V1, renommages `domaines`/`therapeutes`, réseau d'intervenants N-N, séance créée dès la planification, UC dédié par référentiel, anticipation multi-utilisateur
@@ -193,13 +214,7 @@
 ### Documentation exhaustive ✓
 - Mise à jour complète de **CHANGELOG.md** (chronologie inversée, détails depuis 17/05)
 - Mise à jour **README.md** (ton professionnel, structure claire)
-- Mise à jour **Rules.md** (règles DialogChoix, UtilsIcons, modes utilisateur, contextes)
-- Mise à jour **Process_Althea.md** (Processus 06 Gestion utilisateurs, Processus 07 DialogChoix, diagrammes Mermaid)
-- Mise à jour **ARCHITECTURE_DECISIONS.md** (ADR-10 modes utilisateur, ADR-11 DialogChoix, ADR-12 UtilsIcons)
-- **Documentation_technique_UI_Althea.md** : sections complètes pour DialogChoix, UtilisateurEdition, UC_Utilisateurs
-
-### Tests et validation ✓
-- Plan de tests exhaustif créé (`PLAN_TESTS_UC_UTILISATEURS.md`)
-- Tests manuels effectués et validés
-- Corrections des bugs identifiés pendant les tests
-- Validation des workflows création/modification/consultation/reset/unlock
+- Mise à jour **Rules.md** (règles DialogChoix, UtilsIcons, modes utilisateur, contextes, référentiels)
+- Mise à jour **Process_Althea.md** (Processus 06 Gestion utilisateurs, Processus 07 DialogChoix, Processus 08 Référentiels)
+- Mise à jour **ARCHITECTURE_DECISIONS.md** (ADR-10 à ADR-18)
+- **Documentation_technique_UI_Althea.md** : sections complètes pour tous les composants implémentés

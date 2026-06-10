@@ -25,9 +25,9 @@ Partial Class DialogChoix
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(DialogChoix))
         pnlMain = New Panel()
         picIcone = New PictureBox()
+        pnlIcone = New Panel()
         pnlContenu = New Panel()
         lblMessage = New Label()
-        pnlIcone = New Panel()
         pnlBoutons = New Panel()
         btn3 = New Button()
         btn2 = New Button()
@@ -62,6 +62,14 @@ Partial Class DialogChoix
         picIcone.TabIndex = 0
         picIcone.TabStop = False
         ' 
+        ' pnlIcone
+        ' 
+        pnlIcone.BackColor = Color.Transparent
+        pnlIcone.Location = New Point(12, 140)
+        pnlIcone.Name = "pnlIcone"
+        pnlIcone.Size = New Size(440, 10)
+        pnlIcone.TabIndex = 1
+        ' 
         ' pnlContenu
         ' 
         pnlContenu.BackColor = Color.Transparent
@@ -79,18 +87,10 @@ Partial Class DialogChoix
         lblMessage.Font = New Font("Segoe UI", 10F)
         lblMessage.Location = New Point(0, 17)
         lblMessage.Name = "lblMessage"
-        lblMessage.Size = New Size(359, 120)
+        lblMessage.Size = New Size(355, 120)
         lblMessage.TabIndex = 0
         lblMessage.Text = "Message de confirmation"
         lblMessage.TextAlign = ContentAlignment.MiddleLeft
-        ' 
-        ' pnlIcone
-        ' 
-        pnlIcone.BackColor = Color.Transparent
-        pnlIcone.Location = New Point(12, 140)
-        pnlIcone.Name = "pnlIcone"
-        pnlIcone.Size = New Size(440, 10)
-        pnlIcone.TabIndex = 1
         ' 
         ' pnlBoutons
         ' 

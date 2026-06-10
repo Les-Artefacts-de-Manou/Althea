@@ -139,6 +139,10 @@
     <value>..\Assets\Fond\Fond_1000x800_Feuille4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
     <comment>Image de fond pour pnlForm (Forms)</comment>
   </data>
+  <data name="Fond_icone_Transp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Logos\Fond_icone_Transp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <comment>Logo picTitre de pnlTitre pour UC_</comment>
+  </data>
   <data name="Information_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Gif_Animated\Information_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

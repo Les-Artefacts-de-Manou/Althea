@@ -1,56 +1,56 @@
-' -------------------------------------------------------------------------------------------------
+Ôªø' -------------------------------------------------------------------------------------------------
 ' Form       : Home
-' Projet     : AlthÈa
+' Projet     : Alth√©a
 ' Version    : V1.6
 ' Date       : 04/06/2026
-' Auteur     : JoÎlle (Manou) / Projet AlthÈa
+' Auteur     : Jo√´lle (Manou) / Projet Alth√©a
 '
-' RÙle       :
-' Form principale et Shell applicatif de l''application AlthÈa.
-' Centralise l''authentification, la navigation, les composants UI partagÈs, et l''hÈbergement
-' des UserControls mÈtier dans une zone de contenu dynamique.
+' R√¥le       :
+' Form principale et Shell applicatif de l''application Alth√©a.
+' Centralise l''authentification, la navigation, les composants UI partag√©s, et l''h√©bergement
+' des UserControls m√©tier dans une zone de contenu dynamique.
 '
-' ResponsabilitÈs :
-' - GÈrer l''authentification initiale via Login.vb au dÈmarrage
-' - GÈrer le changement de mot de passe obligatoire (MustChangePassword)
-' - CrÈer et maintenir la session utilisateur (UserSession) pendant toute la durÈe de vie de l''application
-' - HÈberger les composants UI partagÈs (StatusStrip, ToolTip, ErrorProvider, lblContexte)
-' - Fournir un contexte UI partagÈ (UserControlContext) ‡ tous les UserControls via IContextAwareUserControl
-' - GÈrer le menu principal (pnlMenu) avec Ètat visuel des boutons (normal/hover/sÈlectionnÈ)
-' - Charger dynamiquement les UserControls mÈtier dans pnlContent via NavigationManager
-' - Afficher le contexte de navigation hiÈrarchique (lblContexte : "Accueil", "Administration > ParamËtres", etc.)
-' - GÈrer l''ÈlÈvation temporaire de privilËges pour accÈder aux zones rÈservÈes (Administration)
-' - Afficher l''utilisateur connectÈ, son rÙle courant, et l''Ètat d''ÈlÈvation dans le header (lblUtilisateurConnecte)
+' Responsabilit√©s :
+' - G√©rer l''authentification initiale via Login.vb au d√©marrage
+' - G√©rer le changement de mot de passe obligatoire (MustChangePassword)
+' - Cr√©er et maintenir la session utilisateur (UserSession) pendant toute la dur√©e de vie de l''application
+' - H√©berger les composants UI partag√©s (StatusStrip, ToolTip, ErrorProvider, lblContexte)
+' - Fournir un contexte UI partag√© (UserControlContext) √† tous les UserControls via IContextAwareUserControl
+' - G√©rer le menu principal (pnlMenu) avec √©tat visuel des boutons (normal/hover/s√©lectionn√©)
+' - Charger dynamiquement les UserControls m√©tier dans pnlContent via NavigationManager
+' - Afficher le contexte de navigation hi√©rarchique (lblContexte : "Accueil", "Administration > Param√®tres", etc.)
+' - G√©rer l''√©l√©vation temporaire de privil√®ges pour acc√©der aux zones r√©serv√©es (Administration)
+' - Afficher l''utilisateur connect√©, son r√¥le courant, et l''√©tat d''√©l√©vation dans le header (lblUtilisateurConnecte)
 ' - Synchroniser le menu, le contenu, et le StatusStrip lors de chaque navigation
-' - Journaliser les actions de navigation et d''ÈlÈvation via GestionLog
+' - Journaliser les actions de navigation et d''√©l√©vation via GestionLog
 ' - Permettre la navigation de retour depuis les UserControls enfants (NavigateToAccueil, NavigateToAdminView)
 '
 ' Remarques  :
-' - Home est le núud central de l''application : tous les UserControls mÈtier sont chargÈs dans pnlContent
-' - Home ne contient aucune logique mÈtier ni accËs direct ‡ la base de donnÈes
-' - L''architecture est organisÈe en panneaux :
+' - Home est le n≈ìud central de l''application : tous les UserControls m√©tier sont charg√©s dans pnlContent
+' - Home ne contient aucune logique m√©tier ni acc√®s direct √† la base de donn√©es
+' - L''architecture est organis√©e en panneaux :
 '   * pnlMenu (gauche)    : boutons de navigation principale
 '   * pnlHeader (haut)    : contexte utilisateur (lblUtilisateurConnecte) et contexte de navigation (lblContexte)
-'   * pnlContent (centre) : zone dynamique o˘ sont chargÈs les UserControls
-'   * stsStatus (bas)     : StatusStrip partagÈ (stsLabelStatus)
-' - Le mÈcanisme de navigation est centralisÈ via NavigationManager (instanciÈ dans Home_Load)
-' - Les UserControls implÈmentant IContextAwareUserControl reÁoivent automatiquement le contexte via SetContext()
-' - L''ÈlÈvation de privilËges est temporaire et limitÈe ‡ la session en cours (gÈrÈe par UserSession)
-' - Le DialogResult n''est jamais utilisÈ (Home est la Form principale, pas une modale)
-' - Tous les UserControls naviguent en appelant des mÈthodes publiques de Home (NavigateToAccueil, NavigateToAdminView)
+'   * pnlContent (centre) : zone dynamique o√π sont charg√©s les UserControls
+'   * stsStatus (bas)     : StatusStrip partag√© (stsLabelStatus)
+' - Le m√©canisme de navigation est centralis√© via NavigationManager (instanci√© dans Home_Load)
+' - Les UserControls impl√©mentant IContextAwareUserControl re√ßoivent automatiquement le contexte via SetContext()
+' - L''√©l√©vation de privil√®ges est temporaire et limit√©e √† la session en cours (g√©r√©e par UserSession)
+' - Le DialogResult n''est jamais utilis√© (Home est la Form principale, pas une modale)
+' - Tous les UserControls naviguent en appelant des m√©thodes publiques de Home (NavigateToAccueil, NavigateToAdminView)
 '
-' DÈpendances :
-' - Login (authentification initiale au dÈmarrage)
+' D√©pendances :
+' - Login (authentification initiale au d√©marrage)
 ' - ChangePassword (changement de mot de passe obligatoire)
-' - ElevationAcces (ÈlÈvation temporaire de privilËges)
-' - UserSession (session utilisateur, rÙle courant, Ètat d''ÈlÈvation)
-' - UtilisateurApplication (utilisateur authentifiÈ)
-' - UserControlContext (contexte UI partagÈ pour les UserControls)
-' - NavigationManager (chargement centralisÈ des UserControls)
-' - UC_Accueil (UserControl d''accueil chargÈ par dÈfaut)
+' - ElevationAcces (√©l√©vation temporaire de privil√®ges)
+' - UserSession (session utilisateur, r√¥le courant, √©tat d''√©l√©vation)
+' - UtilisateurApplication (utilisateur authentifi√©)
+' - UserControlContext (contexte UI partag√© pour les UserControls)
+' - NavigationManager (chargement centralis√© des UserControls)
+' - UC_Accueil (UserControl d''accueil charg√© par d√©faut)
 ' - UC_AdminHome (UserControl administration)
-' - UtilsButtons (thÈmatisation et gestion des boutons du menu)
-' - GestionLog (journalisation des actions de navigation et d''ÈlÈvation)
+' - UtilsButtons (th√©matisation et gestion des boutons du menu)
+' - GestionLog (journalisation des actions de navigation et d''√©l√©vation)
 '
 ' Imports    :
 ' - 
@@ -61,43 +61,43 @@ Option Explicit On
 
 Public Class Home
 
-#Region "Variables privÈes"
+#Region "Variables priv√©es"
 
-    ' Liste centralisÈe des boutons du menu principal (pnlMenu).
+    ' Liste centralis√©e des boutons du menu principal (pnlMenu).
     Private ReadOnly _homeMenuButtons As New List(Of Button)
 
-    ' Gestionnaire de navigation centralisÈ pour charger les UserControls mÈtier dans pnlContent.
+    ' Gestionnaire de navigation centralis√© pour charger les UserControls m√©tier dans pnlContent.
     Private _navManager As NavigationManager
 
-    ' Session utilisateur courante maintenant l'Ètat d'authentification, le rÙle actif, et l'ÈlÈvation temporaire.
+    ' Session utilisateur courante maintenant l'√©tat d'authentification, le r√¥le actif, et l'√©l√©vation temporaire.
     Private _userSession As UserSession
 
-    ' Contexte UI partagÈ fourni ‡ tous les UserControls via IContextAwareUserControl.SetContext().
+    ' Contexte UI partag√© fourni √† tous les UserControls via IContextAwareUserControl.SetContext().
     Private _uiContext As UserControlContext
 
-    ' Utilisateur authentifiÈ retournÈ par Login.vb au dÈmarrage de l'application.
+    ' Utilisateur authentifi√© retourn√© par Login.vb au d√©marrage de l'application.
     Private _authenticatedUser As UtilisateurApplication
 
 #End Region
 
-#Region "PropriÈtÈs publiques"
+#Region "Propri√©t√©s publiques"
 
     ' -------------------------------------------------------------------------------------------------
-    ' PropriÈtÈ  : AuthenticatedUser
+    ' Propri√©t√©  : AuthenticatedUser
     ' Type       : UtilisateurApplication (ReadOnly)
     ' Version    : V1.0.0
     ' Date       : 12/05/2026
     '
-    ' RÙle       :
-    ' Retourne l'utilisateur authentifiÈ courant rÈcupÈrÈ depuis Login.vb au dÈmarrage.
+    ' R√¥le       :
+    ' Retourne l'utilisateur authentifi√© courant r√©cup√©r√© depuis Login.vb au d√©marrage.
     '
     ' Retour     :
-    ' - UtilisateurApplication : Instance de l'utilisateur authentifiÈ avec toutes ses propriÈtÈs
+    ' - UtilisateurApplication : Instance de l'utilisateur authentifi√© avec toutes ses propri√©t√©s
     '
     ' Remarques  :
-    ' - PropriÈtÈ ReadOnly exposÈe publiquement pour permettre aux UserControls d'accÈder aux informations utilisateur
-    ' - UtilisÈe notamment par UC_AdminHome pour passer l'utilisateur authentifiÈ lors de l'ÈlÈvation
-    ' - Ne retourne jamais Nothing aprËs authentification rÈussie (Home se ferme si login Èchoue)
+    ' - Propri√©t√© ReadOnly expos√©e publiquement pour permettre aux UserControls d'acc√©der aux informations utilisateur
+    ' - Utilis√©e notamment par UC_AdminHome pour passer l'utilisateur authentifi√© lors de l'√©l√©vation
+    ' - Ne retourne jamais Nothing apr√®s authentification r√©ussie (Home se ferme si login √©choue)
     '
     ' Exceptions :
     ' - Aucune
@@ -113,36 +113,36 @@ Public Class Home
 #Region "Initialisation"
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : Home_Load
+    ' Proc√©dure  : Home_Load
     ' Version    : V1.5.0
     ' Date       : 07/05/2026
     '
-    ' RÙle       :
-    ' Initialise la Form Home : authentification, session utilisateur, contexte UI partagÈ,
-    ' changement de mot de passe obligatoire, et chargement du UserControl d'accueil par dÈfaut.
+    ' R√¥le       :
+    ' Initialise la Form Home : authentification, session utilisateur, contexte UI partag√©,
+    ' changement de mot de passe obligatoire, et chargement du UserControl d'accueil par d√©faut.
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement
-    ' - e      : Arguments de l'ÈvÈnement Load
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement
+    ' - e      : Arguments de l'√©v√©nement Load
     '
     ' Remarques  :
-    ' - SÈquence d'initialisation :
+    ' - S√©quence d'initialisation :
     '   1. Initialisation des boutons du menu principal (InitializeHomeMenuButtons)
     '   2. Affichage de Login.vb en modal et authentification utilisateur
-    '   3. Si authentification ÈchouÈe (DialogResult <> OK) : fermeture de l'application
-    '   4. CrÈation de la UserSession avec les informations de l'utilisateur authentifiÈ
-    '   5. Affichage de l'utilisateur connectÈ dans le header (UpdateConnectedUserDisplay)
-    '   6. CrÈation du contexte UI partagÈ (UserControlContext) pour injection dans les UserControls
+    '   3. Si authentification √©chou√©e (DialogResult <> OK) : fermeture de l'application
+    '   4. Cr√©ation de la UserSession avec les informations de l'utilisateur authentifi√©
+    '   5. Affichage de l'utilisateur connect√© dans le header (UpdateConnectedUserDisplay)
+    '   6. Cr√©ation du contexte UI partag√© (UserControlContext) pour injection dans les UserControls
     '   7. Si MustChangePassword = True : affichage de ChangePassword.vb en modal
-    '   8. Si changement de mot de passe refusÈ : fermeture de l'application avec log sÈcuritÈ
+    '   8. Si changement de mot de passe refus√© : fermeture de l'application avec log s√©curit√©
     '   9. Initialisation du NavigationManager avec pnlContent et _uiContext
-    '   10. Chargement de UC_Accueil par dÈfaut avec bouton Accueil sÈlectionnÈ
-    ' - Les boutons du menu Home ont un comportement spÈcifique : normal / hover / sÈlectionnÈ
-    ' - Le bouton sÈlectionnÈ reste visuellement actif jusqu'au choix d'un autre menu
+    '   10. Chargement de UC_Accueil par d√©faut avec bouton Accueil s√©lectionn√©
+    ' - Les boutons du menu Home ont un comportement sp√©cifique : normal / hover / s√©lectionn√©
+    ' - Le bouton s√©lectionn√© reste visuellement actif jusqu'au choix d'un autre menu
     ' - Home est la Form principale : si elle se ferme, l'application se termine
     '
     ' Exceptions :
-    ' - Aucune gestion explicite (erreurs propagÈes au niveau global)
+    ' - Aucune gestion explicite (erreurs propag√©es au niveau global)
     ' -------------------------------------------------------------------------------------------------
     Private Sub Home_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -173,16 +173,16 @@ Public Class Home
         _authenticatedUser =
     authenticatedUser
 
-        ' CrÈation session utilisateur
+        ' Cr√©ation session utilisateur
         _userSession = New UserSession(
     authenticatedUser.LoginUtilisateur,
     authenticatedUser.NomAffichage,
     authenticatedUser.RoleUtilisateur
 )
-        ' Affichage de l'utilisateur connectÈ dans le header
+        ' Affichage de l'utilisateur connect√© dans le header
         UpdateConnectedUserDisplay()
 
-        ' Initialisation du contexte partagÈ pour les UserControls
+        ' Initialisation du contexte partag√© pour les UserControls
         _uiContext = New UserControlContext(
             stsLabelStatus,
             ttMain,
@@ -204,7 +204,7 @@ Public Class Home
                 If result <> DialogResult.OK Then
 
                     GestionLog.EcrireLog(
-                $"Application fermÈe : changement mot de passe obligatoire refusÈ ({authenticatedUser.LoginUtilisateur}).",
+                $"Application ferm√©e : changement mot de passe obligatoire refus√© ({authenticatedUser.LoginUtilisateur}).",
                 GestionLog.LogLevel.Succinct,
                 GestionLog.LogCategory.Security
             )
@@ -218,33 +218,33 @@ Public Class Home
 
         End If
 
-        ' Initialisation du gestionnaire de navigation centralisÈ
+        ' Initialisation du gestionnaire de navigation centralis√©
         _navManager = New NavigationManager(pnlContent, _uiContext)
         NavigateTo(New UC_Accueil(), btnAccueil, "Accueil")
 
-        '  _uiContext.SetStatus("Application prÍte")
+        '  _uiContext.SetStatus("Application pr√™te")
         '  _uiContext.SetHeader("Accueil")
 
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : UpdateConnectedUserDisplay
+    ' Proc√©dure  : UpdateConnectedUserDisplay
     ' Version    : V1.1.0
     ' Date       : 12/05/2026
     '
-    ' RÙle       :
-    ' Met ‡ jour l'affichage de l'utilisateur connectÈ dans le header (lblUtilisateurConnecte)
-    ' avec le nom, le rÙle courant, et l'Ètat d'ÈlÈvation temporaire.
+    ' R√¥le       :
+    ' Met √† jour l'affichage de l'utilisateur connect√© dans le header (lblUtilisateurConnecte)
+    ' avec le nom, le r√¥le courant, et l'√©tat d'√©l√©vation temporaire.
     '
-    ' ParamËtres :
+    ' Param√®tres :
     ' - Aucun
     '
     ' Remarques  :
-    ' - AppelÈe dans Home_Load aprËs crÈation de la UserSession
-    ' - AppelÈe aprËs chaque ÈlÈvation de privilËges (btnAdmin_Click) pour reflÈter le changement de rÙle
-    ' - AppelÈe par UC_AdminHome aprËs retour au rÙle de base (btnRetourRoleBase_Click)
-    ' - Format d'affichage : "ConnectÈ : [DisplayName] | RÙle : [CurrentRole] | …lÈvation active"
-    ' - Si _userSession est Nothing (cas anormal) : affiche "ConnectÈ : -" sans erreur
+    ' - Appel√©e dans Home_Load apr√®s cr√©ation de la UserSession
+    ' - Appel√©e apr√®s chaque √©l√©vation de privil√®ges (btnAdmin_Click) pour refl√©ter le changement de r√¥le
+    ' - Appel√©e par UC_AdminHome apr√®s retour au r√¥le de base (btnRetourRoleBase_Click)
+    ' - Format d'affichage : "Connect√© : [DisplayName] | R√¥le : [CurrentRole] | √âl√©vation active"
+    ' - Si _userSession est Nothing (cas anormal) : affiche "Connect√© : -" sans erreur
     ' - lblUtilisateurConnecte est un Label dans pnlHeader, visible en permanence
     '
     ' Exceptions :
@@ -255,18 +255,18 @@ Public Class Home
         If _userSession Is Nothing Then
 
             lblUtilisateurConnecte.Text =
-            "ConnectÈ : -"
+            "Connect√© : -"
 
             Return
 
         End If
 
         Dim texte As String =
-        $"ConnectÈ : {_userSession.DisplayName} | RÙle : {_userSession.CurrentRole}"
+        $"Connect√© : {_userSession.DisplayName} | R√¥le : {_userSession.CurrentRole}"
 
         If _userSession.IsElevated Then
 
-            texte &= " | …lÈvation active"
+            texte &= " | √âl√©vation active"
 
         End If
 
@@ -280,25 +280,25 @@ Public Class Home
 #Region "Initialisation UI"
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : InitializeHomeMenuButtons
+    ' Proc√©dure  : InitializeHomeMenuButtons
     ' Version    : V1.0.0
     ' Date       : 25/04/2026
     '
-    ' RÙle       :
-    ' Initialise la liste centralisÈe des boutons du menu principal (_homeMenuButtons)
+    ' R√¥le       :
+    ' Initialise la liste centralis√©e des boutons du menu principal (_homeMenuButtons)
     ' et applique leur style standard via UtilsButtons.InitHomeMenuButton().
     '
-    ' ParamËtres :
+    ' Param√®tres :
     ' - Aucun
     '
     ' Remarques  :
-    ' - AppelÈe dans Home_Load avant l'authentification
+    ' - Appel√©e dans Home_Load avant l'authentification
     ' - Ajoute les 7 boutons du menu principal : btnAccueil, btnPatients, btnDomaines, btnAgenda,
     '   btnDocuments, btnReferentiels, btnAdmin
-    ' - Chaque bouton doit avoir un Tag dÈfini dans le Designer pour le systËme de navigation
+    ' - Chaque bouton doit avoir un Tag d√©fini dans le Designer pour le syst√®me de navigation
     ' - Exemples de Tags : "accueil", "patients", "domaines", "agenda", "documents", "referentiels", "admin"
-    ' - UtilsButtons.InitHomeMenuButton() configure les styles normal/hover/sÈlectionnÈ pour chaque bouton
-    ' - La liste _homeMenuButtons est utilisÈe par SetSelectedHomeMenuButton() pour gÈrer l'Ètat visuel
+    ' - UtilsButtons.InitHomeMenuButton() configure les styles normal/hover/s√©lectionn√© pour chaque bouton
+    ' - La liste _homeMenuButtons est utilis√©e par SetSelectedHomeMenuButton() pour g√©rer l'√©tat visuel
     '
     ' Exceptions :
     ' - Aucune
@@ -328,25 +328,25 @@ Public Class Home
 #Region "Navigation menu principal"
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : SelectHomeMenuButton
+    ' Proc√©dure  : SelectHomeMenuButton
     ' Version    : V1.0.0
     ' Date       : 25/04/2026
     '
-    ' RÙle       :
-    ' DÈfinit le bouton actif du menu principal, met ‡ jour l'Ètat visuel, affiche le statut,
-    ' et journalise la sÈlection.
+    ' R√¥le       :
+    ' D√©finit le bouton actif du menu principal, met √† jour l'√©tat visuel, affiche le statut,
+    ' et journalise la s√©lection.
     '
-    ' ParamËtres :
-    ' - selectedButton : Bouton ‡ marquer comme sÈlectionnÈ (Button)
-    ' - statusText     : Texte ‡ afficher dans la barre de statut (String)
+    ' Param√®tres :
+    ' - selectedButton : Bouton √† marquer comme s√©lectionn√© (Button)
+    ' - statusText     : Texte √† afficher dans la barre de statut (String)
     '
     ' Remarques  :
-    ' - AppelÈe par NavigateTo() et par les handlers de clic simples (btnPatients_Click, etc.)
-    ' - Utilise UtilsButtons.SetSelectedHomeMenuButton() pour gÈrer l'Ètat visuel de tous les boutons
-    ' - Le bouton sÈlectionnÈ reste visuellement actif jusqu'au choix d'un autre menu
-    ' - Met ‡ jour stsLabelStatus.Text avec le contexte fourni
-    ' - Journalise la sÈlection dans GestionLog (niveau Rapide, catÈgorie UI)
-    ' - Ne charge pas de UserControl (c'est le rÙle de NavigateTo())
+    ' - Appel√©e par NavigateTo() et par les handlers de clic simples (btnPatients_Click, etc.)
+    ' - Utilise UtilsButtons.SetSelectedHomeMenuButton() pour g√©rer l'√©tat visuel de tous les boutons
+    ' - Le bouton s√©lectionn√© reste visuellement actif jusqu'au choix d'un autre menu
+    ' - Met √† jour stsLabelStatus.Text avec le contexte fourni
+    ' - Journalise la s√©lection dans GestionLog (niveau Rapide, cat√©gorie UI)
+    ' - Ne charge pas de UserControl (c'est le r√¥le de NavigateTo())
     '
     ' Exceptions :
     ' - Aucune
@@ -358,28 +358,28 @@ Public Class Home
         stsLabelStatus.Text = statusText
 
         GestionLog.EcrireLog(
-        $"Menu Home sÈlectionnÈ : {statusText}",
+        $"Menu Home s√©lectionn√© : {statusText}",
         GestionLog.LogLevel.Rapide,
         GestionLog.LogCategory.UI)
 
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnAccueil_Click
+    ' Proc√©dure  : btnAccueil_Click
     ' Version    : V1.1.0
     ' Date       : 13/05/2026
     '
-    ' RÙle       :
-    ' Retourne ‡ l'accueil via NavigateToAccueil().
+    ' R√¥le       :
+    ' Retourne √† l'accueil via NavigateToAccueil().
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
     '
     ' Remarques  :
-    ' - UtilisÈ pour revenir ‡ l'Ècran d'accueil depuis n'importe quelle vue
-    ' - NavigateToAccueil() charge UC_Accueil, sÈlectionne btnAccueil, et met ‡ jour le contexte
-    ' - UtilisÈ notamment aprËs une perte d'accËs ‡ une zone rÈservÈe
+    ' - Utilis√© pour revenir √† l'√©cran d'accueil depuis n'importe quelle vue
+    ' - NavigateToAccueil() charge UC_Accueil, s√©lectionne btnAccueil, et met √† jour le contexte
+    ' - Utilis√© notamment apr√®s une perte d'acc√®s √† une zone r√©serv√©e
     '
     ' Exceptions :
     ' - Aucune
@@ -394,20 +394,20 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnPatients_Click
+    ' Proc√©dure  : btnPatients_Click
     ' Version    : V1.0.0
     ' Date       : 25/04/2026
     '
-    ' RÙle       :
-    ' Active l'environnement Patients (en attente d'implÈmentation complËte).
+    ' R√¥le       :
+    ' Active l'environnement Patients (en attente d'impl√©mentation compl√®te).
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
     '
     ' Remarques  :
-    ' - Actuellement : sÈlectionne uniquement le bouton et met ‡ jour le statut
-    ' - ¿ terme : devra charger le UserControl de gestion des patients via NavigateTo()
+    ' - Actuellement : s√©lectionne uniquement le bouton et met √† jour le statut
+    ' - √Ä terme : devra charger le UserControl de gestion des patients via NavigateTo()
     '
     ' Exceptions :
     ' - Aucune
@@ -419,20 +419,20 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnDomaines_Click
+    ' Proc√©dure  : btnDomaines_Click
     ' Version    : V1.0.0
     ' Date       : 25/04/2026
     '
-    ' RÙle       :
-    ' Active l'environnement Domaines (en attente d'implÈmentation complËte).
+    ' R√¥le       :
+    ' Active l'environnement Domaines (en attente d'impl√©mentation compl√®te).
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
     '
     ' Remarques  :
-    ' - Actuellement : sÈlectionne uniquement le bouton et met ‡ jour le statut
-    ' - ¿ terme : devra charger le UserControl de gestion des domaines via NavigateTo()
+    ' - Actuellement : s√©lectionne uniquement le bouton et met √† jour le statut
+    ' - √Ä terme : devra charger le UserControl de gestion des domaines via NavigateTo()
     '
     ' Exceptions :
     ' - Aucune
@@ -444,20 +444,20 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnAgenda_Click
+    ' Proc√©dure  : btnAgenda_Click
     ' Version    : V1.0.0
     ' Date       : 25/04/2026
     '
-    ' RÙle       :
-    ' Active l'environnement Agenda (en attente d'implÈmentation complËte).
+    ' R√¥le       :
+    ' Active l'environnement Agenda (en attente d'impl√©mentation compl√®te).
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
     '
     ' Remarques  :
-    ' - Actuellement : sÈlectionne uniquement le bouton et met ‡ jour le statut
-    ' - ¿ terme : devra charger le UserControl de gestion de l'agenda via NavigateTo()
+    ' - Actuellement : s√©lectionne uniquement le bouton et met √† jour le statut
+    ' - √Ä terme : devra charger le UserControl de gestion de l'agenda via NavigateTo()
     '
     ' Exceptions :
     ' - Aucune
@@ -469,20 +469,20 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnDocuments_Click
+    ' Proc√©dure  : btnDocuments_Click
     ' Version    : V1.0.0
     ' Date       : 25/04/2026
     '
-    ' RÙle       :
-    ' Active l'environnement Documents (en attente d'implÈmentation complËte).
+    ' R√¥le       :
+    ' Active l'environnement Documents (en attente d'impl√©mentation compl√®te).
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
     '
     ' Remarques  :
-    ' - Actuellement : sÈlectionne uniquement le bouton et met ‡ jour le statut
-    ' - ¿ terme : devra charger le UserControl de gestion des documents via NavigateTo()
+    ' - Actuellement : s√©lectionne uniquement le bouton et met √† jour le statut
+    ' - √Ä terme : devra charger le UserControl de gestion des documents via NavigateTo()
     '
     ' Exceptions :
     ' - Aucune
@@ -494,76 +494,48 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnReferentiels_Click
-    ' Version    : V1.0.0
-    ' Date       : 25/04/2026
+    ' Proc√©dure  : btnReferentiels_Click
+    ' Version    : V1.1.0
+    ' Date       : 09/06/2026
     '
-    ' RÙle       :
-    ' Active l'environnement RÈfÈrentiels (en attente d'implÈmentation complËte).
+    ' R√¥le       :
+    ' Ouvre l'espace R√©f√©rentiels (UC_ReferentielHome) avec contr√¥le d'acc√®s et √©l√©vation de privil√®ges si n√©cessaire.
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
-    '
-    ' Remarques  :
-    ' - Actuellement : sÈlectionne uniquement le bouton et met ‡ jour le statut
-    ' - ¿ terme : devra charger le UserControl de gestion des rÈfÈrentiels via NavigateTo()
-    '
-    ' Exceptions :
-    ' - Aucune
-    ' -------------------------------------------------------------------------------------------------
-    Private Sub btnReferentiels_Click(sender As Object, e As EventArgs) Handles btnReferentiels.Click
-
-        SelectHomeMenuButton(btnReferentiels, "RÈfÈrentiels")
-
-    End Sub
-
-    ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnAdmin_Click
-    ' Version    : V1.5.0
-    ' Date       : 11/05/2026
-    '
-    ' RÙle       :
-    ' Ouvre l'espace Administration (UC_AdminHome) avec contrÙle d'accËs et ÈlÈvation de privilËges si nÈcessaire.
-    '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
     '
     ' Remarques  :
-    ' - VÈrifie d'abord si l'utilisateur a les droits d'accËs via PeutAccederAdminHome()
-    ' - Si droits insuffisants : propose une ÈlÈvation temporaire de privilËges via ElevationAcces
-    ' - Si l'utilisateur refuse l'ÈlÈvation : annulation avec message de statut
-    ' - Si l'ÈlÈvation Èchoue : retour sans chargement de UC_AdminHome
-    ' - AprËs ÈlÈvation rÈussie : mise ‡ jour de l'affichage utilisateur (UpdateConnectedUserDisplay)
-    ' - Charge UC_AdminHome via NavigateTo() avec le contexte "Administration"
+    ' - V√©rifie d'abord si l'utilisateur a les droits d'acc√®s via PeutAccederReferentielHome()
+    ' - Si droits insuffisants : propose une √©l√©vation temporaire de privil√®ges via ElevationAcces
+    ' - Si l'utilisateur refuse l'√©l√©vation : annulation avec message de statut
+    ' - Si l'√©l√©vation √©choue : retour sans chargement de UC_ReferentielHome
+    ' - Apr√®s √©l√©vation r√©ussie : mise √† jour de l'affichage utilisateur (UpdateConnectedUserDisplay)
+    ' - Charge UC_ReferentielHome via NavigateTo() avec le contexte "R√©f√©rentiels"
     ' - En cas d'erreur : log (Succinct/UI) + MessageBox d'erreur
     '
     ' Exceptions :
-    ' - Toutes les exceptions sont capturÈes, journalisÈes, et affichÈes ‡ l'utilisateur
+    ' - Toutes les exceptions sont captur√©es, journalis√©es, et affich√©es √† l'utilisateur
     ' -------------------------------------------------------------------------------------------------
-    Private Sub btnAdmin_Click(
-    sender As Object,
-    e As EventArgs
-) Handles btnAdmin.Click
+    Private Sub btnReferentiels_Click(sender As Object, e As EventArgs) Handles btnReferentiels.Click
 
         Try
 
-            If Not PeutAccederAdminHome() Then
+            If Not PeutAccederReferentielHome() Then
 
                 Dim response As DialogResult =
                 DialogChoix.Confirmer(
-                    "Cette zone nÈcessite une ÈlÈvation de privilËges." &
+                    "Cette zone n√©cessite une √©l√©vation de privil√®ges." &
                     Environment.NewLine &
                     Environment.NewLine &
-                    "Souhaitez-vous ouvrir une session ÈlevÈe ?",
-                    "…lÈvation requise"
+                    "Souhaitez-vous ouvrir une session √©lev√©e ?",
+                    "√âl√©vation requise"
                 )
 
                 If response = DialogResult.No Then
 
                     stsLabelStatus.Text =
-                    "AccËs Administration annulÈ."
+                    "Acc√®s R√©f√©rentiels annul√©."
 
                     Return
 
@@ -580,7 +552,105 @@ Public Class Home
                     If elevationResult <> DialogResult.OK Then
 
                         stsLabelStatus.Text =
-                        "…lÈvation refusÈe."
+                        "√âl√©vation refus√©e."
+
+                        Return
+
+                    End If
+
+                End Using
+
+                UpdateConnectedUserDisplay()
+
+            End If
+
+            NavigateTo(
+            New UC_ReferentielHome(_userSession, _authenticatedUser),
+            btnReferentiels,
+            "R√©f√©rentiels"
+        )
+
+        Catch ex As Exception
+
+            GestionLog.EcrireLog(
+            "Erreur btnReferentiels_Click.",
+            GestionLog.LogLevel.Succinct,
+            GestionLog.LogCategory.UI,
+            ex
+        )
+
+            DialogChoix.Erreur(
+            "Erreur lors de l'ouverture des r√©f√©rentiels.",
+            "Erreur"
+        )
+
+        End Try
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Proc√©dure  : btnAdmin_Click
+    ' Version    : V1.5.0
+    ' Date       : 11/05/2026
+    '
+    ' R√¥le       :
+    ' Ouvre l'espace Administration (UC_AdminHome) avec contr√¥le d'acc√®s et √©l√©vation de privil√®ges si n√©cessaire.
+    '
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
+    '
+    ' Remarques  :
+    ' - V√©rifie d'abord si l'utilisateur a les droits d'acc√®s via PeutAccederAdminHome()
+    ' - Si droits insuffisants : propose une √©l√©vation temporaire de privil√®ges via ElevationAcces
+    ' - Si l'utilisateur refuse l'√©l√©vation : annulation avec message de statut
+    ' - Si l'√©l√©vation √©choue : retour sans chargement de UC_AdminHome
+    ' - Apr√®s √©l√©vation r√©ussie : mise √† jour de l'affichage utilisateur (UpdateConnectedUserDisplay)
+    ' - Charge UC_AdminHome via NavigateTo() avec le contexte "Administration"
+    ' - En cas d'erreur : log (Succinct/UI) + MessageBox d'erreur
+    '
+    ' Exceptions :
+    ' - Toutes les exceptions sont captur√©es, journalis√©es, et affich√©es √† l'utilisateur
+    ' -------------------------------------------------------------------------------------------------
+    Private Sub btnAdmin_Click(
+    sender As Object,
+    e As EventArgs
+) Handles btnAdmin.Click
+
+        Try
+
+            If Not PeutAccederAdminHome() Then
+
+                Dim response As DialogResult =
+                DialogChoix.Confirmer(
+                    "Cette zone n√©cessite une √©l√©vation de privil√®ges." &
+                    Environment.NewLine &
+                    Environment.NewLine &
+                    "Souhaitez-vous ouvrir une session √©lev√©e ?",
+                    "√âl√©vation requise"
+                )
+
+                If response = DialogResult.No Then
+
+                    stsLabelStatus.Text =
+                    "Acc√®s Administration annul√©."
+
+                    Return
+
+                End If
+
+                Using frmElevation As New ElevationAcces(
+                _userSession,
+                _authenticatedUser
+            )
+
+                    Dim elevationResult As DialogResult =
+                    frmElevation.ShowDialog(Me)
+
+                    If elevationResult <> DialogResult.OK Then
+
+                        stsLabelStatus.Text =
+                        "√âl√©vation refus√©e."
 
                         Return
 
@@ -617,24 +687,24 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : btnChangerMotDePasse_Click
+    ' Proc√©dure  : btnChangerMotDePasse_Click
     ' Version    : V1.0.0
     ' Date       : 01/06/2026
     '
-    ' RÙle       :
-    ' Ouvre la Form ChangePassword en mode UserChange pour permettre ‡ l'utilisateur de changer son mot de passe.
+    ' R√¥le       :
+    ' Ouvre la Form ChangePassword en mode UserChange pour permettre √† l'utilisateur de changer son mot de passe.
     '
-    ' ParamËtres :
-    ' - sender : Objet source de l'ÈvÈnement (Object)
-    ' - e      : Arguments de l'ÈvÈnement Click (EventArgs)
+    ' Param√®tres :
+    ' - sender : Objet source de l'√©v√©nement (Object)
+    ' - e      : Arguments de l'√©v√©nement Click (EventArgs)
     '
     ' Remarques  :
-    ' - Accessible ‡ tous les utilisateurs authentifiÈs
-    ' - N'affecte pas la navigation (pas de sÈlection de bouton menu)
+    ' - Accessible √† tous les utilisateurs authentifi√©s
+    ' - N'affecte pas la navigation (pas de s√©lection de bouton menu)
     ' - En cas d'erreur : log (Succinct/UI) + MessageBox
     '
     ' Exceptions :
-    ' - Toutes les exceptions sont capturÈes et journalisÈes
+    ' - Toutes les exceptions sont captur√©es et journalis√©es
     ' -------------------------------------------------------------------------------------------------
     Private Sub btnChangerMotDePasse_Click(
         sender As Object,
@@ -675,31 +745,31 @@ Public Class Home
 #Region "Navigation - Chargement des vues"
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : NavigateTo
+    ' Proc√©dure  : NavigateTo
     ' Version    : V1.3.0
     ' Date       : 14/05/2026
     '
-    ' RÙle       :
-    ' Navigue vers un UserControl mÈtier et synchronise le menu, le contenu (pnlContent),
+    ' R√¥le       :
+    ' Navigue vers un UserControl m√©tier et synchronise le menu, le contenu (pnlContent),
     ' le contexte de navigation (lblContexte), et le StatusStrip.
     '
-    ' ParamËtres :
-    ' - view           : UserControl ‡ charger dans pnlContent (UserControl)
-    ' - selectedButton : Bouton du menu ‡ marquer comme sÈlectionnÈ (Button)
-    ' - statusText     : Texte de contexte ‡ afficher dans lblContexte et stsLabelStatus (String)
+    ' Param√®tres :
+    ' - view           : UserControl √† charger dans pnlContent (UserControl)
+    ' - selectedButton : Bouton du menu √† marquer comme s√©lectionn√© (Button)
+    ' - statusText     : Texte de contexte √† afficher dans lblContexte et stsLabelStatus (String)
     '
     ' Remarques  :
-    ' - SÈquence de navigation :
-    '   1. SelectHomeMenuButton(selectedButton, statusText) : mise ‡ jour de l'Ètat visuel du menu
-    '   2. _navManager.Navigate(view) : chargement du UserControl dans pnlContent (dÈcharge l'ancien, charge le nouveau)
-    '   3. SetContexte(statusText) : mise ‡ jour de lblContexte et stsLabelStatus
-    ' - Le contexte est appliquÈ APRES la navigation pour Èviter qu'un UserControl ne l'Ècrase pendant son chargement
-    ' - _navManager injecte automatiquement _uiContext aux UserControls implÈmentant IContextAwareUserControl
-    ' - UtilisÈe par tous les handlers de navigation : btnAccueil_Click, btnAdmin_Click, NavigateToAccueil, etc.
-    ' - MÈthode centrale de navigation : toute navigation doit passer par ici pour garantir la cohÈrence UI
+    ' - S√©quence de navigation :
+    '   1. SelectHomeMenuButton(selectedButton, statusText) : mise √† jour de l'√©tat visuel du menu
+    '   2. _navManager.Navigate(view) : chargement du UserControl dans pnlContent (d√©charge l'ancien, charge le nouveau)
+    '   3. SetContexte(statusText) : mise √† jour de lblContexte et stsLabelStatus
+    ' - Le contexte est appliqu√© APRES la navigation pour √©viter qu'un UserControl ne l'√©crase pendant son chargement
+    ' - _navManager injecte automatiquement _uiContext aux UserControls impl√©mentant IContextAwareUserControl
+    ' - Utilis√©e par tous les handlers de navigation : btnAccueil_Click, btnAdmin_Click, NavigateToAccueil, etc.
+    ' - M√©thode centrale de navigation : toute navigation doit passer par ici pour garantir la coh√©rence UI
     '
     ' Exceptions :
-    ' - Aucune gestion explicite (erreurs propagÈes par NavigationManager)
+    ' - Aucune gestion explicite (erreurs propag√©es par NavigationManager)
     ' -------------------------------------------------------------------------------------------------
     Private Sub NavigateTo(
     view As UserControl,
@@ -719,26 +789,26 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : NavigateToAdminView
+    ' Proc√©dure  : NavigateToAdminView
     ' Version    : V1.1.0
     ' Date       : 13/05/2026
     '
-    ' RÙle       :
-    ' Navigue vers un Ècran d'administration (sous-UserControl de UC_AdminHome) avec contexte hiÈrarchique.
+    ' R√¥le       :
+    ' Navigue vers un √©cran d'administration (sous-UserControl de UC_AdminHome) avec contexte hi√©rarchique.
     '
-    ' ParamËtres :
-    ' - view       : UserControl d'administration ‡ charger (ex: UC_Parametres) (UserControl)
-    ' - statusText : Texte du sous-contexte (ex: "ParamËtres") (String)
+    ' Param√®tres :
+    ' - view       : UserControl d'administration √† charger (ex: UC_Parametres) (UserControl)
+    ' - statusText : Texte du sous-contexte (ex: "Param√®tres") (String)
     '
     ' Remarques  :
-    ' - AppelÈe publiquement par les UserControls d'administration (ex: UC_AdminHome.btnParametres_Click)
-    ' - Construit un contexte hiÈrarchique via BuildAdminContexte() : "Administration > [statusText]"
-    ' - Navigue via NavigateTo() avec btnAdmin sÈlectionnÈ pour maintenir la cohÈrence du menu
-    ' - Permet de naviguer entre les diffÈrents Ècrans d'administration sans repasser par UC_AdminHome
-    ' - Le contexte hiÈrarchique indique clairement la position dans l'arborescence : "Administration > Connexion DB", etc.
+    ' - Appel√©e publiquement par les UserControls d'administration (ex: UC_AdminHome.btnParametres_Click)
+    ' - Construit un contexte hi√©rarchique via BuildAdminContexte() : "Administration > [statusText]"
+    ' - Navigue via NavigateTo() avec btnAdmin s√©lectionn√© pour maintenir la coh√©rence du menu
+    ' - Permet de naviguer entre les diff√©rents √©crans d'administration sans repasser par UC_AdminHome
+    ' - Le contexte hi√©rarchique indique clairement la position dans l'arborescence : "Administration > Connexion DB", etc.
     '
     ' Exceptions :
-    ' - Aucune gestion explicite (erreurs propagÈes par NavigateTo)
+    ' - Aucune gestion explicite (erreurs propag√©es par NavigateTo)
     ' -------------------------------------------------------------------------------------------------
     Public Sub NavigateToAdminView(
     view As UserControl,
@@ -757,24 +827,61 @@ Public Class Home
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : NavigateToAccueil
+    ' Proc√©dure  : NavigateToReferentielView
+    ' Version    : V1.0.0
+    ' Date       : 09/06/2026
+    '
+    ' R√¥le       :
+    ' Navigue vers un √©cran de r√©f√©rentiel (sous-UserControl de UC_ReferentielHome) avec contexte hi√©rarchique.
+    '
+    ' Param√®tres :
+    ' - view       : UserControl de r√©f√©rentiel √† charger (ex: UC_Domaines) (UserControl)
+    ' - statusText : Texte du sous-contexte (ex: "Domaines") (String)
+    '
+    ' Remarques  :
+    ' - Appel√©e publiquement par les UserControls de r√©f√©rentiels (ex: UC_ReferentielHome.btnDomaines_Click)
+    ' - Construit un contexte hi√©rarchique via BuildReferentielContexte() : "R√©f√©rentiels > [statusText]"
+    ' - Navigue via NavigateTo() avec btnReferentiels s√©lectionn√© pour maintenir la coh√©rence du menu
+    ' - Permet de naviguer entre les diff√©rents √©crans de r√©f√©rentiels sans repasser par UC_ReferentielHome
+    '
+    ' Exceptions :
+    ' - Aucune gestion explicite (erreurs propag√©es par NavigateTo)
+    ' -------------------------------------------------------------------------------------------------
+    Public Sub NavigateToReferentielView(
+    view As UserControl,
+    statusText As String
+)
+
+        Dim contexte As String =
+        BuildReferentielContexte(statusText)
+
+        NavigateTo(
+        view,
+        btnReferentiels,
+        contexte
+    )
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Proc√©dure  : NavigateToAccueil
     ' Version    : V1.0.0
     ' Date       : 12/05/2026
     '
-    ' RÙle       :
-    ' Retourne vers l'Ècran d'accueil (UC_Accueil) avec contexte "Accueil".
+    ' R√¥le       :
+    ' Retourne vers l'√©cran d'accueil (UC_Accueil) avec contexte "Accueil".
     '
-    ' ParamËtres :
+    ' Param√®tres :
     ' - Aucun
     '
     ' Remarques  :
-    ' - AppelÈe publiquement par les UserControls pour revenir ‡ l'accueil
-    ' - UtilisÈe notamment aprËs perte d'accËs ‡ un Ècran rÈservÈ (ex: UC_AdminHome aprËs retour au rÙle de base)
-    ' - Navigue via NavigateTo() avec btnAccueil sÈlectionnÈ et contexte "Accueil"
-    ' - Charge une nouvelle instance de UC_Accueil ‡ chaque appel (pas de rÈutilisation)
+    ' - Appel√©e publiquement par les UserControls pour revenir √† l'accueil
+    ' - Utilis√©e notamment apr√®s perte d'acc√®s √† un √©cran r√©serv√© (ex: UC_AdminHome apr√®s retour au r√¥le de base)
+    ' - Navigue via NavigateTo() avec btnAccueil s√©lectionn√© et contexte "Accueil"
+    ' - Charge une nouvelle instance de UC_Accueil √† chaque appel (pas de r√©utilisation)
     '
     ' Exceptions :
-    ' - Aucune gestion explicite (erreurs propagÈes par NavigateTo)
+    ' - Aucune gestion explicite (erreurs propag√©es par NavigateTo)
     ' -------------------------------------------------------------------------------------------------
     Public Sub NavigateToAccueil()
 
@@ -788,7 +895,7 @@ Public Class Home
 
 #End Region
 
-#Region "Gestion des accËs"
+#Region "Gestion des acc√®s"
 
     ' -------------------------------------------------------------------------------------------------
     ' Fonction   : PeutAccederAdminHome
@@ -796,27 +903,64 @@ Public Class Home
     ' Version    : V1.0.0
     ' Date       : 11/05/2026
     '
-    ' RÙle       :
-    ' VÈrifie si l'utilisateur courant possËde les droits d'accËs ‡ l'espace Administration (UC_AdminHome).
+    ' R√¥le       :
+    ' V√©rifie si l'utilisateur courant poss√®de les droits d'acc√®s √† l'espace Administration (UC_AdminHome).
     '
-    ' ParamËtres :
+    ' Param√®tres :
     ' - Aucun
     '
     ' Retour     :
-    ' - True : Si le rÙle courant est SuperUser ou Admin (via _userSession.IsSuperUserOrAdmin())
-    ' - False : Si _userSession est Nothing ou si le rÙle est insuffisant
+    ' - True : Si le r√¥le courant est SuperUser ou Admin (via _userSession.IsSuperUserOrAdmin())
+    ' - False : Si _userSession est Nothing ou si le r√¥le est insuffisant
     '
     ' Remarques  :
-    ' - AppelÈe dans btnAdmin_Click avant de charger UC_AdminHome
-    ' - Si retourne False : propose une ÈlÈvation de privilËges via ElevationAcces
-    ' - VÈrifie le rÙle COURANT (_userSession.CurrentRole), pas le rÙle de base
-    ' - AprËs ÈlÈvation rÈussie, retournera True car CurrentRole aura changÈ
-    ' - La vÈrification passe par UserSession.IsSuperUserOrAdmin() qui utilise l'enum AppRole
+    ' - Appel√©e dans btnAdmin_Click avant de charger UC_AdminHome
+    ' - Si retourne False : propose une √©l√©vation de privil√®ges via ElevationAcces
+    ' - V√©rifie le r√¥le COURANT (_userSession.CurrentRole), pas le r√¥le de base
+    ' - Apr√®s √©l√©vation r√©ussie, retournera True car CurrentRole aura chang√©
+    ' - La v√©rification passe par UserSession.IsSuperUserOrAdmin() qui utilise l'enum AppRole
     '
     ' Exceptions :
     ' - Aucune (retourne False en cas de session invalide)
     ' -------------------------------------------------------------------------------------------------
     Private Function PeutAccederAdminHome() As Boolean
+
+        If _userSession Is Nothing Then
+
+            Return False
+
+        End If
+
+        Return _userSession.IsSuperUserOrAdmin()
+
+    End Function
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : PeutAccederReferentielHome
+    ' Type       : Boolean
+    ' Version    : V1.0.0
+    ' Date       : 09/06/2026
+    '
+    ' R√¥le       :
+    ' V√©rifie si l'utilisateur courant poss√®de les droits d'acc√®s √† l'espace R√©f√©rentiels (UC_ReferentielHome).
+    '
+    ' Param√®tres :
+    ' - Aucun
+    '
+    ' Retour     :
+    ' - True : Si le r√¥le courant est SuperUser ou Admin (via _userSession.IsSuperUserOrAdmin())
+    ' - False : Si _userSession est Nothing ou si le r√¥le est insuffisant
+    '
+    ' Remarques  :
+    ' - Appel√©e dans btnReferentiels_Click avant de charger UC_ReferentielHome
+    ' - Si retourne False : propose une √©l√©vation de privil√®ges via ElevationAcces
+    ' - V√©rifie le r√¥le COURANT (_userSession.CurrentRole), pas le r√¥le de base
+    ' - La gestion des r√©f√©rentiels est r√©serv√©e aux m√™mes r√¥les que l'Administration (SuperUser / Admin)
+    '
+    ' Exceptions :
+    ' - Aucune (retourne False en cas de session invalide)
+    ' -------------------------------------------------------------------------------------------------
+    Private Function PeutAccederReferentielHome() As Boolean
 
         If _userSession Is Nothing Then
 
@@ -838,24 +982,24 @@ Public Class Home
     ' Version    : V1.1.0
     ' Date       : 13/05/2026
     '
-    ' RÙle       :
-    ' Construit un libellÈ de contexte hiÈrarchique pour les Ècrans issus de l'administration.
+    ' R√¥le       :
+    ' Construit un libell√© de contexte hi√©rarchique pour les √©crans issus de l'administration.
     '
-    ' ParamËtres :
-    ' - sousContexte : Nom du sous-Ècran d'administration (ex: "ParamËtres", "Connexion DB") (String)
+    ' Param√®tres :
+    ' - sousContexte : Nom du sous-√©cran d'administration (ex: "Param√®tres", "Connexion DB") (String)
     '
     ' Retour     :
     ' - "Administration" : Si sousContexte est vide ou null
-    ' - "Administration > [sousContexte]" : Si sousContexte est fourni (Trim() appliquÈ)
+    ' - "Administration > [sousContexte]" : Si sousContexte est fourni (Trim() appliqu√©)
     '
     ' Remarques  :
-    ' - AppelÈe publiquement par NavigateToAdminView() pour construire le contexte hiÈrarchique
-    ' - Le format hiÈrarchique permet de visualiser la navigation : "Administration > ParamËtres > DÈtail"
-    ' - Trim() est appliquÈ pour Èviter les espaces indÈsirables dans le rendu final
-    ' - Peut Ítre appelÈe par les UserControls pour construire des contextes multi-niveaux
+    ' - Appel√©e publiquement par NavigateToAdminView() pour construire le contexte hi√©rarchique
+    ' - Le format hi√©rarchique permet de visualiser la navigation : "Administration > Param√®tres > D√©tail"
+    ' - Trim() est appliqu√© pour √©viter les espaces ind√©sirables dans le rendu final
+    ' - Peut √™tre appel√©e par les UserControls pour construire des contextes multi-niveaux
     '
     ' Exceptions :
-    ' - Aucune (gËre les chaÓnes vides/null sans erreur)
+    ' - Aucune (g√®re les cha√Ænes vides/null sans erreur)
     ' -------------------------------------------------------------------------------------------------
     Public Function BuildAdminContexte(
         sousContexte As String
@@ -871,24 +1015,62 @@ Public Class Home
 
     End Function
 
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : BuildReferentielContexte
+    ' Type       : String
+    ' Version    : V1.0.0
+    ' Date       : 09/06/2026
+    '
+    ' R√¥le       :
+    ' Construit un libell√© de contexte hi√©rarchique pour les √©crans issus des r√©f√©rentiels.
+    '
+    ' Param√®tres :
+    ' - sousContexte : Nom du sous-√©cran de r√©f√©rentiel (ex: "Domaines") (String)
+    '
+    ' Retour     :
+    ' - "R√©f√©rentiels" : Si sousContexte est vide ou null
+    ' - "R√©f√©rentiels > [sousContexte]" : Si sousContexte est fourni (Trim() appliqu√©)
+    '
+    ' Remarques  :
+    ' - Appel√©e publiquement par NavigateToReferentielView() pour construire le contexte hi√©rarchique
+    ' - Le format hi√©rarchique permet de visualiser la navigation : "R√©f√©rentiels > Domaines"
+    ' - Trim() est appliqu√© pour √©viter les espaces ind√©sirables dans le rendu final
+    '
+    ' Exceptions :
+    ' - Aucune (g√®re les cha√Ænes vides/null sans erreur)
+    ' -------------------------------------------------------------------------------------------------
+    Public Function BuildReferentielContexte(
+        sousContexte As String
+    ) As String
+
+        If String.IsNullOrWhiteSpace(sousContexte) Then
+
+            Return "R√©f√©rentiels"
+
+        End If
+
+        Return $"R√©f√©rentiels > {sousContexte.Trim()}"
+
+    End Function
+
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : SetContexte
+    ' Proc√©dure  : SetContexte
     ' Version    : V1.2.0
     ' Date       : 14/05/2026
     '
-    ' RÙle       :
-    ' Met ‡ jour le contexte de navigation affichÈ dans lblContexte (header) et stsLabelStatus (barre de statut).
+    ' R√¥le       :
+    ' Met √† jour le contexte de navigation affich√© dans lblContexte (header) et stsLabelStatus (barre de statut).
     '
-    ' ParamËtres :
-    ' - contexte : LibellÈ du contexte ‡ afficher (ex: "Accueil", "Administration > ParamËtres") (String)
+    ' Param√®tres :
+    ' - contexte : Libell√© du contexte √† afficher (ex: "Accueil", "Administration > Param√®tres") (String)
     '
     ' Remarques  :
-    ' - AppelÈe par NavigateTo() aprËs chaque navigation pour synchroniser l'affichage
-    ' - AppelÈe publiquement par les UserControls pour mettre ‡ jour le contexte dynamiquement
-    ' - lblContexte (Label dans pnlHeader) : indique "o˘ je suis" dans l'application
-    ' - stsLabelStatus (ToolStripStatusLabel) : affiche l'Ètat courant associÈ au contexte
-    ' - Les deux contrÙles affichent le mÍme texte pour cohÈrence visuelle
+    ' - Appel√©e par NavigateTo() apr√®s chaque navigation pour synchroniser l'affichage
+    ' - Appel√©e publiquement par les UserControls pour mettre √† jour le contexte dynamiquement
+    ' - lblContexte (Label dans pnlHeader) : indique "o√π je suis" dans l'application
+    ' - stsLabelStatus (ToolStripStatusLabel) : affiche l'√©tat courant associ√© au contexte
+    ' - Les deux contr√¥les affichent le m√™me texte pour coh√©rence visuelle
     '
     ' Exceptions :
     ' - Aucune
@@ -908,21 +1090,21 @@ Public Class Home
     ' Version    : V1.0.0
     ' Date       : 13/05/2026
     '
-    ' RÙle       :
-    ' Applique temporairement un contexte avant ouverture d'une Form modale et retourne le contexte prÈcÈdent.
+    ' R√¥le       :
+    ' Applique temporairement un contexte avant ouverture d'une Form modale et retourne le contexte pr√©c√©dent.
     '
-    ' ParamËtres :
-    ' - contexteTemporaire : LibellÈ du contexte temporaire ‡ afficher (String)
+    ' Param√®tres :
+    ' - contexteTemporaire : Libell√© du contexte temporaire √† afficher (String)
     '
     ' Retour     :
-    ' - Contexte prÈcÈdent (lblContexte.Text) ‡ restaurer aprËs fermeture de la modale
+    ' - Contexte pr√©c√©dent (lblContexte.Text) √† restaurer apr√®s fermeture de la modale
     '
     ' Remarques  :
-    ' - UtilisÈe avant l'ouverture de Forms modales (ConfigurationConnexion, ElevationAcces, etc.)
+    ' - Utilis√©e avant l'ouverture de Forms modales (ConfigurationConnexion, ElevationAcces, etc.)
     ' - Pattern typique : contexte = PushContexteTemporaire("...") > ShowDialog() > RestoreContexte(contexte)
     ' - Sauvegarde le contexte actuel (lblContexte.Text) avant de le remplacer
-    ' - Appelle SetContexte() pour mettre ‡ jour lblContexte et stsLabelStatus
-    ' - Le contexte retournÈ doit Ítre passÈ ‡ RestoreContexte() aprËs fermeture de la modale
+    ' - Appelle SetContexte() pour mettre √† jour lblContexte et stsLabelStatus
+    ' - Le contexte retourn√© doit √™tre pass√© √† RestoreContexte() apr√®s fermeture de la modale
     '
     ' Exceptions :
     ' - Aucune
@@ -942,24 +1124,24 @@ Public Class Home
 
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : RestoreContexte
+    ' Proc√©dure  : RestoreContexte
     ' Version    : V1.0.0
     ' Date       : 13/05/2026
     '
-    ' RÙle       :
-    ' Restaure un contexte prÈcÈdemment sauvegardÈ via PushContexteTemporaire().
+    ' R√¥le       :
+    ' Restaure un contexte pr√©c√©demment sauvegard√© via PushContexteTemporaire().
     '
-    ' ParamËtres :
-    ' - contextePrecedent : Contexte ‡ restaurer (String)
+    ' Param√®tres :
+    ' - contextePrecedent : Contexte √† restaurer (String)
     '
     ' Remarques  :
-    ' - UtilisÈe aprËs fermeture de Forms modales pour revenir au contexte prÈcÈdent
+    ' - Utilis√©e apr√®s fermeture de Forms modales pour revenir au contexte pr√©c√©dent
     ' - Pattern typique : contexte = PushContexteTemporaire("...") > ShowDialog() > RestoreContexte(contexte)
     ' - Si contextePrecedent est vide ou null : retourne sans erreur (protection)
-    ' - Appelle SetContexte() pour mettre ‡ jour lblContexte et stsLabelStatus
+    ' - Appelle SetContexte() pour mettre √† jour lblContexte et stsLabelStatus
     '
     ' Exceptions :
-    ' - Aucune (gËre les chaÓnes vides/null sans erreur)
+    ' - Aucune (g√®re les cha√Ænes vides/null sans erreur)
     ' -------------------------------------------------------------------------------------------------
     Public Sub RestoreContexte(
         contextePrecedent As String
@@ -977,11 +1159,26 @@ Public Class Home
 
 #End Region
 
-#Region "Tests divers - ‡ supprimer"
+#Region "Tests divers - √† supprimer"
 
+    'PROVISOIRE :  TEMPORAIRE DEV - √† supprimer apr√®s usage - Test PW Hash
+    Private Sub butTempHashPW_Click(sender As Object, e As EventArgs) Handles butTempHashPW.Click
 
+        Dim salt As String = PasswordSecurityHelper.GenerateSalt()
+        Dim newHash As String =
+        PasswordSecurityHelper.HashPassword(
+         "AltheaSuperUser1",
+         salt
+        )
+        Debug.WriteLine($"Salt : {salt}{Environment.NewLine}{Environment.NewLine}Hash : {newHash}")
+        DialogChoix.Information(
+         $"Salt : {salt}{Environment.NewLine}{Environment.NewLine}Hash : {newHash}",
+         "Debug Hash"
+        )
 
-    'PROVISOIRE : TEMPORAIRE DEV - ‡ supprimer aprËs usage - Test DialogChoix
+    End Sub
+
+    'PROVISOIRE : TEMPORAIRE DEV - √† supprimer apr√®s usage - Test DialogChoix
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
 
         ' Test simple
@@ -994,7 +1191,7 @@ Public Class Home
         End If
     End Sub
 
-    'PROVISOIRE : TEMPORAIRE DEV - ‡ supprimer aprËs usage - Test RichTextEditor
+    'PROVISOIRE : TEMPORAIRE DEV - √† supprimer apr√®s usage - Test RichTextEditor
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
 
         Using TestRichTextEditor As New TestRichTextEditor()

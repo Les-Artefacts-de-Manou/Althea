@@ -1,6 +1,6 @@
 # Architecture technique de la base de données
 
- *Dernière mise à jour : 23/05/2026*
+ *Dernière mise à jour : 10/06/2026 — Lot 0 complet (référentiels + UC_RichTextEditorSimple)*
 
 Document consolidé et dédupliqué à partir des sources SQL (`backup_NoData_althea.sql` et `backup_WithData_althea.sql`).
 
@@ -24,23 +24,26 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 - `documents`
 - `dossiers`
 - `famille_contacts`
-- `medecins`
 - `modeles_documents`
 - `paiements`
 - `patients`
 - `rendez_vous`
 - `seances`
+- `therapeutes`
 
 ### Tables référentielles
 
+- `ref_domaines`
 - `ref_liens_patient`
+- `ref_roles_intervenant`
 - `ref_situations_familiales`
 - `ref_statuts_dossier`
 - `ref_statuts_seance`
 - `ref_types_documents`
 - `ref_types_rendez_vous`
 - `ref_types_seance`
-- `ref_volets`
+
+> ⚠️ **Note** : les tables `ref_*` utilisent **`AUTO_INCREMENT`** pour leurs clés primaires, contrairement aux tables métier qui utilisent `LASTVAL(seq_*)`. La table `ref_types_seance` a un champ additionnel `tarif_defaut decimal(10,2) NOT NULL DEFAULT 0.00` absent des autres référentiels.
 
 ### Tables de liaison
 
@@ -59,17 +62,19 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 ## Relations principales
 
 - `autres_suivis_patient`: 
-	- `id_patient` → `patients.id_patient`
+	- `id_patient` → `patients.id_patient`,
+	- `id_role_intervenant` → `ref_roles_intervenant.id_role_intervenant`,
+	- `id_therapeute` → `therapeutes.id_therapeute`
 - `documents`: 
 	- `id_dossier` → `dossiers.id_dossier`, 
 	- `id_rendez_vous` → `rendez_vous.id_rendez_vous`, 
 	- `id_seance` → `seances.id_seance`, 
 	- `id_type_document` → `ref_types_documents.id_type_document`
 - `dossiers`: 
-	- `id_medecin_traitant` → `medecins.id_medecin`, 
+	- `id_therapeute_traitant` → `therapeutes.id_therapeute`, 
 	- `id_patient` → `patients.id_patient`, 
 	- `id_statut_dossier` → `ref_statuts_dossier.id_statut_dossier`, 
-	- `id_volet` → `ref_volets.id_volet`
+	- `id_domaine` → `ref_domaines.id_domaine`
 - `famille_contacts`: 
 	- `id_lien_patient` → `ref_liens_patient.id_lien_patient`, 
 	- `id_patient` → `patients.id_patient`
@@ -78,7 +83,7 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 	- `id_seance` → `seances.id_seance`
 - `modeles_documents`: 
 	- `id_type_document` → `ref_types_documents.id_type_document`, 
-	- `id_volet` → `ref_volets.id_volet`
+	- `id_domaine` → `ref_domaines.id_domaine`
 - `patients`: 
 	- `id_situation_familiale` → `ref_situations_familiales.id_situation_familiale`
 - `rendez_vous`: 
@@ -99,19 +104,25 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 
 #### `autres_suivis_patient`
 
-**Rôle**: Autres professionnels impliqués dans le suivi du patient.
+**Rôle**: Réseau d'intervenants externes liés au suivi d'un patient (liaison N-N). Chaque ligne associe un patient à un rôle d'intervenant et, optionnellement, à un thérapeute connu dans le référentiel.
 
 **Références sortantes**: 
 
-`id_patient` → `patients.id_patient`
+`id_patient` → `patients.id_patient`,
+
+`id_role_intervenant` → `ref_roles_intervenant.id_role_intervenant`,
+
+`id_therapeute` → `therapeutes.id_therapeute`
 
 **Références entrantes**: —
 
 | Champ | Type SQL | Null | Défaut / Généré | Clé / contrainte | Référence | Exemple |
 |---|---|---|---|---|---|---|
 | `id_autre_suivi_patient` | `bigint(20) unsigned NOT NULL` | NON | nextval(`althea`.`seq_autres_suivis_patient`) | PK | - | - |
-| `code_autre_suivi_patient` | `varchar(12) GENERATED ALWAYS AS (concat('AS',lpad(`id_autre_suivi_patient`,6,'0'))) STORED` | OUI | Généré: concat('AS',lpad(`id_autre_suivi_patient`,6,'0')) | UQ `uq_autres_suivis_patient_code` | - | - |
+| `code_autre_suivi_patient` | `varchar(12) GENERATED` | OUI | concat('AS',lpad(`id_autre_suivi_patient`,6,'0')) | UQ `uq_autres_suivis_patient_code` | - | - |
 | `id_patient` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_autres_suivis_patient_patients` | `patients.id_patient` | - |
+| `id_role_intervenant` | `bigint(20) unsigned` | OUI | NULL | FK `fk_autres_suivis_ref_roles` | `ref_roles_intervenant.id_role_intervenant` | - |
+| `id_therapeute` | `bigint(20) unsigned` | OUI | NULL | FK `fk_autres_suivis_therapeutes` | `therapeutes.id_therapeute` | - |
 | `nom_professionnel` | `varchar(150)` | OUI | NULL | - | - | - |
 | `specialite` | `varchar(100)` | OUI | NULL | - | - | - |
 | `lieu` | `varchar(150)` | OUI | NULL | - | - | - |
@@ -168,17 +179,17 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 
 #### `dossiers`
 
-**Rôle**: Dossier de suivi clinique par patient et par volet métier.
+**Rôle**: Dossier de suivi clinique par patient et par domaine métier.
 
 **Références sortantes**: 
 
-`id_medecin_traitant` → `medecins.id_medecin`, 
+`id_therapeute_traitant` → `therapeutes.id_therapeute`, 
 
 `id_patient` → `patients.id_patient`, 
 
 `id_statut_dossier` → `ref_statuts_dossier.id_statut_dossier`, 
 
-`id_volet` → `ref_volets.id_volet`
+`id_domaine` → `ref_domaines.id_domaine`
 
 **Références entrantes**:
 
@@ -191,15 +202,15 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | Champ | Type SQL | Null | Défaut / Généré | Clé / contrainte | Référence | Exemple |
 |---|---|---|---|---|---|---|
 | `id_dossier` | `bigint(20) unsigned NOT NULL` | NON | nextval(`althea`.`seq_dossiers`) | PK | - | - |
-| `code_dossier` | `varchar(12) GENERATED ALWAYS AS (concat('DO',lpad(`id_dossier`,6,'0'))) STORED` | OUI | Généré: concat('DO',lpad(`id_dossier`,6,'0')) | UQ `uq_dossiers_code_dossier` | - | - |
+| `code_dossier` | `varchar(12) GENERATED` | OUI | concat('DO',lpad(`id_dossier`,6,'0')) | UQ `uq_dossiers_code_dossier` | - | - |
 | `id_patient` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_dossiers_patients` | `patients.id_patient` | - |
-| `id_volet` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_dossiers_ref_volets` | `ref_volets.id_volet` | - |
+| `id_domaine` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_dossiers_ref_domaines` | `ref_domaines.id_domaine` | - |
 | `id_statut_dossier` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_dossiers_ref_statuts_dossier` | `ref_statuts_dossier.id_statut_dossier` | - |
 | `date_ouverture` | `date NOT NULL` | NON | - | - | - | - |
 | `date_cloture` | `date` | OUI | NULL | - | - | - |
 | `prescripteur` | `varchar(150)` | OUI | NULL | - | - | - |
 | `modalites_paiement` | `varchar(150)` | OUI | NULL | - | - | - |
-| `id_medecin_traitant` | `bigint(20) unsigned` | OUI | NULL | FK `fk_dossiers_medecins` | `medecins.id_medecin` | - |
+| `id_therapeute_traitant` | `bigint(20) unsigned` | OUI | NULL | FK `fk_dossiers_therapeutes` | `therapeutes.id_therapeute` | - |
 | `motif_suivi_rtf` | `longtext` | OUI | NULL | - | - | - |
 | `motif_suivi_txt` | `longtext` | OUI | NULL | - | - | - |
 | `historique_rtf` | `longtext` | OUI | NULL | - | - | - |
@@ -254,20 +265,22 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | `date_creation` | `datetime NOT NULL` | NON | current_timestamp() | - | - | - |
 | `date_modification` | `datetime NOT NULL` | NON | current_timestamp() | - | - | - |
 
-#### `medecins`
+#### `therapeutes`
 
-**Rôle**: Référentiel des médecins traitants et prescripteurs.
+**Rôle**: Référentiel des thérapeutes traitants et prescripteurs (ex-`medecins`).
 
 **Références sortantes**: —
 
 **Références entrantes**: 
 
-`dossiers.id_medecin_traitant`
+`dossiers.id_therapeute_traitant`,
+
+`autres_suivis_patient.id_therapeute`
 
 | Champ | Type SQL | Null | Défaut / Généré | Clé / contrainte | Référence | Exemple |
 |---|---|---|---|---|---|---|
-| `id_medecin` | `bigint(20) unsigned NOT NULL` | NON | nextval(`althea`.`seq_medecins`) | PK | - | - |
-| `code_medecin` | `varchar(12) GENERATED ALWAYS AS (concat('ME',lpad(`id_medecin`,6,'0'))) STORED` | OUI | Généré: concat('ME',lpad(`id_medecin`,6,'0')) | UQ `uq_medecins_code_medecin` | - | - |
+| `id_therapeute` | `bigint(20) unsigned NOT NULL` | NON | nextval(`althea`.`seq_therapeutes`) | PK | - | - |
+| `code_therapeute` | `varchar(12) GENERATED` | OUI | concat('TH',lpad(`id_therapeute`,6,'0')) | UQ `uq_therapeutes_code_therapeute` | - | - |
 | `nom` | `varchar(100) NOT NULL` | NON | - | - | - | - |
 | `prenom` | `varchar(100)` | OUI | NULL | - | - | - |
 | `specialite` | `varchar(100)` | OUI | NULL | - | - | - |
@@ -290,16 +303,16 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 
 `id_type_document` → `ref_types_documents.id_type_document`, 
 
-`id_volet` → `ref_volets.id_volet`
+`id_domaine` → `ref_domaines.id_domaine`
 
 **Références entrantes**: —
 
 | Champ | Type SQL | Null | Défaut / Généré | Clé / contrainte | Référence | Exemple |
 |---|---|---|---|---|---|---|
 | `id_modele_document` | `bigint(20) unsigned NOT NULL` | NON | nextval(`althea`.`seq_modeles_documents`) | PK | - | - |
-| `code_modele_document` | `varchar(12) GENERATED ALWAYS AS (concat('MOD',lpad(`id_modele_document`,6,'0'))) STORED` | OUI | Généré: concat('MOD',lpad(`id_modele_document`,6,'0')) | UQ `uq_modeles_documents_code` | - | - |
+| `code_modele_document` | `varchar(12) GENERATED` | OUI | concat('MOD',lpad(`id_modele_document`,6,'0')) | UQ `uq_modeles_documents_code` | - | - |
 | `id_type_document` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_modeles_documents_ref_types_documents` | `ref_types_documents.id_type_document` | - |
-| `id_volet` | `bigint(20) unsigned` | OUI | NULL | FK `fk_modeles_documents_ref_volets` | `ref_volets.id_volet` | - |
+| `id_domaine` | `bigint(20) unsigned` | OUI | NULL | FK `fk_modeles_documents_ref_domaines` | `ref_domaines.id_domaine` | - |
 | `nom_modele` | `varchar(255) NOT NULL` | NON | - | - | - | - |
 | `nom_fichier` | `varchar(255) NOT NULL` | NON | - | - | - | - |
 | `chemin_relatif` | `varchar(500) NOT NULL` | NON | - | - | - | - |
@@ -584,23 +597,41 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | `actif` | `tinyint(1) NOT NULL` | NON | 1 | - | - | 1 |
 | `ordre_affichage` | `int(11) NOT NULL` | NON | 0 | - | - | 10 |
 
-#### `ref_volets`
+#### `ref_domaines`
 
-**Rôle**: Référentiel des volets de suivi.
+**Rôle**: Référentiel des domaines de suivi (ex-`ref_volets`). Définit les spécialités pratiquées (Psychologie, Graphothérapie, etc.).
 
 **Références sortantes**: —
 
 **Références entrantes**:
 
-`dossiers.id_volet`, 
+`dossiers.id_domaine`, 
 
-`modeles_documents.id_volet`
+`modeles_documents.id_domaine`
 
 | Champ | Type SQL | Null | Défaut / Généré | Clé / contrainte | Référence | Exemple |
 |---|---|---|---|---|---|---|
-| `id_volet` | `bigint(20) unsigned NOT NULL` | NON | - | PK | - | 1 |
-| `code_volet` | `varchar(10) NOT NULL` | NON | - | UQ `uq_ref_volets_code` | - | 'PSY' |
-| `libelle_volet` | `varchar(100) NOT NULL` | NON | - | UQ `uq_ref_volets_libelle` | - | 'Psychologie' |
+| `id_domaine` | `bigint(20) unsigned NOT NULL` | NON | - | PK | - | 1 |
+| `code_domaine` | `varchar(10) NOT NULL` | NON | - | UQ `uq_ref_domaines_code` | - | 'PSY' |
+| `libelle_domaine` | `varchar(100) NOT NULL` | NON | - | UQ `uq_ref_domaines_libelle` | - | 'Psychologie' |
+| `actif` | `tinyint(1) NOT NULL` | NON | 1 | - | - | 1 |
+| `ordre_affichage` | `int(11) NOT NULL` | NON | 0 | - | - | 10 |
+
+#### `ref_roles_intervenant`
+
+**Rôle**: Référentiel des rôles possibles pour un intervenant externe dans le réseau de suivi du patient.
+
+**Références sortantes**: —
+
+**Références entrantes**:
+
+`autres_suivis_patient.id_role_intervenant`
+
+| Champ | Type SQL | Null | Défaut / Généré | Clé / contrainte | Référence | Exemple |
+|---|---|---|---|---|---|---|
+| `id_role_intervenant` | `bigint(20) unsigned NOT NULL` | NON | - | PK | - | 1 |
+| `code_role_intervenant` | `varchar(30) NOT NULL` | NON | - | UQ `uq_ref_roles_intervenant_code` | - | 'MEDECIN_TRAITANT' |
+| `libelle_role_intervenant` | `varchar(100) NOT NULL` | NON | - | UQ `uq_ref_roles_intervenant_libelle` | - | 'Médecin traitant' |
 | `actif` | `tinyint(1) NOT NULL` | NON | 1 | - | - | 1 |
 | `ordre_affichage` | `int(11) NOT NULL` | NON | 0 | - | - | 10 |
 
@@ -726,7 +757,7 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 - `seq_dossiers`
 - `seq_famille_contacts`
 - `seq_lia_paiements_seances`
-- `seq_medecins`
+- `seq_therapeutes` *(anciennement `seq_medecins` — renommé ADR-17)*
 - `seq_modeles_documents`
 - `seq_paiements`
 - `seq_patients`
@@ -736,6 +767,8 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 - `seq_tec_meta_schema`
 - `seq_tec_parametres`
 - `seq_tec_sync_evenements_google`
+
+> ⚠️ Les tables `ref_*` n'ont **pas** de séquence dédiée — elles utilisent `AUTO_INCREMENT` natif MariaDB.
 
 ## Triggers
 

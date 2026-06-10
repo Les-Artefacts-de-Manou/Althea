@@ -492,6 +492,7 @@ Partial Class UC_Utilisateurs
         ' 
         picTitre.BackgroundImage = CType(resources.GetObject("picTitre.BackgroundImage"), Image)
         picTitre.BackgroundImageLayout = ImageLayout.Stretch
+        picTitre.ErrorImage = My.Resources.Resources.Fond_icone_Transp
         picTitre.Location = New Point(14, 3)
         picTitre.Name = "picTitre"
         picTitre.Size = New Size(60, 52)

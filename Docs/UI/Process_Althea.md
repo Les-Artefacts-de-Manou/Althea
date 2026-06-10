@@ -1,6 +1,6 @@
 # Processus Althéa - Documentation technique
 
->  *Dernière mise à jour : 07/06/2026*
+> *Dernière mise à jour : 10/06/2026*
 
 Ce document décrit les processus métier et techniques clés de l'application Althéa.
 Chaque processus est détaillé avec son statut, ses fichiers associés, et un diagramme Mermaid pour visualiser le flux.
@@ -2083,6 +2083,318 @@ Lors de l'implémentation de ces modules, vérifier la structure base de donnée
 - **Séances** : notes consultation (`notes_seance_rtf` / `notes_seance_txt`)
 - **Correspondances** : courriers professionnels (`courrier_rtf` / `courrier_txt`)
 - **Plans d'accompagnement** : documents évolutifs (`plan_rtf` / `plan_txt`)
+
+---
+
+# Processus 09 – UC_RichTextEditorSimple – Éditeur de texte riche allégé
+
+**Statut : Implémenté**
+
+**Traçabilité mainteneur (VB) :**
+- [`UI/Controls/Communs/UC_RichTextEditorSimple.vb`](../UI/Controls/Communs/UC_RichTextEditorSimple.vb)
+- [`Utils/Helpers/RichTextEditorHelper.vb`](../Utils/Helpers/RichTextEditorHelper.vb)
+
+## Objectif
+
+Fournir une surface d'édition de texte riche **compacte** adaptée aux zones de notes courtes embarquées dans d'autres UserControls ou Forms. Contrairement à `UC_RichTextEditor` (complet, autonome, avec export/impression), ce composant est **minimal et ré-embeddable** sans overhead.
+
+**Cas d'usage typiques :**
+- Notes/commentaires d'un dossier patient
+- Observations sur une séance
+- Remarques sur un type de document
+
+---
+
+## Vue d'ensemble du flow
+
+1. Le parent crée l'instance et la Docks (ou l'Anchore) dans son panneau cible
+2. `SetContext()` est appelé si le contexte UI est disponible (optionnel)
+3. L'utilisateur saisit ; l'événement `ContentChanged` est déclenché
+4. À la sauvegarde, le parent lit `RtfContent` (sauvegarde DB) **et** `TextContent` (texte brut, full-text)
+5. Au chargement d'un enregistrement, le parent affecte `RtfContent`
+6. En mode consultation, `ReadOnlyMode = True` ; la toolbar peut être masquée via `ShowToolbar = False`
+
+---
+
+## Étapes détaillées
+
+### 1. Initialisation et intégration
+
+```vb
+' Exemple d'intégration dans un UC parent
+Dim editorNotes As New UC_RichTextEditorSimple()
+editorNotes.Dock = DockStyle.Fill
+pnlNotes.Controls.Add(editorNotes)
+If _contexte IsNot Nothing Then editorNotes.SetContext(_contexte)
+```
+
+### 2. Sauvegarde (double format obligatoire)
+
+```vb
+' Toujours sauvegarder les DEUX champs
+cmd.Parameters.AddWithValue("@notes_rtf", editorNotes.RtfContent)
+cmd.Parameters.AddWithValue("@notes_txt", editorNotes.TextContent)
+```
+
+### 3. Chargement
+
+```vb
+' Charger uniquement depuis le champ RTF (conserve le formatage)
+editorNotes.RtfContent = dr("notes_rtf").ToString()
+```
+
+### 4. Mode lecture seule
+
+```vb
+editorNotes.ReadOnlyMode = True     ' Verrouille l'édition
+editorNotes.ShowToolbar = False     ' Masque la toolbar en consultation pure
+```
+
+---
+
+## Toolbar disponible (7 boutons)
+
+| Bouton | Raccourci | Rôle |
+|---|---|---|
+| **Gras** | Ctrl+B | Appliquer/ôter le gras |
+| *Italique* | Ctrl+I | Appliquer/ôter l'italique |
+| <u>Souligné</u> | Ctrl+U | Appliquer/ôter le soulignement |
+| Annuler | Ctrl+Z | Annuler la dernière action |
+| Rétablir | Ctrl+Y | Rétablir la dernière action annulée |
+| Effacer format | — | Supprimer tout le formatage de la sélection |
+| Date/Heure | — | Insérer la date et l'heure courantes |
+
+---
+
+## Règles importantes
+
+- **Double format obligatoire** : ne jamais sauvegarder uniquement le RTF ; le champ `_txt` doit toujours être renseigné pour permettre la recherche full-text.
+- Toute la logique de formatage est déléguée à `RichTextEditorHelper` (règle de non-duplication).
+- La taille est imposée par le parent ; ne pas fixer de taille dans le code.
+- `ShowToolbar = False` est réservé à la consultation pure (mode résumé non éditable) ; en mode édition, la toolbar est toujours visible.
+
+---
+
+## Flowchart – Processus 09 (UC_RichTextEditorSimple)
+
+```mermaid
+flowchart TD
+    A[Parent crée UC_RichTextEditorSimple] --> B[SetContext optionnel]
+    B --> C{Mode?}
+    C -->|Édition| D[Toolbar visible\nReadOnlyMode=False]
+    C -->|Consultation| E[ReadOnlyMode=True\nShowToolbar optionnel False]
+    D --> F[Utilisateur saisit]
+    F --> G[ContentChanged déclenché]
+    G --> H{Sauvegarde demandée?}
+    H -->|Oui| I[Lire RtfContent → champ _rtf\nLire TextContent → champ _txt]
+    I --> J[(MariaDB\ncol _rtf + col _txt)]
+    H -->|Non| F
+    E --> K[Affichage seul\npas d'événement]
+```
+
+---
+
+# Processus 10 – Gestion des référentiels
+
+**Statut : Implémenté (Lot 0 complet)**
+
+**Traçabilité mainteneur (VB) :**
+- [`UI/Controls/Referentiels/UC_ReferentielBase.vb`](../UI/Controls/Referentiels/UC_ReferentielBase.vb)
+- [`UI/Controls/Referentiels/UC_ReferentielHome.vb`](../UI/Controls/Referentiels/UC_ReferentielHome.vb)
+- [`UI/Controls/Referentiels/UC_Domaines.vb`](../UI/Controls/Referentiels/UC_Domaines.vb)
+- [`UI/Controls/Referentiels/UC_LiensPatient.vb`](../UI/Controls/Referentiels/UC_LiensPatient.vb)
+- [`UI/Controls/Referentiels/UC_RolesIntervenant.vb`](../UI/Controls/Referentiels/UC_RolesIntervenant.vb)
+- [`UI/Controls/Referentiels/UC_SituationsFamiliales.vb`](../UI/Controls/Referentiels/UC_SituationsFamiliales.vb)
+- [`UI/Controls/Referentiels/UC_StatutsDossier.vb`](../UI/Controls/Referentiels/UC_StatutsDossier.vb)
+- [`UI/Controls/Referentiels/UC_StatutsSeance.vb`](../UI/Controls/Referentiels/UC_StatutsSeance.vb)
+- [`UI/Controls/Referentiels/UC_TypesDocuments.vb`](../UI/Controls/Referentiels/UC_TypesDocuments.vb)
+- [`UI/Controls/Referentiels/UC_TypesRendezVous.vb`](../UI/Controls/Referentiels/UC_TypesRendezVous.vb)
+- [`UI/Controls/Referentiels/UC_TypesSeance.vb`](../UI/Controls/Referentiels/UC_TypesSeance.vb)
+- [`Metier/Referentiels/`](../Metier/Referentiels/) — modèles + services
+- [`Core/Database/Queries/Query*.vb`](../Core/Database/Queries/) — SQL référentiels
+
+## Objectif
+
+Permettre à l'administrateur de gérer les tables de référence (`ref_*`) utilisées dans toute l'application : domaines, types de séances, statuts, situations, rôles, types de documents…
+
+Ces données conditionnent les listes déroulantes, filtres et catégorisations dans les modules Dossier, Séance, Documents et Agenda. Leur gestion doit être sécurisée (accès restreint), fiable (pas de suppression si en cours d'usage) et cohérente (unicité code + libellé).
+
+---
+
+## Architecture
+
+```
+Home (NavigateToReferentielView)
+    └── UC_ReferentielHome (hub 9 tuiles)
+            ├── UC_Domaines
+            ├── UC_LiensPatient
+            ├── UC_RolesIntervenant
+            ├── UC_SituationsFamiliales
+            ├── UC_StatutsDossier
+            ├── UC_StatutsSeance
+            ├── UC_TypesDocuments
+            ├── UC_TypesRendezVous
+            └── UC_TypesSeance ⭐ (tarif_defaut)
+
+Chaque UC hérite de UC_ReferentielBase
+    └── Query<X>.vb → Gestion<X>.vb → <X>.vb (modèle) → UC_<X>.vb
+```
+
+---
+
+## Vue d'ensemble du flow principal
+
+1. L'utilisateur navigue vers **Référentiels** (menu Admin de `Home`)
+2. `Home.NavigateToReferentielView()` charge `UC_ReferentielHome`
+3. `UC_ReferentielHome` affiche 9 tuiles et applique les droits
+4. L'utilisateur clique sur une tuile → `Home.NavigateToReferentielView(ucConcret)`
+5. L'UC référentiel concret se charge ; `UC_ReferentielBase.LoadControl()` s'exécute :
+   - Injections contexte + droits
+   - Appel `ConfigurerChampSupplementaire()` (hooks)
+   - Chargement de la liste via `ChargerElements()`
+6. Mode Consultation (lecture seule par défaut)
+7. L'administrateur sélectionne un élément → Mode Modification
+8. Ou clique « Nouveau » → Mode Création
+9. Saisie, validation (unicité code, libellé, longueur, champ sup.) → Enregistrement
+10. Si suppression demandée : vérification d'usage → soft-delete si utilisé, hard-delete sinon
+11. Retour automatique au mode Consultation après chaque opération
+
+---
+
+## Étapes détaillées
+
+### 1. Navigation vers le hub
+
+```vb
+' Depuis Home ou UC_AdminHome
+Home.NavigateToReferentielView()
+```
+
+### 2. Sélection d'un référentiel
+
+```vb
+' UC_ReferentielHome – exemple tuile Types séance
+Private Sub btnTypesSeance_Click(...)
+    Home.NavigateToReferentielView(New UC_TypesSeance())
+End Sub
+```
+
+### 3. Chargement d'un UC référentiel (UC_ReferentielBase)
+
+```
+LoadControl()
+├── InjecterContexte()
+├── AppliquerDroits()
+├── ConfigurerChampSupplementaire()   ← hook (vide par défaut)
+└── ChargerEtAfficherListe()
+        └── ChargerElements(afficherInactifs) ← Overridable
+```
+
+### 4. Modes d'édition
+
+| Mode | Déclencheur | État des contrôles |
+|---|---|---|
+| Consultation | Par défaut / après enregistrement | Liste active, formulaire verrouillé |
+| Création | Bouton « Nouveau » | Formulaire vide, éditable |
+| Modification | Sélection d'un élément | Formulaire pré-rempli, éditable |
+
+### 5. Validation avant enregistrement
+
+```
+SaisieValide()
+├── Code non vide + longueur ≤ LongueurMaxCode
+├── Libellé non vide
+├── CodeExisteDeja(code, idExclu)       ← Overridable
+├── LibelleExisteDeja(libelle, idExclu) ← Overridable
+└── ValiderChampSupplementaire()        ← hook (True par défaut)
+```
+
+### 6. Enregistrement
+
+```
+btnEnregistrer_Click()
+├── SaisieValide() → True ?
+├── Mode = Création  → InsererElement(...)   ← Overridable
+│                       + AfficherChampSupplementaire si hook actif
+├── Mode = Modif    → MettreAJourElement(...) ← Overridable
+└── ChargerEtAfficherListe() + BasculerModeConsultation()
+```
+
+### 7. Activation / Désactivation
+
+```
+btnActiver_Click()
+└── DefinirActivation(id, actif) ← Overridable
+        └── <X>EstUtilise() → si utilisé : soft-delete uniquement
+                            → sinon : hard-delete proposé
+```
+
+### 8. Cas spécial : UC_TypesSeance (tarif_defaut)
+
+```
+ConfigurerChampSupplementaire()
+└── Crée Label "Tarif par défaut (€)" + NumericUpDown (decimal, 0→9999, 2 décimales)
+    └── Ajouté dynamiquement dans pnlEdition (Y=262)
+
+AfficherChampSupplementaire(ligne)
+└── _numTarif.Value = ligne.Tarif ?? 0
+
+InsererElement / MettreAJourElement
+└── Transmettent _numTarif.Value à GestionTypesSeance
+    └── GestionTypesSeance → QueryTypesSeance (@tarif)
+        └── INSERT/UPDATE ref_types_seance.tarif_defaut
+```
+
+---
+
+## Droits d'accès
+
+| Rôle | Accès Référentiels |
+|---|---|
+| Lecteur | ❌ Accès refusé |
+| Utilisateur | ❌ Accès refusé |
+| Admin | ✅ Consultation + modification |
+| SuperUser | ✅ Consultation + modification + suppression physique |
+
+> La vérification de droit est centralisée dans `UC_ReferentielBase.AppliquerDroits()` et pilotée par la propriété `RoleMinimum` de chaque UC concret.
+
+---
+
+## Règles importantes
+
+- **Soft-delete prioritaire** : si un référentiel est utilisé dans les données métier, il ne peut être que désactivé (jamais supprimé physiquement).
+- **Unicité code + libellé** : vérifiée côté service (`CodeExisteDeja` / `LibelleExisteDeja`) ET côté base de données (contraintes UNIQUE).
+- **Aucun accès DB dans l'UC** : tout passe par `Gestion<X>`.
+- **Hooks champ supplémentaire** : no-op par défaut, seulement surchargés si la table a un champ additionnel.
+- **ReferentielLigne** : modèle de présentation générique — l'UC de base ne connaît pas les modèles métier (`TypeSeance`, `Domaine`…).
+
+---
+
+## Flowchart – Processus 10 (Gestion Référentiels)
+
+```mermaid
+flowchart TD
+    A[Admin → menu Référentiels] --> B[UC_ReferentielHome\n9 tuiles]
+    B --> C{Droits suffisants?}
+    C -->|Non| D[Tuiles désactivées\nMessage erreur]
+    C -->|Oui| E[Sélection d'un référentiel]
+    E --> F[UC_ReferentielBase.LoadControl\nContexte + droits + hooks + liste]
+    F --> G[Mode Consultation]
+    G --> H{Action?}
+    H -->|Nouveau| I[Mode Création\nFormulaire vide]
+    H -->|Sélectionner| J[Mode Modification\nFormulaire pré-rempli]
+    H -->|Activer/Désactiver| K{Référentiel utilisé?}
+    K -->|Oui| L[Soft-delete\nDésactivation uniquement]
+    K -->|Non| M[Hard-delete\nou désactivation]
+    I --> N[Saisie + Validation]
+    J --> N
+    N --> O{Saisie valide?}
+    O -->|Non| P[Erreur affichée\nRetour saisie]
+    O -->|Oui| Q[INSERT ou UPDATE\nvia Gestion< X >]
+    Q --> R[Liste rechargée\nMode Consultation]
+    L --> R
+    M --> R
+```
 
 ---
 

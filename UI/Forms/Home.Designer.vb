@@ -41,6 +41,7 @@ Partial Class Home
         pnlMenu = New Panel()
         Button2 = New Button()
         Button1 = New Button()
+        butTempHashPW = New Button()
         pnlHeader = New Panel()
         lblUtilisateurConnecte = New Label()
         lblContexte = New Label()
@@ -284,6 +285,7 @@ Partial Class Home
         pnlMenu.Controls.Add(Button2)
         pnlMenu.Controls.Add(Button1)
         pnlMenu.Controls.Add(btnChangerMotDePasse)
+        pnlMenu.Controls.Add(butTempHashPW)
         pnlMenu.Controls.Add(btnAdmin)
         pnlMenu.Controls.Add(btnReferentiels)
         pnlMenu.Controls.Add(btnDocuments)
@@ -315,6 +317,15 @@ Partial Class Home
         Button1.TabIndex = 10
         Button1.Text = "Test DialogChoix"
         Button1.UseVisualStyleBackColor = True
+        ' 
+        ' butTempHashPW
+        ' 
+        butTempHashPW.Location = New Point(11, 518)
+        butTempHashPW.Name = "butTempHashPW"
+        butTempHashPW.Size = New Size(166, 29)
+        butTempHashPW.TabIndex = 9
+        butTempHashPW.Text = "Temp Hash PW"
+        butTempHashPW.UseVisualStyleBackColor = True
         ' 
         ' pnlHeader
         ' 
@@ -405,6 +416,7 @@ Partial Class Home
     Friend WithEvents lblContexte As Label
     Friend WithEvents lblUtilisateurConnecte As Label
     Friend WithEvents btnChangerMotDePasse As Button
+    Friend WithEvents butTempHashPW As Button
     Friend WithEvents Button1 As Button
     Friend WithEvents Button2 As Button
 

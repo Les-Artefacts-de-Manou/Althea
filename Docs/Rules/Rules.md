@@ -1,6 +1,6 @@
 # Rules – Althéa
 
->  *Dernière mise à jour : 08/06/2026*
+> *Dernière mise à jour : 10/06/2026*
 
 ## Objectif
 Ce document fixe les règles de conception et de développement pour maintenir une application fiable, lisible et reprise facilement.
@@ -502,8 +502,11 @@ ORDER BY score DESC, b.date_bilan DESC;
 - **Thérapeute** (et non « médecin ») : tout intervenant (médecin traitant, logopède, adresseur…). Table : `therapeutes`.
 
 ### Référentiels (UC physique + classe de base)
-- Un **UserControl physique par référentiel** (design libre).
-- Logique mutualisée dans `UC_ReferentielBase` ; chaque écran héritier nommé `UC_Ref<Entité>` (ex. `UC_RefDomaines`, `UC_RefTypesSeance`).
+- Un **UserControl physique par référentiel** (design libre, `.Designer.vb` propre à chaque écran).
+- Logique mutualisée dans `UC_ReferentielBase` ; les noms réels des UCs sont `UC_Domaines`, `UC_LiensPatient`, `UC_RolesIntervenant`, `UC_SituationsFamiliales`, `UC_StatutsDossier`, `UC_StatutsSeance`, `UC_TypesDocuments`, `UC_TypesRendezVous`, `UC_TypesSeance` (pas de préfixe `Ref` dans le nom de fichier).
+- `ReferentielLigne` est le modèle de présentation générique — l'UC de base ne connaît pas les modèles métier.
+- Les hooks champ supplémentaire (`ConfigurerChampSupplementaire`, etc.) sont no-op par défaut ; seul `UC_TypesSeance` les surcharge pour `tarif_defaut`.
+- Soft-delete prioritaire : si `<X>EstUtilise()` retourne `True`, désactiver uniquement (jamais supprimer physiquement).
 - Cf. ADR-18.
 - 
 ---
@@ -516,3 +519,6 @@ ORDER BY score DESC, b.date_bilan DESC;
 > - GitHub public :  Althea https://github.com/Les-Artefacts-de-Manou/Althea
 > 
 > ---
+
+[TOC]
+
