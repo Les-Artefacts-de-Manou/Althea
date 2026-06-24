@@ -240,7 +240,7 @@ Partial Class Home
         stsStatus.Location = New Point(0, 929)
         stsStatus.Name = "stsStatus"
         stsStatus.Padding = New Padding(1, 0, 12, 0)
-        stsStatus.Size = New Size(1284, 32)
+        stsStatus.Size = New Size(1584, 32)
         stsStatus.TabIndex = 17
         stsStatus.Text = "StatusStrip1"
         ' 
@@ -265,7 +265,7 @@ Partial Class Home
         pnlForm.Font = New Font("Calibri", 11F)
         pnlForm.Location = New Point(0, 0)
         pnlForm.Name = "pnlForm"
-        pnlForm.Size = New Size(1284, 929)
+        pnlForm.Size = New Size(1584, 929)
         pnlForm.TabIndex = 18
         ' 
         ' pnlContent
@@ -276,7 +276,7 @@ Partial Class Home
         pnlContent.Location = New Point(189, 94)
         pnlContent.Name = "pnlContent"
         pnlContent.Padding = New Padding(8)
-        pnlContent.Size = New Size(1095, 835)
+        pnlContent.Size = New Size(1395, 835)
         pnlContent.TabIndex = 3
         ' 
         ' pnlMenu
@@ -336,7 +336,7 @@ Partial Class Home
         pnlHeader.Dock = DockStyle.Top
         pnlHeader.Location = New Point(0, 0)
         pnlHeader.Name = "pnlHeader"
-        pnlHeader.Size = New Size(1284, 94)
+        pnlHeader.Size = New Size(1584, 94)
         pnlHeader.TabIndex = 0
         ' 
         ' lblUtilisateurConnecte
@@ -377,7 +377,7 @@ Partial Class Home
         ' 
         AutoScaleDimensions = New SizeF(6F, 14F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(1284, 961)
+        ClientSize = New Size(1584, 961)
         Controls.Add(pnlForm)
         Controls.Add(stsStatus)
         Font = New Font("Calibri", 9F)

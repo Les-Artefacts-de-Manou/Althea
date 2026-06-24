@@ -1,6 +1,6 @@
 # Althéa - README
 
->  *Dernière mise à jour : 08/06/2026*
+> *Dernière mise à jour : 18/06/2026*
 
 ## Application de gestion des dossiers patients
 
@@ -98,12 +98,13 @@ Relations :
 
 | Outil | Usage | Version | Date |
 | ----- | ----- | ----- | ----- |
-| **Visual Studio Community** | IDE principal - VB.NET / .NET 8 LTS / WinForms | 18.6.2 | Mai 2026 |
+| **Visual Studio Community** | IDE principal - VB.NET / .NET 8 LTS / WinForms | 18.6.3 | Mai 2026 |
 | **MariaDB** | Base de données (charset `utf8mb4`, collation `utf8mb4_uca1400_ai_ci`, base `Althea`) | 12.3.2 | 28 mai 2026 |
-| **HeidiSQL** | Administration et visualisation de la base MariaDB | 12.17.0 | 21 mai 2026 |
+| **HeidiSQL** | Administration et visualisation de la base MariaDB | 12.19 .0 | 20/06/26 |
 | **DBeaver** | Visualisation de la base MariaDB, génération de diagrammes | 26.1.0 | 01/06/26 |
-| **Typora** | Rédaction de la documentation Markdown | 1.13.6 |  |
-| **LordIcon** | Icônes pour l'interface utilisateur – https://lordicon.com/ |  |  |
+| **Typora** | Rédaction de la documentation Markdown | 1.13.7 | 13/06/26 |
+| **LordIcon** | Icônes pour l'interface utilisateur – https://lordicon.com/ |  | Abonnement mensuel |
+| **Icone8** | Icônes pour l'interface utilisateur – https://icons8.fr/ |  | Libre de droits |
 
 > 
 
@@ -112,8 +113,8 @@ Relations :
 | Package | Version | Date |  |
 | ------- | ------- | ----- | ------- |
 | **MySqlConnector** | 2.6.0 | 03/06/26 | Bradley Grainger - <br />A truly async MySQL ADO.NET provider, supporting MySQL Server, MariaDB, Amazon Aurora, Azure Database for MySQL, Google Cloud SQL, and more.<br />https://mysqlconnector.net/ |
-| **Syncfusion.DocIO.WinForms** | 33.2.10 | 02/06/26 | Avec licence gratuite. The Syncfusion® [WinForms Word library](https://www.syncfusion.com/word-framework/net/word-library?utm_source=nuget&utm_medium=listing&utm_campaign=winforms-docio-nuget) (Essential® DocIO) is a feature-rich and high-performance .NET Word library that is used to create, read, and edit Word documents programmatically without Microsoft Office dependencies. |
-| **Syncfusion.DocToPDFConverter.WinForm** | 33.2.10 | 02/06/26 | The Syncfusion® [WinForms Word library](https://www.syncfusion.com/word-framework/net/word-library?utm_source=nuget&utm_medium=listing&utm_campaign=winforms-doctopdfconverter-nuget) (Essential® DocIO) converts a [Word document to PDF](https://www.syncfusion.com/word-framework/net/word-to-pdf-conversion?utm_source=nuget&utm_medium=listing&utm_campaign=winforms-doctopdfconverter-nuget) with just five lines of code and also it does not require Adobe and Microsoft Word application to be installed in the machine. It preserves the original appearance of the Word document in the converted PDF document |
+| **Syncfusion.DocIO.WinForms** | 33.2.15 | 23/06/26 | Avec licence gratuite. The Syncfusion® [WinForms Word library](https://www.syncfusion.com/word-framework/net/word-library?utm_source=nuget&utm_medium=listing&utm_campaign=winforms-docio-nuget) (Essential® DocIO) is a feature-rich and high-performance .NET Word library that is used to create, read, and edit Word documents programmatically without Microsoft Office dependencies. |
+| **Syncfusion.DocToPDFConverter.WinForm** | 33.2.15 | 23/06/26 | The Syncfusion® [WinForms Word library](https://www.syncfusion.com/word-framework/net/word-library?utm_source=nuget&utm_medium=listing&utm_campaign=winforms-doctopdfconverter-nuget) (Essential® DocIO) converts a [Word document to PDF](https://www.syncfusion.com/word-framework/net/word-to-pdf-conversion?utm_source=nuget&utm_medium=listing&utm_campaign=winforms-doctopdfconverter-nuget) with just five lines of code and also it does not require Adobe and Microsoft Word application to be installed in the machine. It preserves the original appearance of the Word document in the converted PDF document |
 
 ### Versioning
 
@@ -291,6 +292,8 @@ End If
 
 L'application intègre un **éditeur de texte riche réutilisable** (`UI/Controls/UC_RichTextEditor.vb`) pour la saisie et le formatage des notes patients, anamnèses, bilans psychologiques/graphothérapeutiques, et comptes-rendus de consultations.
 
+> **Utilisation actuelle** : onglet *Anamnèse* de `UC_PatientFiche` — chargement via `ChargerContenu(rtf, txt)`, export PDF/Word contextuel par délégation (ADR-21).
+
 ### Fonctionnalités principales
 
 **Toolbar complète (30 boutons)** :
@@ -417,9 +420,175 @@ ucEditor.ReadOnlyMode = True
 
 ---
 
+## UC_RichTextEditorSimple - Éditeur de texte riche allégé
+
+Variante compacte de `UC_RichTextEditor`, destinée aux zones de notes courtes embarquées dans d'autres UserControls ou Forms (référentiels, fiches patient, dossiers, contacts…).
+
+**Toolbar (7 boutons uniquement)** : Gras, Italique, Souligné, Annuler, Rétablir, Effacer format, Date/Heure
+
+**Même règle de sauvegarde double format** que `UC_RichTextEditor` : `RtfContent` (RTF) + `TextContent` (texte brut) — **obligatoire**.
+
+**Différences avec UC_RichTextEditor** :
+
+| Fonctionnalité | UC_RichTextEditor | UC_RichTextEditorSimple |
+|---|---|---|
+| Toolbar | 30 boutons | 7 boutons |
+| Impression, PDF, Word | ✅ | ❌ |
+| Contexte UI | ✅ obligatoire | ✅ optionnel |
+| Taille | Fixe (grande) | Pilotée par le parent |
+
+```vb
+' Intégration
+Dim editorNotes As New UC_RichTextEditorSimple()
+editorNotes.Dock = DockStyle.Fill
+pnlNotes.Controls.Add(editorNotes)
+
+' Sauvegarde (double format obligatoire)
+cmd.Parameters.AddWithValue("@notes_rtf", editorNotes.RtfContent)
+cmd.Parameters.AddWithValue("@notes_txt", editorNotes.TextContent)
+
+' Lecture seule
+editorNotes.ReadOnlyMode = True
+editorNotes.ShowToolbar = False
+```
+
+---
+
+## Gestion des référentiels
+
+Le système de gestion des tables de référence (`ref_*`) couvre désormais **10 référentiels**. Ces données alimentent les listes déroulantes, filtres et catégorisations de toute l'application.
+
+**Architecture (héritage + noyau commun)** :
+- `UC_ReferentielBase` : classe de base héritable qui centralise chargement, modes, CRUD via hooks, validation (unicité code + libellé), droits, journalisation, soft-delete.
+- `UC_ReferentielHome` : hub de **11 tuiles** de navigation (10 référentiels simples + la tuile **Thérapeutes**, *entité riche* documentée plus bas).
+- 10 UCs concrets héritent de la base et n'implémentent que leurs spécificités ; `UC_Therapeutes` est accessible depuis le même hub mais **ne dérive pas** de `UC_ReferentielBase`.
+
+**Les 10 référentiels** :
+
+| UC | Table | Lot | Particularité |
+|---|---|---|---|
+| `UC_Domaines` | `ref_domaines` | Lot 0 | — |
+| `UC_LiensPatient` | `ref_liens_patient` | Lot 0 | — |
+| `UC_RolesIntervenant` | `ref_roles_intervenant` | Lot 0 | — |
+| `UC_SituationsFamiliales` | `ref_situations_familiales` | Lot 0 | — |
+| `UC_StatutsDossier` | `ref_statuts_dossier` | Lot 0 | — |
+| `UC_StatutsSeance` | `ref_statuts_seance` | Lot 0 | — |
+| `UC_TypesDocuments` | `ref_types_documents` | Lot 0 | — |
+| `UC_TypesRendezVous` | `ref_types_rendez_vous` | Lot 0 | — |
+| `UC_TypesSeance` | `ref_types_seance` | Lot 0 | ⭐ `tarif_defaut decimal(10,2)` via hooks |
+| `UC_RoleLegal` ✨ | `ref_role_legal` | Lot 2 | Rôle légal **unique** des contacts famille (migration v2.2) |
+
+**Pile technique par référentiel** :
+
+Core\Database\Queries\Query<X>.vb     
+→ SQL (SELECT, INSERT, UPDATE, soft/hard delete) Metier\Referentiels<X>.vb            
+→ Modèle (id, code, libelle, actif, ordre [+ tarif]) Metier\Referentiels\Gestion<X>.vb     
+→ Service CRUD + unicité + EstUtilise() UI\Controls\Referentiels\UC_<X>.vb    
+→ UserControl concret (hérite UC_ReferentielBase)
+
+
+**Règles clés** :
+- Tables `ref_*` → `AUTO_INCREMENT` (pas de séquences)
+- Soft-delete si le référentiel est utilisé dans les données métier, hard-delete sinon
+- Unicité vérifiée côté service + contrainte UNIQUE en base
+- Aucun accès DB dans l'UC (tout passe par `Gestion<X>`)
+
+### Ajout d'une valeur de référentiel « en contexte » (bouton `[+]`)
+
+Un référentiel peut être complété **sans quitter l'écran courant** grâce à un hôte modal générique :
+
+- `ReferentielModalHost` (`UI/Forms/Communs/`) héberge n'importe quel `UC_Ref<X>` en `Dock.Fill`, avec son propre contexte UI local (session + tooltips + ErrorProvider) et **aucune logique de sécurité dupliquée**.
+- `Home.OuvrirReferentielModal(vueReferentiel, titre)` est le point d'entrée unique pour déclencher un référentiel en modal depuis n'importe quel UC métier.
+- À la fermeture, le combo appelant est rechargé avec **auto-sélection** de la nouvelle valeur (ex. `cboRoleLegal` et `cboLien` dans `ContactEdition`, `cboSituationFamiliale` dans la fiche patient).
+
+---
+
+---
+
+## Gestion des patients *(cœur métier — Lot 1 en cours)*
+
+Le cœur métier patient est désormais amorcé : couche métier complète, écran de liste, fiche patient multi-onglets, gestion des contacts de l'entourage et du **réseau d'intervenants** (relation N-N avec le référentiel Thérapeutes).
+
+### Couche métier
+
+| Module | Rôle |
+|---|---|
+| `Metier/Patients/Patient.vb` | DTO complet : identité, coordonnées, situation familiale, `PhotoFichier`, `AlerteRtf`/`AlerteTxt`, **`AnamneseRtf`/`AnamneseTxt`** ; helpers `NomComplet`, `AAlerte` |
+| `Metier/Patients/PatientListeItem.vb` | Modèle léger pour la liste (`NbDossiers`, `NbDossiersActifs`, **`SuiviEnCours`**, `DateModification`, `APhoto`) |
+| `Metier/Patients/FamilleContact.vb` | DTO d'un contact de l'entourage (lien, identité, coordonnées, `IdRoleLegal` + `LibelleRoleLegal`, commentaire RTF/TXT) |
+| `Metier/Patients/SuiviIntervenant.vb` | DTO d'un suivi du réseau (liaison N-N `autres_suivis_patient` : thérapeute, rôle, identité texte libre, période, commentaire) |
+| `Metier/Patients/GestionPatients.vb` | Service CRUD patients + validations (`NissExiste`, `DoublonExiste`, `PeutSupprimerPatient`) + **`UpdatePhotoPatient`** |
+| `Metier/Patients/GestionFamilleContacts.vb` | Service CRUD des contacts famille |
+| `Metier/Patients/GestionSuivisIntervenants.vb` | Service CRUD du réseau d'intervenants (liaison N-N) |
+| `Metier/Referentiels/GestionTherapeutes.vb` | Service CRUD du référentiel Thérapeutes (entité riche, soft-delete) |
+| `Core/Database/Queries/QueryPatients.vb` | SQL patients (liste, CRUD complet anamnèse + photo, unicité NISS, doublon nom+prénom+naissance) |
+| `Core/Database/Queries/QueryFamilleContacts.vb` | SQL contacts (jointure `ref_role_legal`, CRUD) |
+| `Core/Database/Queries/QuerySuivisIntervenants.vb` | SQL réseau d'intervenants (jointures `therapeutes` + `ref_roles_intervenant`, CRUD) |
+| `Core/Database/Queries/QueryTherapeutes.vb` | SQL référentiel Thérapeutes (liste, CRUD, soft-delete, test d'usage) |
+
+### UC_PatientHome — écran de liste
+
+- Grille `dgvPatients` liée par `DataPropertyName` (Suivi 🔴, Code, Nom, Prénom, Naissance, NISS, Téléphone, Email, Alerte ☑, Photo ☑, Modifié le)
+- **Recherche multi-champs en mémoire** (nom, prénom, NISS, code, téléphone, email) insensible à la casse
+- **Filtre de statut de suivi** (`cboFiltreSuivi`) à 3 états : en cours (défaut, `suivi_en_cours = 1`) / clôturé-archivé / tous
+- **Colonne icône de statut** (`colStatutSuivi`) rendue via `dgvPatients_CellFormatting` (`patientEncours_20` / `patientNonEncours_20`)
+- Téléphone **formaté au rendu** via `dgvPatients_CellFormatting` (la source reste stockée en canonique)
+- `ErrorProvider`/`ToolTip` délégués entièrement au contexte UI partagé de `Home`
+
+### UC_PatientFiche — fiche patient plein panneau
+
+- Bandeau identité persistant (photo via `CheminsPatientHelper` + bouton **upload photo** `btnUploadPhoto` + bandeau d'alerte RTF) et onglets **Identité / Anamnèse / Famille-Contacts / Intervenants / Dossiers**
+- Modes **Consultation / Création / Modification** (pattern `UC_ReferentielBase`)
+- **Contexte de navigation dynamique** : fil d'Ariane patient + onglet courant rafraîchi à chaque changement d'onglet (`RafraichirContexteNavigation`) ; **actions de la fiche** limitées à l'onglet pertinent (`AppliquerVisibiliteActionsFiche`)
+- **Activation progressive** des onglets dépendants tant qu'aucun `id_patient` n'est obtenu (handler `tabFiche_Selecting`, D-Q14)
+- **Âge calculé à la volée**, validations bloquantes explicites (Nom, Prénom, Téléphone, E-mail, NISS), alerte/notes via `UC_RichTextEditorSimple`
+- **Sélecteur de pays** `cboPays` + téléphone *country-aware* (`UtilsTelephone`)
+- **Onglet Anamnèse** : `UC_RichTextEditor` complet, sauvegarde double format `anamnese_rtf`/`anamnese_txt` (migration v2.3) ; chargement/vidage/mode lecture seule câblés
+- **Export anamnèse** (PDF + Word) : chemin déterministe horodaté `anamnese_{code}_{yyyyMMdd_HHmmss}.ext` dans `…\Documents\{code_patient}\` ; ouverture automatique du fichier exporté (ADR-21)
+- **Upload photo d'identité** : `OpenFileDialog` filtré (JPG/PNG/BMP/GIF/TIFF), validation défensive, copie vers `Identite.ext` (nom fixe, remplacement), `AssurerDossierPatient`, MAJ `patients.photo_fichier`
+- **Correctif** : en *Modification*, l'onglet courant est conservé (retour sur *Identité* uniquement en *Création*)
+
+### ContactEdition — modale de contact famille
+
+- Saisie du lien (`ref_liens_patient`), de l'identité/coordonnées et du **rôle légal unique** (`cboRoleLegal`, FK obligatoire vers `ref_role_legal`)
+- Commentaire enrichi RTF/TXT (`UC_RichTextEditorSimple`)
+- Téléphone/e-mail *country-aware*, boutons `[+]` pour ajouter un lien ou un rôle légal manquant (référentiel en modal)
+- Présélection à la création : lien par défaut + rôle `AUTORITE_PARENTALE`
+- **Consultation d'abord** : double-clic d'un contact existant → ouverture en **lecture seule** (champs et `[+]` désactivés) ; bouton **Modifier** pour éditer, **Fermer** pour sortir (création = saisie directe)
+
+### IntervenantEdition — modale du réseau d'intervenants
+
+- Rattache un patient à un **thérapeute** du référentiel (`cboTherapeute`, **obligatoire**) et persiste la liaison **N-N** `autres_suivis_patient` (D-Q1bis)
+- Rôle d'intervenant **optionnel** (`cboRole`, `ref_roles_intervenant`), identité texte libre (nom/praticien, spécialité, lieu), période de suivi (dates début/fin optionnelles), commentaire enrichi (`UC_RichTextEditorSimple`)
+- **Auto-remplissage** nom/spécialité/lieu depuis le thérapeute choisi (`AppliquerSnapshotTherapeute`, neutralisé pendant le chargement par `_chargementEnCours`)
+- Boutons `[+]` pour ajouter un thérapeute (`UC_Therapeutes`) ou un rôle (`UC_RolesIntervenant`) sans quitter la saisie
+- **Consultation d'abord** : double-clic d'un intervenant existant → ouverture en **lecture seule** (snapshot thérapeute toujours en lecture seule) ; bouton **Modifier** pour éditer, **Fermer** pour sortir (création = saisie directe)
+- Branché dans l'onglet **Intervenants** de `UC_PatientFiche` (grille `dgvIntervenants`, recherche, CRUD délégué)
+
+### Référentiel Thérapeutes — entité riche
+
+- `UC_Therapeutes` : écran de liste dédié (recherche/filtre « inactifs », CRUD) **ne dérivant pas** de `UC_ReferentielBase` (identité complète, coordonnées, commentaire)
+- `TherapeuteEdition` : modale d'édition (identité, coordonnées *country-aware*, état actif, commentaire) ; persistance via `GestionTherapeutes` (table `therapeutes`)
+- **Soft-delete prioritaire** : un thérapeute référencé par un suivi (`autres_suivis_patient`) ne peut être que désactivé ; suppression physique uniquement s'il n'est pas utilisé
+- Accessible depuis le hub Référentiels **et** via le bouton `[+]` d'`IntervenantEdition`
+
+### Briques transverses associées (Lot C0)
+
+| Module | Rôle |
+|---|---|
+| `Utils/UI/UtilsTelephone.vb` | Normalisation E.164, formatage et validation du téléphone par pays (BE, FR, LU, DE, NL) ; libellés pays pour les ComboBox |
+| `Utils/Helpers/CheminsPatientHelper.vb` | Chemins fichiers patients déterministes : `{PATH_GENERAL}\{PATH_DOCUMENT}\{code_patient}\` (ex. `D:\Althea_Data\Documents\PA000003\`) — `GetDossierPatient`, `AssurerDossierPatient`, `GetNomFichierPhotoIdentite`, `FormaterCodePatient` |
+| `UI/Navigation/NavigationEntry.vb` + `NavigationManager` | **Mini-pile de navigation** (retour contextuel avec restauration du filtre : `NavigateAndPush`, `NavigateBack`, `CanNavigateBack`) |
+| `QueryParametres` / `GestionParametres` | Lookup scalaire d'un paramètre (`GetValeurParametre("PATH_GENERAL")`) |
+| `UtilsValidation` | `IsValidTelephone`, `IsValidEmail` (validation souple, champ optionnel) |
+
+> Le rôle légal des contacts a été **refondu** (migration v2.2) : les 4 anciens booléens cumulables (`autorite_parentale`, `representant_legal`, `personne_autorisee`, `contact_urgence`) sont remplacés par un **rôle unique** via FK `id_role_legal` → `ref_role_legal`.
+
+---
+
 ## Utilitaires UI
 
-Les modules utilitaires UI centralisent les comportements visuels et fonctionnels communs à l'ensemble de l'application.
+Les modules utilitaires UI centralisent
 
 ### UITheme
 
@@ -626,9 +795,22 @@ Althea/
 │   │
 │   ├── Database/               → Accès base de données
 │   │   ├── DatabaseManager.vb      → Point d'accès unique à MariaDB
+│   │   ├── DbHelper.vb             → ✨ Helpers partagés d'accès aux données (Lire*/Valeur*)
 │   │   └── Queries/                → Requêtes SQL centralisées
 │   │       ├── QueryParametres.vb
-│   │       └── QueryUtilisateurs.vb
+│   │       ├── QueryUtilisateurs.vb
+│   │       ├── QueryPatients.vb            → ✨ SQL patients
+│   │       ├── QueryFamilleContacts.vb     → ✨ SQL contacts famille
+│   │       ├── QueryDomaines.vb
+│   │       ├── QueryLiensPatient.vb
+│   │       ├── QueryRolesIntervenant.vb
+│   │       ├── QuerySituationsFamiliales.vb
+│   │       ├── QueryStatutsDossier.vb
+│   │       ├── QueryStatutsSeance.vb
+│   │       ├── QueryTypesDocuments.vb
+│   │       ├── QueryTypesRendezVous.vb
+│   │       ├── QueryTypesSeance.vb
+│   │       └── QueryRoleLegal.vb           → ✨ SQL référentiel rôles légaux
 │   │
 │   ├── Logging/                → Journalisation et gestion des logs
 │   │   └── GestionLog.vb           → Journalisation (niveaux : Succinct, Complet)
@@ -647,6 +829,26 @@ Althea/
 │   │   ├── GestionParametres.vb        → Logique métier des paramètres
 │   │   └── ParametreApplication.vb     → Modèle de paramètre applicatif
 │   │
+│   ├── Patients/               → ✨ Cœur métier patients (Lot 1)
+│   │   ├── Patient.vb                  → Modèle patient (identité, alerte, photo)
+│   │   ├── PatientListeItem.vb         → Modèle léger pour la liste
+│   │   ├── FamilleContact.vb           → Modèle contact entourage (rôle légal)
+│   │   ├── GestionPatients.vb          → Service CRUD patients
+│   │   └── GestionFamilleContacts.vb   → Service CRUD contacts
+│   │
+│   ├── Referentiels/           → Logique métier des référentiels
+│   │   ├── ReferentielLigne.vb         → Modèle de présentation générique
+│   │   ├── Domaine.vb + GestionDomaines.vb
+│   │   ├── LienPatient.vb + GestionLiensPatient.vb
+│   │   ├── RoleIntervenant.vb + GestionRolesIntervenant.vb
+│   │   ├── SituationFamiliale.vb + GestionSituationsFamiliales.vb
+│   │   ├── StatutDossier.vb + GestionStatutsDossier.vb
+│   │   ├── StatutSeance.vb + GestionStatutsSeance.vb
+│   │   ├── TypeDocument.vb + GestionTypesDocuments.vb
+│   │   ├── TypeRendezVous.vb + GestionTypesRendezVous.vb
+│   │   ├── TypeSeance.vb + GestionTypesSeance.vb  (+ TarifDefaut)
+│   │   └── RoleLegal.vb + GestionRoleLegal.vb     → ✨ 10e référentiel (Lot 2)
+│   │
 │   └── Security/               → Logique métier liée à la sécurité
 │       ├── AuthenticationResult.vb     → Résultat de l'authentification
 │       ├── GestionAuthentification.vb  → Logique métier de l'authentification
@@ -664,7 +866,26 @@ Althea/
 │   │   │   └── UC_Utilisateurs.vb      → Gestion des utilisateurs
 │   │   │
 │   │   ├── Communs/                → Composants UI réutilisables
-│   │   │   └── UC_RichTextEditor.vb    → Éditeur de texte riche (30 boutons, exports PDF/Word)
+│   │   │   ├── UC_RichTextEditor.vb    → Éditeur de texte riche (30 boutons, exports PDF/Word)
+│   │   │   └── UC_RichTextEditorSimple.vb → Éditeur allégé (7 boutons, ré-embeddable)
+│   │   │
+│   │   ├── Patients/               → ✨ Écrans du cœur métier patients
+│   │   │   ├── UC_PatientHome.vb       → Liste des patients (recherche, filtre)
+│   │   │   └── UC_PatientFiche.vb      → Fiche patient plein panneau (4 onglets)
+│   │   │
+│   │   ├── Referentiels/           → Gestion des référentiels
+│   │   │   ├── UC_ReferentielBase.vb   → Classe de base héritable (logique commune)
+│   │   │   ├── UC_ReferentielHome.vb   → Hub des 10 référentiels
+│   │   │   ├── UC_Domaines.vb
+│   │   │   ├── UC_LiensPatient.vb
+│   │   │   ├── UC_RolesIntervenant.vb
+│   │   │   ├── UC_SituationsFamiliales.vb
+│   │   │   ├── UC_StatutsDossier.vb
+│   │   │   ├── UC_StatutsSeance.vb
+│   │   │   ├── UC_TypesDocuments.vb
+│   │   │   ├── UC_TypesRendezVous.vb
+│   │   │   ├── UC_TypesSeance.vb       → + tarif_defaut (hook champ supplémentaire)
+│   │   │   └── UC_RoleLegal.vb         → ✨ Rôles légaux des contacts (Lot 2)
 │   │   │
 │   │   └── UC_Accueil.vb           → Accueil de l'application
 │   │
@@ -672,7 +893,11 @@ Althea/
 │   │   ├── Home.vb                 → Formulaire principal (shell)
 │   │   │
 │   │   ├── Communs/                → Composants UI réutilisables
-│   │   │   └── DialogChoix.vb          → Boîte de dialogue personnalisée
+│   │   │   ├── DialogChoix.vb          → Boîte de dialogue personnalisée
+│   │   │   └── ReferentielModalHost.vb → ✨ Hôte modal générique de référentiel ([+])
+│   │   │
+│   │   ├── Patients/               → ✨ Formulaires du cœur métier patients
+│   │   │   └── ContactEdition.vb       → Modale contact famille (rôle légal unique)
 │   │   │
 │   │   ├── Login/                  → Formulaires liés à l'authentification
 │   │   │   ├── Login.vb                → Formulaire de connexion utilisateur
@@ -689,13 +914,15 @@ Althea/
 │   │       └── TestRichTextEditor.vb   → Test manuel du RichTextEditor
 │   │
 │   └── Navigation/             → Gestion de la navigation
-│       ├── NavigationManager.vb            → Gestion centralisée de la navigation
+│       ├── NavigationManager.vb            → Navigation centralisée + mini-pile (D-Q15)
+│       ├── NavigationEntry.vb              → ✨ Entrée d'historique de navigation
 │       ├── IContextAwareForm.vb            → Interface pour Forms modales
 │       └── IContextAwareUserControl.vb     → Interface pour UserControls
 │
 ├── Utils/                      → Utilitaires divers
 │   ├── Helpers/                → Modules helper métier
-│   │   └── RichTextEditorHelper.vb     → Helper RichTextEditor (impression Win32, exports)
+│   │   ├── RichTextEditorHelper.vb     → Helper RichTextEditor (impression Win32, exports)
+│   │   └── CheminsPatientHelper.vb     → ✨ Chemins fichiers patients déterministes
 │   │
 │   └── UI/                     → Utilitaires UI
 │       ├── UITheme.vb              → Thème visuel centralisé
@@ -704,6 +931,7 @@ Althea/
 │       ├── UtilsDataGrid.vb        → Style standard des DataGridView
 │       ├── UtilsIcons.vb           → Centralisation des icônes d'état
 │       ├── UtilsString.vb          → Helpers de normalisation et manipulation
+│       ├── UtilsTelephone.vb       → ✨ Téléphone/pays (E.164, formatage, validation)
 │       └── UtilsValidation.vb      → Helpers de validation
 │
 ├── Assets/                     → Ressources graphiques et visuelles
@@ -725,7 +953,9 @@ Althea/
 └── Docs/                       → Documentation du projet
     ├── Database/               → Documentation base de données
     │   ├── Database_technique.md
-    │   └── Diagrams/               → Diagrammes de base de données
+    │   ├── Diagrams/               → Diagrammes de base de données
+    │   ├── Migration/              → ✨ Scripts de migration de schéma
+    │   └── Seeds/                  → ✨ Jeux de données de développement
     │
     ├── Divers/                   → Divers documents
     │   ├── Guide_Licence_Syncfusion.md                             → Guide d'obtention de la licence gratuite Syncfusion Community
@@ -783,6 +1013,8 @@ Althea/
 | Login                  | Formulaire de connexion utilisateur                          | /UI/Forms/Login   |
 | ChangePassword         | Formulaire de changement de mot de passe utilisateur         | /UI/Forms/Login   |
 | UtilisateurEdition     | Formulaire d'édition des utilisateurs (création/modification/consultation) | /UI/Forms/Utilisateur |
+| ContactEdition         | Modale de création/édition d'un contact de l'entourage patient (rôle légal unique) | /UI/Forms/Patients |
+| ReferentielModalHost   | Hôte modal générique pour ajouter une valeur de référentiel en contexte ([+]) | /UI/Forms/Communs |
 
 ### Modules
 
@@ -790,12 +1022,15 @@ Althea/
 | ----------------------- | ------------------------------------------------------------ | ---------------------- |
 | ConfigManager           | Gestion de la configuration de l'application                 | /Core/Configuration    |
 | DatabaseManager         | Gestion des connexions et des opérations sur la base de données | /Core/Database         |
+| DbHelper                | Helpers partagés d'accès aux données (lecture typée NULL-safe `Lire*`, conversion paramètres SQL `Valeur*`) | /Core/Database         |
 | QueryParametres         | Centralisation des requêtes SQL sur la table tec_parametres  | /Core/Database/Queries |
 | QueryUtilisateurs       | Centralisation des requêtes SQL sur la table sec_utilisateurs | /Core/Database/Queries |
+| Query\<X\> ×9          | Requêtes SQL référentiels (Domaines, LiensPatient, RolesIntervenant, SituationsFamiliales, StatutsDossier, StatutsSeance, TypesDocuments, TypesRendezVous, TypesSeance) | /Core/Database/Queries |
 | GestionLog              | Gestion des journaux et des événements                       | /Core/Logging          |
 | CryptoManagerDPAPI      | Gestion de la cryptographie et de la sécurité                | /Core/Security         |
 | PasswordSecurityHelper  | Aide à la gestion sécurité des mots de passe (PBKDF2)        | /Core/Security         |
 | GestionParametres       | Gestion des paramètres et configurations métier              | /Metier/Parametres     |
+| Gestion\<X\> ×10        | Services CRUD + unicité + EstUtilise() pour les 10 référentiels (9 Lot 0 + RoleLegal Lot 2) | /Metier/Referentiels |
 | GestionAuthentification | Gestion de l'authentification utilisateur                    | /Metier/Security       |
 | GestionUtilisateurs     | Logique métier des utilisateurs applicatifs                  | /Metier/Security       |
 | UITheme                 | Thème visuel centralisé (couleurs, constantes, assets)       | /Utils                 |
@@ -806,6 +1041,14 @@ Althea/
 | UtilsValidation         | Helpers de validation des champs et données                  | /Utils                 |
 | UtilsControls           | Helpers contrôles WinForms divers                            | /Utils                 |
 | RichTextEditorHelper    | Helper centralisé pour édition texte riche (formatage, impression, exports) | /Utils/Helpers         |
+| QueryPatients           | Centralisation des requêtes SQL sur la table patients (liste, CRUD, unicité NISS, doublon) | /Core/Database/Queries |
+| QueryFamilleContacts    | Requêtes SQL sur famille_contacts (jointure ref_role_legal) | /Core/Database/Queries |
+| QueryRoleLegal          | Requêtes SQL du référentiel ref_role_legal (10e référentiel) | /Core/Database/Queries |
+| GestionPatients         | Service CRUD patients + validations (NISS, doublon, suppression) | /Metier/Patients |
+| GestionFamilleContacts  | Service CRUD des contacts de l'entourage | /Metier/Patients |
+| GestionRoleLegal        | Service CRUD + unicité + EstUtilisé() du référentiel rôles légaux | /Metier/Referentiels |
+| UtilsTelephone          | Normalisation E.164, formatage et validation du téléphone par pays | /Utils/UI |
+| CheminsPatientHelper    | Chemins fichiers patients déterministes (depuis PATH_GENERAL) | /Utils/Helpers |
 | Program                 | Point d'entrée de l'application                              | root                   |
 
 ### Classes
@@ -816,10 +1059,17 @@ Althea/
 | UserSession            | Gestion de la session utilisateur                            | /Core/Security      |
 | AppStartupManager      | Gestion du démarrage de l'application                        | /Core/Startup       |
 | ParametreApplication   | Paramètres applicatifs : lecture depuis la base, transformation en objets métier | /Metier/Parametres  |
+| ReferentielLigne       | Modèle de présentation générique pour tous les référentiels  | /Metier/Referentiels |
+| \<X\> ×9              | Modèles métier référentiels (Domaine, LienPatient, RoleIntervenant, SituationFamiliale, StatutDossier, StatutSeance, TypeDocument, TypeRendezVous, TypeSeance) | /Metier/Referentiels |
 | UtilisateurApplication | Modèle de l'utilisateur applicatif (login, rôle, MustChangePassword, etc.) | /Metier/Security    |
 | AuthenticationResult   | Résultat de l'authentification utilisateur                   | /Metier/Security    |
 | UserControlContext     | Gestion du contexte utilisateur, rôles et accès              | /UI/Context         |
 | NavigationManager      | Gestion de la navigation entre les écrans principaux         | /UI/Navigation      |
+| Patient                | Modèle patient (identité, coordonnées, alerte RTF/TXT, photo) | /Metier/Patients |
+| PatientListeItem       | Modèle léger pour la liste patients (compteurs de dossiers) | /Metier/Patients |
+| FamilleContact         | Modèle d'un contact de l'entourage (lien, rôle légal, commentaire) | /Metier/Patients |
+| RoleLegal              | Modèle métier du référentiel rôles légaux | /Metier/Referentiels |
+| NavigationEntry        | Entrée d'historique de la mini-pile de navigation (retour contextuel) | /UI/Navigation |
 
 ### Enums
 
@@ -832,13 +1082,28 @@ Althea/
 
 ### UserControls
 
-| Noms           | Usage                                              | Emplacement  |
-| -------------- | -------------------------------------------------- | ------------ |
-| UC_Accueil     | Accueil de l'application, point d'entrée principal | /UI/Controls |
-| UC_AdminHome   | Accueil des fonctions d'administration             | /UI/Controls |
-| UC_Parametres  | Gestion des paramètres applicatifs                 | /UI/Controls |
-| UC_Utilisateurs | Gestion des utilisateurs (liste, recherche, actions) | /UI/Controls |
-| UC_RichTextEditor | **Éditeur de texte riche réutilisable** (notes, anamnèses, bilans, comptes-rendus) | /UI/Controls |
+| Noms | Usage | Emplacement |
+| --- | --- | --- |
+| UC_Accueil | Accueil de l'application, point d'entrée principal | /UI/Controls/Administration |
+| UC_AdminHome | Accueil des fonctions d'administration | /UI/Controls/Administration |
+| UC_Parametres | Gestion des paramètres applicatifs | /UI/Controls/Administration |
+| UC_Utilisateurs | Gestion des utilisateurs (liste, recherche, actions) | /UI/Controls/Administration |
+| UC_RichTextEditor | **Éditeur de texte riche réutilisable** (notes, anamnèses, bilans, comptes-rendus) | /UI/Controls/Communs |
+| UC_RichTextEditorSimple | **Éditeur allégé ré-embeddable** (notes courtes, commentaires) | /UI/Controls/Communs |
+| UC_ReferentielBase | **Classe de base héritable** pour tous les référentiels | /UI/Controls/Referentiels |
+| UC_ReferentielHome | **Hub des 9 référentiels** (navigation, droits) | /UI/Controls/Referentiels |
+| UC_Domaines | Référentiel Domaines | /UI/Controls/Referentiels |
+| UC_LiensPatient | Référentiel Liens patient | /UI/Controls/Referentiels |
+| UC_RolesIntervenant | Référentiel Rôles intervenant | /UI/Controls/Referentiels |
+| UC_SituationsFamiliales | Référentiel Situations familiales | /UI/Controls/Referentiels |
+| UC_StatutsDossier | Référentiel Statuts dossier | /UI/Controls/Referentiels |
+| UC_StatutsSeance | Référentiel Statuts séance | /UI/Controls/Referentiels |
+| UC_TypesDocuments | Référentiel Types documents | /UI/Controls/Referentiels |
+| UC_TypesRendezVous | Référentiel Types rendez-vous | /UI/Controls/Referentiels |
+| UC_TypesSeance | Référentiel Types séance **(+ tarif_defaut)** | /UI/Controls/Referentiels |
+| UC_RoleLegal | Référentiel **Rôles légaux** des contacts (10e référentiel, Lot 2) | /UI/Controls/Referentiels |
+| UC_PatientHome | **Liste des patients** (grille, recherche multi-champs, filtre statut de suivi) | /UI/Controls/Patients |
+| UC_PatientFiche | **Fiche patient** plein panneau (Identité, Famille/Contacts, Intervenants, Dossiers) | /UI/Controls/Patients |
 
 ### Interfaces 
 
@@ -856,7 +1121,7 @@ Althea/
 **Implémenté et fonctionnel** :
 
 - Infrastructure : Config locale JSON, chiffrement DPAPI, démarrage bloquant, logs
-- Base de données : `DatabaseManager`, requêtes centralisées (`QueryParametres`, `QueryUtilisateurs`)
+- Base de données : `DatabaseManager`, helpers d'accès partagés (`DbHelper`), requêtes centralisées (`QueryParametres`, `QueryUtilisateurs`, Query* référentiels ×9)
 - Sécurité : Authentification (login / PBKDF2 / verrouillage), changement de mot de passe obligatoire, élévation temporaire de droits
 - Session utilisateur : `UserSession`, `AppRole` (User / SuperUser / Admin)
 - Navigation : `NavigationManager`, `UserControlContext`, `IContextAwareUserControl`, `IContextAwareForm`
@@ -870,13 +1135,28 @@ Althea/
 - **Interface utilisateur personnalisée**
   - DialogChoix : remplacement complet des MessageBox (34 occurrences)
   - UtilsIcons : centralisation des icônes d'état
+- **Éditeurs de texte riche** :
+  - `UC_RichTextEditor` : 30 boutons, impression Win32, exports PDF/Word Syncfusion
+  - `UC_RichTextEditorSimple` : 7 boutons, allégé, ré-embeddable, même double format RTF+TXT
+- **Gestion des référentiels (Lot 0 complet)** :
+  - `UC_ReferentielBase` : classe de base héritable (CRUD, validation, droits, journalisation, hooks)
+  - `UC_ReferentielHome` : hub de navigation (9 tuiles, droits)
+  - 9 référentiels complets : Domaines, Liens patient, Rôles intervenant, Situations familiales, Statuts dossier, Statuts séance, Types documents, Types rendez-vous, Types séance
+  - `UC_TypesSeance` : champ additionnel `tarif_defaut` via hooks dédiés
+  -   - `UC_TypesSeance` : champ additionnel `tarif_defaut` via hooks dédiés
+  - **`UC_RoleLegal` (10e référentiel, Lot 2)** : rôle légal unique des contacts famille (`ref_role_legal`, migration v2.2)
+- **Cœur métier Patients (Lot 1 en cours)** :
+  - Couche métier complète : `Patient`, `PatientListeItem`, `FamilleContact`, `GestionPatients`, `GestionFamilleContacts`
+  - `UC_PatientHome` : liste, recherche multi-champs, filtre statut de suivi, téléphone formaté au rendu
+  - `UC_PatientFiche` : fiche multi-onglets, modes Consultation/Création/Modification, activation progressive des onglets, alerte RTF, pays + téléphone *country-aware*
+  - `ContactEdition` : modale de contact famille avec rôle légal unique et boutons `[+]`
+- **Briques transverses** : `UtilsTelephone` (téléphone/pays), `CheminsPatientHelper` (chemins fichiers), mini-pile de navigation (`NavigationEntry`), hôte modal de référentiel (`ReferentielModalHost`)
 
 **Prévus (non démarrés dans le code principal)** :
 
-- Patients / Dossiers / Séances / Paiements
+- Dossiers / Séances / Paiements
 - Gestion documentaire *(POC réalisé - voir [Docs/Poc/](Docs/Poc/))*
 - Agenda *(POC réalisé - voir [Docs/Poc/](Docs/Poc/))*
-- Référentiels / Domaines
 
 > Voir le détail par module dans la section [Statut des modules](#statut-des-modules) ci-dessous.
 
@@ -893,8 +1173,10 @@ Althea/
 | `AppStartupManager` | ✅ | Démarrage bloquant, config → DB → Home |
 | `ConfigManager` | ✅ | Lecture/écriture config JSON locale (AppData) |
 | `DatabaseManager` | ✅ | Point d'accès unique à MariaDB |
+| `DbHelper` | ✅ | Helpers partagés d'accès aux données (`Lire*` NULL-safe, `Valeur*` vers paramètre SQL) |
 | `QueryParametres` | ✅ | Requêtes CRUD sur `tec_parametres` |
 | `QueryUtilisateurs` | ✅ | Requêtes CRUD sur `sec_utilisateurs` |
+| `Query<X>` ×10 | ✅ | Requêtes SQL des 10 référentiels (SELECT actifs/tous, INSERT, UPDATE, soft/hard delete, unicité, usage) |
 | `GestionLog` | ✅ | Journalisation avec niveaux (Succinct, Rapide, Complet) |
 | `CryptoManagerDPAPI` | ✅ | Chiffrement/déchiffrement DPAPI |
 | `PasswordSecurityHelper` | ✅ | Hachage et vérification PBKDF2-SHA256 |
@@ -906,9 +1188,11 @@ Althea/
 | Module | Statut | Notes |
 | ------ | ------ | ----- |
 | `GestionAuthentification` | ✅ | Auth, changement MDP, élévation, verrouillage |
-| `GestionUtilisateurs` | ✅ | **CRUD complet** : création, modification, reset password, déverrouillage, activation/désactivation, génération mot de passe temporaire |
+| `GestionUtilisateurs` | ✅ | **CRUD complet** : création, modification, reset password, déverrouillage, activation/désactivation |
 | `GestionParametres` | ✅ | CRUD paramètres applicatifs avec contrôle rôle |
-| Gestion patients | 🔜 | Non démarré |
+| `Gestion<X>` référentiels (×10) | ✅ | **9 (Lot 0) + RoleLegal (Lot 2)** : Domaines, LiensPatient, RolesIntervenant, SituationsFamiliales, StatutsDossier, StatutsSeance, TypesDocuments, TypesRendezVous, TypesSeance, RoleLegal |
+| `GestionPatients` | 🟡 | **Lot 1 en cours** : CRUD + validations (NISS, doublon, suppression) |
+| `GestionFamilleContacts` | 🟡 | CRUD des contacts de l'entourage (rôle légal unique) |
 | Gestion dossiers | 🔜 | Non démarré |
 | Gestion séances | 🔜 | Non démarré |
 | Gestion paiements | 🔜 | Non démarré |
@@ -928,10 +1212,28 @@ Althea/
 | `UC_Accueil` | ✅ | Écran d'accueil |
 | `UC_AdminHome` | ✅ | Tableau de bord administration (boutons, élévation) |
 | `UC_Parametres` | ✅ | Gestion des paramètres (liste + détail + CRUD) |
-| `UC_Utilisateurs` | ✅ | **Gestion des utilisateurs complète** : liste, recherche/filtrage multi-critères, création/modification/consultation, actions de maintenance |
-| `UtilisateurEdition` | ✅ | **Form modale d'édition utilisateur** : Création, Modification, Consultation (Admin vs SuperUser) |
-| `UC_RichTextEditor` | ✅ | **Éditeur de texte riche réutilisable** : formatage complet, impression Win32 natif, exports PDF/Word avec Syncfusion |
-| UC patients / dossiers / séances | 🔜 | Non démarrés |
+| `UC_Utilisateurs` | ✅ | **Gestion des utilisateurs complète** : liste, recherche/filtrage, création/modification/consultation, actions |
+| `UtilisateurEdition` | ✅ | **Form modale d'édition utilisateur** : Création, Modification, Consultation |
+| `UC_RichTextEditor` | ✅ | **Éditeur de texte riche complet** : 30 boutons, impression Win32, exports PDF/Word |
+| `UC_RichTextEditorSimple` | ✅ | **Éditeur allégé ré-embeddable** : 7 boutons, double format RTF+TXT, optionnellement contextuel |
+| `UC_ReferentielHome` | ✅ | **Hub des 9 référentiels** (navigation, droits) |
+| `UC_ReferentielBase` | ✅ | **Classe de base héritable** : CRUD, validation, droits, journalisation, hooks |
+| `UC_Domaines` | ✅ | Référentiel Domaines |
+| `UC_LiensPatient` | ✅ | Référentiel Liens patient |
+| `UC_RolesIntervenant` | ✅ | Référentiel Rôles intervenant |
+| `UC_SituationsFamiliales` | ✅ | Référentiel Situations familiales |
+| `UC_StatutsDossier` | ✅ | Référentiel Statuts dossier |
+| `UC_StatutsSeance` | ✅ | Référentiel Statuts séance |
+| `UC_TypesDocuments` | ✅ | Référentiel Types documents |
+| `UC_TypesRendezVous` | ✅ | Référentiel Types rendez-vous |
+| `UC_TypesSeance` | ✅ | Référentiel Types séance **(+ tarif_defaut)** |
+| `UC_TypesSeance` | ✅ | Référentiel Types séance **(+ tarif_defaut)** |
+| `UC_RoleLegal` | ✅ | Référentiel **Rôles légaux** des contacts (Lot 2) |
+| `UC_PatientHome` | ✅ | **Liste des patients** : grille, recherche multi-champs, filtre statut de suivi, téléphone formaté |
+| `UC_PatientFiche` | 🟡 | **Fiche patient** multi-onglets (Identité + Famille/Contacts opérationnels ; Intervenants/Dossiers à venir) |
+| `ContactEdition` | ✅ | **Modale contact famille** (rôle légal unique, téléphone *country-aware*, boutons `[+]`) |
+| `ReferentielModalHost` | ✅ | Hôte modal générique pour ajout de valeur référentiel en contexte |
+| UC dossiers / séances | 🔜 | Non démarrés |
 
 ### Utilitaires
 
@@ -945,6 +1247,8 @@ Althea/
 | `UtilsControls` | ✅ | Helpers contrôles WinForms divers |
 | `UtilsIcons` | ✅ | **Centralisation des icônes d'état** (OK, OFF, Lock, No) avec support multi-tailles |
 | `RichTextEditorHelper` | ✅ | **Helper centralisé pour édition texte riche** (formatage, impression Win32, exports PDF/Word) |
+| `UtilsTelephone` | ✅ | **Téléphone/pays** : normalisation E.164, formatage, validation par pays (BE, FR, LU, DE, NL) |
+| `CheminsPatientHelper` | ✅ | **Chemins fichiers patients déterministes** (depuis `PATH_GENERAL`) |
 
 ---
 
@@ -966,6 +1270,7 @@ Althea/
 
 ### Standards et règles
 
+- [ARCHITECTURE_DECISIONS.md](Docs/Rules/ARCHITECTURE_DECISIONS.md) : Documentation des décisions d'architecture pour le projet Althéa, avec les choix techniques et les justifications.
 - [Standards-Commentaires.md](Docs/Rules/Standards-Commentaires.md) : Documentation des standards de commentaires pour le code Althéa, avec les bonnes pratiques à suivre.
 - [Rules.md](Docs/Rules/Rules.md) : Règles de développement et de gestion du projet, avec les bonnes pratiques à suivre.
 - [Reference_UI_Guide_Utilisation.md](Docs/Rules/Reference_UI_Guide_Utilisation.md) : Guide d'utilisation des contrôles UI personnalisés.
@@ -1006,7 +1311,7 @@ Althea/
 | UC_RichTextEditor | [PLAN_TESTS_UC_RICHTEXTEDITOR.md](Docs/Tests/PLAN_TESTS_UC_RICHTEXTEDITOR.md) |
 | DialogChoix | [PLAN_TESTS_DIALOGCHOIX.md](Docs/Tests/PLAN_TESTS_DIALOGCHOIX.md) |
 | Home & Navigation | [PLAN_TESTS_HOME_NAVIGATION.md](Docs/Tests/PLAN_TESTS_HOME_NAVIGATION.md) |
-
+| Référentiels | [PLAN_TESTS_REFERENTIELS.md](Docs/Tests/PLAN_TESTS_REFERENTIELS.md) |
 
 ## Objectif du projet
 

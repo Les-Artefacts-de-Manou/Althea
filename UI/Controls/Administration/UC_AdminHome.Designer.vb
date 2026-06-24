@@ -31,12 +31,11 @@ Partial Class UC_AdminHome
         btnLogs = New Button()
         btnSauvegardes = New Button()
         btnConnexionDatabase = New Button()
-        pnlElevation = New Panel()
-        btnRetourRoleBase = New Button()
-        lblElevation = New Label()
         pnlRoleCourant = New Panel()
         btnEleverAcces = New Button()
         lblRoleCourant = New Label()
+        btnRetourRoleBase = New Button()
+        lblElevation = New Label()
         pnlTop = New Panel()
         lblTop = New Label()
         pnlTitre = New Panel()
@@ -45,7 +44,6 @@ Partial Class UC_AdminHome
         pnlForm.SuspendLayout()
         pnlCenter.SuspendLayout()
         tblMenu.SuspendLayout()
-        pnlElevation.SuspendLayout()
         pnlRoleCourant.SuspendLayout()
         pnlTop.SuspendLayout()
         pnlTitre.SuspendLayout()
@@ -69,7 +67,6 @@ Partial Class UC_AdminHome
         ' 
         pnlCenter.BackColor = Color.Transparent
         pnlCenter.Controls.Add(tblMenu)
-        pnlCenter.Controls.Add(pnlElevation)
         pnlCenter.Controls.Add(pnlRoleCourant)
         pnlCenter.Controls.Add(pnlTop)
         pnlCenter.Dock = DockStyle.Fill
@@ -90,13 +87,13 @@ Partial Class UC_AdminHome
         tblMenu.Controls.Add(btnSauvegardes, 0, 1)
         tblMenu.Controls.Add(btnConnexionDatabase, 1, 1)
         tblMenu.Dock = DockStyle.Fill
-        tblMenu.Location = New Point(16, 142)
+        tblMenu.Location = New Point(16, 146)
         tblMenu.Name = "tblMenu"
         tblMenu.RowCount = 3
         tblMenu.RowStyles.Add(New RowStyle(SizeType.Percent, 33.3333321F))
         tblMenu.RowStyles.Add(New RowStyle(SizeType.Percent, 33.3333321F))
         tblMenu.RowStyles.Add(New RowStyle(SizeType.Percent, 33.3333321F))
-        tblMenu.Size = New Size(933, 537)
+        tblMenu.Size = New Size(933, 533)
         tblMenu.TabIndex = 10
         ' 
         ' btnParametres
@@ -109,7 +106,7 @@ Partial Class UC_AdminHome
         btnParametres.Font = New Font("Calibri", 12F, FontStyle.Bold)
         btnParametres.ForeColor = Color.White
         btnParametres.Image = CType(resources.GetObject("btnParametres.Image"), Image)
-        btnParametres.Location = New Point(115, 44)
+        btnParametres.Location = New Point(115, 43)
         btnParametres.Name = "btnParametres"
         btnParametres.Size = New Size(235, 90)
         btnParametres.TabIndex = 9
@@ -129,7 +126,7 @@ Partial Class UC_AdminHome
         btnUtilisateurs.Font = New Font("Calibri", 12F, FontStyle.Bold)
         btnUtilisateurs.ForeColor = Color.White
         btnUtilisateurs.Image = CType(resources.GetObject("btnUtilisateurs.Image"), Image)
-        btnUtilisateurs.Location = New Point(582, 44)
+        btnUtilisateurs.Location = New Point(582, 43)
         btnUtilisateurs.Name = "btnUtilisateurs"
         btnUtilisateurs.Size = New Size(235, 90)
         btnUtilisateurs.TabIndex = 12
@@ -148,7 +145,7 @@ Partial Class UC_AdminHome
         btnLogs.Font = New Font("Calibri", 12F, FontStyle.Bold)
         btnLogs.ForeColor = Color.White
         btnLogs.Image = CType(resources.GetObject("btnLogs.Image"), Image)
-        btnLogs.Location = New Point(115, 402)
+        btnLogs.Location = New Point(115, 398)
         btnLogs.Name = "btnLogs"
         btnLogs.Size = New Size(235, 90)
         btnLogs.TabIndex = 10
@@ -167,7 +164,7 @@ Partial Class UC_AdminHome
         btnSauvegardes.Font = New Font("Calibri", 12F, FontStyle.Bold)
         btnSauvegardes.ForeColor = Color.White
         btnSauvegardes.Image = CType(resources.GetObject("btnSauvegardes.Image"), Image)
-        btnSauvegardes.Location = New Point(115, 223)
+        btnSauvegardes.Location = New Point(115, 220)
         btnSauvegardes.Name = "btnSauvegardes"
         btnSauvegardes.Size = New Size(235, 90)
         btnSauvegardes.TabIndex = 13
@@ -186,7 +183,7 @@ Partial Class UC_AdminHome
         btnConnexionDatabase.Font = New Font("Calibri", 12F, FontStyle.Bold)
         btnConnexionDatabase.ForeColor = Color.White
         btnConnexionDatabase.Image = CType(resources.GetObject("btnConnexionDatabase.Image"), Image)
-        btnConnexionDatabase.Location = New Point(582, 223)
+        btnConnexionDatabase.Location = New Point(582, 220)
         btnConnexionDatabase.Name = "btnConnexionDatabase"
         btnConnexionDatabase.Size = New Size(235, 90)
         btnConnexionDatabase.TabIndex = 8
@@ -195,59 +192,19 @@ Partial Class UC_AdminHome
         btnConnexionDatabase.TextImageRelation = TextImageRelation.ImageBeforeText
         btnConnexionDatabase.UseVisualStyleBackColor = False
         ' 
-        ' pnlElevation
-        ' 
-        pnlElevation.BackColor = Color.Transparent
-        pnlElevation.Controls.Add(btnRetourRoleBase)
-        pnlElevation.Controls.Add(lblElevation)
-        pnlElevation.Dock = DockStyle.Top
-        pnlElevation.Font = New Font("Calibri", 11F)
-        pnlElevation.Location = New Point(16, 100)
-        pnlElevation.Name = "pnlElevation"
-        pnlElevation.Padding = New Padding(8)
-        pnlElevation.Size = New Size(933, 42)
-        pnlElevation.TabIndex = 7
-        ' 
-        ' btnRetourRoleBase
-        ' 
-        btnRetourRoleBase.BackColor = Color.FromArgb(CByte(122), CByte(155), CByte(135))
-        btnRetourRoleBase.BackgroundImageLayout = ImageLayout.Center
-        btnRetourRoleBase.FlatAppearance.BorderSize = 0
-        btnRetourRoleBase.FlatStyle = FlatStyle.Flat
-        btnRetourRoleBase.ForeColor = Color.White
-        btnRetourRoleBase.Image = CType(resources.GetObject("btnRetourRoleBase.Image"), Image)
-        btnRetourRoleBase.ImageAlign = ContentAlignment.MiddleLeft
-        btnRetourRoleBase.Location = New Point(636, 0)
-        btnRetourRoleBase.Name = "btnRetourRoleBase"
-        btnRetourRoleBase.Size = New Size(181, 37)
-        btnRetourRoleBase.TabIndex = 9
-        btnRetourRoleBase.Tag = "retourRole_normal"
-        btnRetourRoleBase.Text = "Retour rôle de base"
-        btnRetourRoleBase.TextImageRelation = TextImageRelation.ImageBeforeText
-        btnRetourRoleBase.UseVisualStyleBackColor = False
-        ' 
-        ' lblElevation
-        ' 
-        lblElevation.Font = New Font("Calibri", 12F, FontStyle.Bold)
-        lblElevation.ForeColor = Color.FromArgb(CByte(11), CByte(95), CByte(125))
-        lblElevation.Location = New Point(8, 8)
-        lblElevation.Name = "lblElevation"
-        lblElevation.Size = New Size(465, 26)
-        lblElevation.TabIndex = 1
-        lblElevation.Text = "Elevation"
-        lblElevation.TextAlign = ContentAlignment.MiddleCenter
-        ' 
         ' pnlRoleCourant
         ' 
-        pnlRoleCourant.BackColor = Color.Transparent
+        pnlRoleCourant.BackColor = Color.FromArgb(CByte(235), CByte(226), CByte(217))
         pnlRoleCourant.Controls.Add(btnEleverAcces)
         pnlRoleCourant.Controls.Add(lblRoleCourant)
+        pnlRoleCourant.Controls.Add(btnRetourRoleBase)
+        pnlRoleCourant.Controls.Add(lblElevation)
         pnlRoleCourant.Dock = DockStyle.Top
         pnlRoleCourant.Font = New Font("Calibri", 11F)
         pnlRoleCourant.Location = New Point(16, 58)
         pnlRoleCourant.Name = "pnlRoleCourant"
         pnlRoleCourant.Padding = New Padding(8)
-        pnlRoleCourant.Size = New Size(933, 42)
+        pnlRoleCourant.Size = New Size(933, 88)
         pnlRoleCourant.TabIndex = 6
         ' 
         ' btnEleverAcces
@@ -259,10 +216,10 @@ Partial Class UC_AdminHome
         btnEleverAcces.ForeColor = Color.White
         btnEleverAcces.Image = CType(resources.GetObject("btnEleverAcces.Image"), Image)
         btnEleverAcces.ImageAlign = ContentAlignment.MiddleLeft
-        btnEleverAcces.Location = New Point(636, 0)
+        btnEleverAcces.Location = New Point(471, 5)
         btnEleverAcces.Name = "btnEleverAcces"
         btnEleverAcces.Size = New Size(181, 37)
-        btnEleverAcces.TabIndex = 8
+        btnEleverAcces.TabIndex = 12
         btnEleverAcces.Tag = "eleverAcces_normal"
         btnEleverAcces.Text = "Elever Accès"
         btnEleverAcces.TextImageRelation = TextImageRelation.ImageBeforeText
@@ -271,13 +228,42 @@ Partial Class UC_AdminHome
         ' lblRoleCourant
         ' 
         lblRoleCourant.Font = New Font("Calibri", 12F, FontStyle.Bold)
-        lblRoleCourant.ForeColor = Color.FromArgb(CByte(11), CByte(95), CByte(125))
-        lblRoleCourant.Location = New Point(8, 8)
+        lblRoleCourant.ForeColor = Color.FromArgb(CByte(74), CByte(74), CByte(74))
+        lblRoleCourant.Location = New Point(280, 52)
         lblRoleCourant.Name = "lblRoleCourant"
-        lblRoleCourant.Size = New Size(465, 26)
-        lblRoleCourant.TabIndex = 0
+        lblRoleCourant.Size = New Size(185, 26)
+        lblRoleCourant.TabIndex = 10
         lblRoleCourant.Text = "Rôle courant"
-        lblRoleCourant.TextAlign = ContentAlignment.MiddleCenter
+        lblRoleCourant.TextAlign = ContentAlignment.MiddleRight
+        ' 
+        ' btnRetourRoleBase
+        ' 
+        btnRetourRoleBase.BackColor = Color.FromArgb(CByte(122), CByte(155), CByte(135))
+        btnRetourRoleBase.BackgroundImageLayout = ImageLayout.Center
+        btnRetourRoleBase.FlatAppearance.BorderSize = 0
+        btnRetourRoleBase.FlatStyle = FlatStyle.Flat
+        btnRetourRoleBase.ForeColor = Color.White
+        btnRetourRoleBase.Image = CType(resources.GetObject("btnRetourRoleBase.Image"), Image)
+        btnRetourRoleBase.ImageAlign = ContentAlignment.MiddleLeft
+        btnRetourRoleBase.Location = New Point(471, 45)
+        btnRetourRoleBase.Name = "btnRetourRoleBase"
+        btnRetourRoleBase.Size = New Size(181, 37)
+        btnRetourRoleBase.TabIndex = 13
+        btnRetourRoleBase.Tag = "retourRole_normal"
+        btnRetourRoleBase.Text = "Retour rôle de base"
+        btnRetourRoleBase.TextImageRelation = TextImageRelation.ImageBeforeText
+        btnRetourRoleBase.UseVisualStyleBackColor = False
+        ' 
+        ' lblElevation
+        ' 
+        lblElevation.Font = New Font("Calibri", 12F, FontStyle.Bold)
+        lblElevation.ForeColor = Color.FromArgb(CByte(74), CByte(74), CByte(74))
+        lblElevation.Location = New Point(280, 16)
+        lblElevation.Name = "lblElevation"
+        lblElevation.Size = New Size(185, 26)
+        lblElevation.TabIndex = 11
+        lblElevation.Text = "Elevation"
+        lblElevation.TextAlign = ContentAlignment.MiddleRight
         ' 
         ' pnlTop
         ' 
@@ -294,7 +280,7 @@ Partial Class UC_AdminHome
         ' lblTop
         ' 
         lblTop.Dock = DockStyle.Fill
-        lblTop.Font = New Font("Calibri", 11F)
+        lblTop.Font = New Font("Calibri", 14F, FontStyle.Bold)
         lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
         lblTop.Location = New Point(8, 8)
         lblTop.Name = "lblTop"
@@ -323,9 +309,9 @@ Partial Class UC_AdminHome
         lblTitreForm.Location = New Point(80, 3)
         lblTitreForm.Name = "lblTitreForm"
         lblTitreForm.Padding = New Padding(0, 4, 8, 4)
-        lblTitreForm.Size = New Size(172, 37)
+        lblTitreForm.Size = New Size(218, 37)
         lblTitreForm.TabIndex = 1
-        lblTitreForm.Text = "Administration"
+        lblTitreForm.Text = "Hub Administration"
         ' 
         ' picTitre
         ' 
@@ -350,7 +336,6 @@ Partial Class UC_AdminHome
         pnlForm.ResumeLayout(False)
         pnlCenter.ResumeLayout(False)
         tblMenu.ResumeLayout(False)
-        pnlElevation.ResumeLayout(False)
         pnlRoleCourant.ResumeLayout(False)
         pnlTop.ResumeLayout(False)
         pnlTitre.ResumeLayout(False)
@@ -372,13 +357,12 @@ Partial Class UC_AdminHome
     Friend WithEvents btnLogs As Button
     Friend WithEvents btnSauvegardes As Button
     Friend WithEvents btnConnexionDatabase As Button
-    Friend WithEvents pnlElevation As Panel
-    Friend WithEvents lblElevation As Label
-    Friend WithEvents pnlRoleCourant As Panel
-    Friend WithEvents lblRoleCourant As Label
     Friend WithEvents pnlTop As Panel
     Friend WithEvents lblTop As Label
+    Friend WithEvents pnlRoleCourant As Panel
     Friend WithEvents btnEleverAcces As Button
+    Friend WithEvents lblRoleCourant As Label
     Friend WithEvents btnRetourRoleBase As Button
+    Friend WithEvents lblElevation As Label
 
 End Class

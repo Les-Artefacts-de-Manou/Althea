@@ -1,33 +1,33 @@
-' -------------------------------------------------------------------------------------------------
+Ôªø' -------------------------------------------------------------------------------------------------
 ' Classe     : NavigationManager
-' Projet     : AlthÈa
+' Projet     : Alth√©a
 ' Version    : V1.1
 ' Date       : 01/05/2026
-' Auteur     : JoÎlle (Manou) / Projet AlthÈa
+' Auteur     : Jo√´lle (Manou) / Projet Alth√©a
 '
-' RÙle       :
-' Gestionnaire centralisÈ de la navigation entre les UserControls dans la Form principale Home.
-' GËre le chargement dynamique des UserControls dans pnlContent avec injection automatique
-' du contexte UI partagÈ (UserControlContext) pour les UserControls implÈmentant IContextAwareUserControl.
+' R√¥le       :
+' Gestionnaire centralis√© de la navigation entre les UserControls dans la Form principale Home.
+' G√®re le chargement dynamique des UserControls dans pnlContent avec injection automatique
+' du contexte UI partag√© (UserControlContext) pour les UserControls impl√©mentant IContextAwareUserControl.
 '
-' ResponsabilitÈs :
+' Responsabilit√©s :
 ' - Charger dynamiquement un UserControl dans le Panel central (pnlContent)
-' - DÈcharger et libÈrer proprement les UserControls prÈcÈdents (Dispose)
+' - D√©charger et lib√©rer proprement les UserControls pr√©c√©dents (Dispose)
 ' - Injecter automatiquement le contexte UI (_context) via IContextAwareUserControl.SetContext()
-' - Garantir que le UserControl chargÈ occupe tout l''espace disponible (Dock = Fill)
-' - Assurer une navigation cohÈrente et sans fuite mÈmoire
+' - Garantir que le UserControl charg√© occupe tout l''espace disponible (Dock = Fill)
+' - Assurer une navigation coh√©rente et sans fuite m√©moire
 '
 ' Remarques  :
-' - Classe utilitaire instanciÈe dans Home.Load aprËs authentification rÈussie
-' - UtilisÈe exclusivement par Home via NavigateTo() et ses dÈrivÈes (NavigateToAccueil, NavigateToAdminView)
-' - Ne contient aucune logique mÈtier ni accËs base de donnÈes
-' - L''injection du contexte se fait AVANT l''ajout au Panel pour Èviter les effets de bord
-' - Tous les anciens contrÙles sont explicitement Dispose() avant Clear() pour libÈrer les ressources
+' - Classe utilitaire instanci√©e dans Home.Load apr√®s authentification r√©ussie
+' - Utilis√©e exclusivement par Home via NavigateTo() et ses d√©riv√©es (NavigateToAccueil, NavigateToAdminView)
+' - Ne contient aucune logique m√©tier ni acc√®s base de donn√©es
+' - L''injection du contexte se fait AVANT l''ajout au Panel pour √©viter les effets de bord
+' - Tous les anciens contr√¥les sont explicitement Dispose() avant Clear() pour lib√©rer les ressources
 ' - Le Panel cible (_pnlContent) et le contexte (_context) sont ReadOnly et fournis au constructeur
 '
-' DÈpendances :
+' D√©pendances :
 ' - System.Windows.Forms (Panel, UserControl, Control, DockStyle)
-' - UserControlContext (contexte UI partagÈ)
+' - UserControlContext (contexte UI partag√©)
 ' - IContextAwareUserControl (interface pour injection du contexte)
 '
 ' Imports    :
@@ -39,13 +39,17 @@ Option Explicit On
 
 Public Class NavigationManager
 
-#Region "Variables privÈes"
+#Region "Variables priv√©es"
 
-    ' Panel central de Home (pnlContent) dans lequel les UserControls sont chargÈs dynamiquement.
+    ' Panel central de Home (pnlContent) dans lequel les UserControls sont charg√©s dynamiquement.
     Private ReadOnly _pnlContent As Panel
 
-    ' Contexte UI partagÈ injectÈ automatiquement aux UserControls implÈmentant IContextAwareUserControl.
+    ' Contexte UI partag√© inject√© automatiquement aux UserControls impl√©mentant IContextAwareUserControl.
     Private ReadOnly _context As UserControlContext
+
+    ' Historique de navigation (mini-pile Push/Pop, D-Q15) : chaque entr√©e sait recr√©er sa vue
+    ' et porte le contexte + le dernier filtre √† restaurer lors d'un retour en arri√®re.
+    Private ReadOnly _historique As New Stack(Of NavigationEntry)
 
 #End Region
 
@@ -56,18 +60,18 @@ Public Class NavigationManager
     ' Version      : V1.1.0
     ' Date         : 01/05/2026
     '
-    ' RÙle         :
-    ' Initialise le NavigationManager avec le Panel central et le contexte UI partagÈ.
+    ' R√¥le         :
+    ' Initialise le NavigationManager avec le Panel central et le contexte UI partag√©.
     '
-    ' ParamËtres   :
-    ' - pnlContent : Panel central de Home (pnlContent) o˘ les UserControls seront chargÈs (Panel)
-    ' - context    : Contexte UI partagÈ ‡ injecter dans les UserControls (UserControlContext)
+    ' Param√®tres   :
+    ' - pnlContent : Panel central de Home (pnlContent) o√π les UserControls seront charg√©s (Panel)
+    ' - context    : Contexte UI partag√© √† injecter dans les UserControls (UserControlContext)
     '
     ' Remarques    :
-    ' - AppelÈ dans Home.Load aprËs crÈation du contexte UI (_uiContext)
-    ' - Les deux paramËtres sont obligatoires et stockÈs dans des variables ReadOnly
-    ' - Aucune validation : suppose que les paramËtres fournis sont valides (responsabilitÈ de Home)
-    ' - L'instance de NavigationManager est crÈÈe une seule fois et rÈutilisÈe pendant toute la durÈe de vie de Home
+    ' - Appel√© dans Home.Load apr√®s cr√©ation du contexte UI (_uiContext)
+    ' - Les deux param√®tres sont obligatoires et stock√©s dans des variables ReadOnly
+    ' - Aucune validation : suppose que les param√®tres fournis sont valides (responsabilit√© de Home)
+    ' - L'instance de NavigationManager est cr√©√©e une seule fois et r√©utilis√©e pendant toute la dur√©e de vie de Home
     '
     ' Exceptions   :
     ' - Aucune
@@ -82,32 +86,32 @@ Public Class NavigationManager
 #Region "Navigation"
 
     ' -------------------------------------------------------------------------------------------------
-    ' ProcÈdure  : Navigate
+    ' Proc√©dure  : Navigate
     ' Version    : V1.0.0
     ' Date       : 26/04/2026
     '
-    ' RÙle       :
+    ' R√¥le       :
     ' Charge dynamiquement un UserControl dans le Panel central (_pnlContent) avec injection
-    ' automatique du contexte UI pour les UserControls implÈmentant IContextAwareUserControl.
+    ' automatique du contexte UI pour les UserControls impl√©mentant IContextAwareUserControl.
     '
-    ' ParamËtres :
-    ' - view : UserControl ‡ charger dans le Panel central (UserControl)
+    ' Param√®tres :
+    ' - view : UserControl √† charger dans le Panel central (UserControl)
     '
     ' Remarques  :
-    ' - SÈquence de navigation :
-    '   1. VÈrification : si view est Nothing, retourne sans action
-    '   2. Injection du contexte : TryCast vers IContextAwareUserControl, appel SetContext(_context) si implÈmentÈ
-    '   3. LibÈration des anciens contrÙles : Dispose() explicite de tous les contrÙles enfants de _pnlContent
+    ' - S√©quence de navigation :
+    '   1. V√©rification : si view est Nothing, retourne sans action
+    '   2. Injection du contexte : TryCast vers IContextAwareUserControl, appel SetContext(_context) si impl√©ment√©
+    '   3. Lib√©ration des anciens contr√¥les : Dispose() explicite de tous les contr√¥les enfants de _pnlContent
     '   4. Nettoyage : Controls.Clear() pour vider la collection
-    '   5. Configuration du nouveau contrÙle : Dock = Fill pour occuper tout l''espace
+    '   5. Configuration du nouveau contr√¥le : Dock = Fill pour occuper tout l''espace
     '   6. Ajout au Panel : Controls.Add(view)
-    ' - L''injection du contexte se fait AVANT l''ajout au Panel pour Èviter les ÈvÈnements Load sans contexte
-    ' - Dispose() explicite prÈvient les fuites mÈmoire en libÈrant les ressources des UserControls prÈcÈdents
-    ' - Un seul UserControl actif ‡ la fois dans _pnlContent (navigation exclusive)
-    ' - AppelÈe par Home.NavigateTo() qui gËre Ègalement la synchronisation menu/contexte/statut
+    ' - L''injection du contexte se fait AVANT l''ajout au Panel pour √©viter les √©v√©nements Load sans contexte
+    ' - Dispose() explicite pr√©vient les fuites m√©moire en lib√©rant les ressources des UserControls pr√©c√©dents
+    ' - Un seul UserControl actif √† la fois dans _pnlContent (navigation exclusive)
+    ' - Appel√©e par Home.NavigateTo() qui g√®re √©galement la synchronisation menu/contexte/statut
     '
     ' Exceptions :
-    ' - Aucune gestion explicite (erreurs propagÈes ‡ Home)
+    ' - Aucune gestion explicite (erreurs propag√©es √† Home)
     ' -------------------------------------------------------------------------------------------------
     Public Sub Navigate(view As UserControl)
 
@@ -123,7 +127,7 @@ Public Class NavigationManager
             contextAwareControl.SetContext(_context)
         End If
 
-        ' LibÈration des anciens contrÙles
+        ' Lib√©ration des anciens contr√¥les
         For Each ctrl As Control In _pnlContent.Controls
 
             ctrl.Dispose()
@@ -132,10 +136,114 @@ Public Class NavigationManager
 
         _pnlContent.Controls.Clear()
 
-        ' Chargement du nouveau contrÙle
+        ' Chargement du nouveau contr√¥le
         view.Dock = DockStyle.Fill
         _pnlContent.Controls.Add(view)
 
+    End Sub
+
+#End Region
+
+#Region "Historique (mini-pile de navigation, D-Q15)"
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Propri√©t√©  : CanNavigateBack
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' Type       : Boolean (ReadOnly)
+    '
+    ' R√¥le       :
+    ' Indique s'il existe une √©tape pr√©c√©dente vers laquelle revenir.
+    '
+    ' Retour     :
+    ' - True : si l'historique contient au moins une √©tape ant√©rieure (Pop possible)
+    ' - False : si l'historique est vide (on est sur l'√©cran d'entr√©e)
+    '
+    ' Remarques  :
+    ' - Utilis√©e par Home pour activer/d√©sactiver un √©ventuel bouton "Retour"
+    ' -------------------------------------------------------------------------------------------------
+    Public ReadOnly Property CanNavigateBack As Boolean
+        Get
+            Return _historique.Count > 0
+        End Get
+    End Property
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Proc√©dure  : NavigateAndPush
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' R√¥le       :
+    ' Empile l'√©tape COURANTE (pour pouvoir y revenir) puis navigue vers une nouvelle vue.
+    '
+    ' Param√®tres :
+    ' - nouvelleVue   : UserControl d√©j√† instanci√© √† charger imm√©diatement (UserControl)
+    ' - etapeCourante : √âtape d√©crivant l'√©cran actuel (fabrique + menu + contexte + filtre) √†
+    '                   empiler pour un retour ult√©rieur (NavigationEntry)
+    '
+    ' Remarques  :
+    ' - etapeCourante.CreerVue doit recr√©er l'√©cran courant √Ä L'IDENTIQUE (filtre restaur√© par closure)
+    '   car la vue courante est lib√©r√©e (Dispose) lors du chargement de nouvelleVue
+    ' - Si etapeCourante est Nothing, la navigation a lieu sans empilement (√©quivaut √† Navigate)
+    ' - La nouvelle vue n'est PAS empil√©e ici : elle le sera lors de la prochaine NavigateAndPush
+    ' -------------------------------------------------------------------------------------------------
+    Public Sub NavigateAndPush(nouvelleVue As UserControl, etapeCourante As NavigationEntry)
+
+        If etapeCourante IsNot Nothing Then
+            _historique.Push(etapeCourante)
+        End If
+
+        Navigate(nouvelleVue)
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : NavigateBack
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' R√¥le       :
+    ' D√©pile l'√©tape pr√©c√©dente, recr√©e sa vue et la charge, puis retourne l'√©tape restaur√©e.
+    '
+    ' Retour     :
+    ' - NavigationEntry : l'√©tape restaur√©e (pour que Home res√©lectionne le menu et le contexte),
+    '                     ou Nothing si l'historique est vide
+    '
+    ' Remarques  :
+    ' - La vue est RECR√â√âE via la fabrique (CreerVue) car l'instance d'origine a √©t√© lib√©r√©e
+    ' - Home est responsable de restaurer le menu s√©lectionn√© et le contexte √† partir de l'√©tape rendue
+    ' - Ne l√®ve pas d'exception si l'historique est vide (retourne Nothing)
+    ' -------------------------------------------------------------------------------------------------
+    Public Function NavigateBack() As NavigationEntry
+
+        If _historique.Count = 0 Then
+            Return Nothing
+        End If
+
+        Dim etapePrecedente As NavigationEntry = _historique.Pop()
+
+        Dim vue As UserControl = etapePrecedente.CreerVue.Invoke()
+        Navigate(vue)
+
+        Return etapePrecedente
+
+    End Function
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Proc√©dure  : ClearHistory
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' R√¥le       :
+    ' Vide l'historique de navigation (r√©initialise la mini-pile).
+    '
+    ' Remarques  :
+    ' - √Ä appeler lors d'une navigation "racine" (clic sur un bouton du menu principal) pour repartir
+    '   d'un historique propre et √©viter d'accumuler des cha√Ænes de retour incoh√©rentes
+    ' -------------------------------------------------------------------------------------------------
+    Public Sub ClearHistory()
+        _historique.Clear()
     End Sub
 
 #End Region

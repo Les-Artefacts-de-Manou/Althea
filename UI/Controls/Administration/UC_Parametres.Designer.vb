@@ -33,10 +33,10 @@ Partial Class UC_Parametres
         btnModifier = New Button()
         pnlTop = New Panel()
         chkAfficherInactifs = New CheckBox()
-        lblTop = New Label()
         pnlTitre = New Panel()
         lblTitreForm = New Label()
         picTitre = New PictureBox()
+        lblTop = New Label()
         pnlForm.SuspendLayout()
         pnlCenter.SuspendLayout()
         pnlActions.SuspendLayout()
@@ -83,6 +83,7 @@ Partial Class UC_Parametres
         ' 
         ' pnlActions
         ' 
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
         pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
         pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.Fixed3D
@@ -178,7 +179,6 @@ Partial Class UC_Parametres
         ' 
         pnlTop.BackColor = Color.Transparent
         pnlTop.Controls.Add(chkAfficherInactifs)
-        pnlTop.Controls.Add(lblTop)
         pnlTop.Dock = DockStyle.Top
         pnlTop.Font = New Font("Calibri", 11F)
         pnlTop.Location = New Point(16, 16)
@@ -198,19 +198,10 @@ Partial Class UC_Parametres
         chkAfficherInactifs.Text = "Afficher les paramètres désactivés"
         chkAfficherInactifs.UseVisualStyleBackColor = True
         ' 
-        ' lblTop
-        ' 
-        lblTop.Font = New Font("Calibri", 11F)
-        lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
-        lblTop.Location = New Point(8, 8)
-        lblTop.Name = "lblTop"
-        lblTop.Size = New Size(500, 26)
-        lblTop.TabIndex = 0
-        lblTop.Text = "Gestion des paramètres applicatifs : chemins, stockage, options"
-        ' 
         ' pnlTitre
         ' 
         pnlTitre.BackColor = Color.Transparent
+        pnlTitre.Controls.Add(lblTop)
         pnlTitre.Controls.Add(lblTitreForm)
         pnlTitre.Controls.Add(picTitre)
         pnlTitre.Dock = DockStyle.Top
@@ -226,7 +217,7 @@ Partial Class UC_Parametres
         lblTitreForm.BackColor = Color.Transparent
         lblTitreForm.Font = New Font("Calibri", 18F, FontStyle.Bold)
         lblTitreForm.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
-        lblTitreForm.Location = New Point(80, 3)
+        lblTitreForm.Location = New Point(71, 3)
         lblTitreForm.Name = "lblTitreForm"
         lblTitreForm.Padding = New Padding(0, 4, 8, 4)
         lblTitreForm.Size = New Size(137, 37)
@@ -242,6 +233,16 @@ Partial Class UC_Parametres
         picTitre.Size = New Size(60, 52)
         picTitre.TabIndex = 2
         picTitre.TabStop = False
+        ' 
+        ' lblTop
+        ' 
+        lblTop.Font = New Font("Calibri", 12F)
+        lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
+        lblTop.Location = New Point(232, 16)
+        lblTop.Name = "lblTop"
+        lblTop.Size = New Size(500, 26)
+        lblTop.TabIndex = 3
+        lblTop.Text = "Gestion des paramètres applicatifs : chemins, stockage, options"
         ' 
         ' UC_Parametres
         ' 
@@ -271,7 +272,6 @@ Partial Class UC_Parametres
     Friend WithEvents lblTitreForm As Label
     Friend WithEvents picTitre As PictureBox
     Friend WithEvents pnlTop As Panel
-    Friend WithEvents lblTop As Label
     Friend WithEvents pnlActions As Panel
     Friend WithEvents btnModifier As Button
     Friend WithEvents tabParametres As TabControl
@@ -279,5 +279,6 @@ Partial Class UC_Parametres
     Friend WithEvents btnEnregistrer As Button
     Friend WithEvents btnNouveau As Button
     Friend WithEvents chkAfficherInactifs As CheckBox
+    Friend WithEvents lblTop As Label
 
 End Class

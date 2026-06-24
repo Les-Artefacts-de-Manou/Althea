@@ -138,6 +138,49 @@ Public Module GestionParametres
 
     End Function
 
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : GetValeurParametre
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' Rôle       :
+    ' Retourne la valeur d'un paramètre actif identifié par sa clé (accès programmatique direct).
+    '
+    ' Paramètres :
+    ' - cle : Clé unique du paramètre à lire (cle_parametre, ex : "PATH_GENERAL")
+    '
+    ' Retour     :
+    ' - String : Valeur du paramètre, ou Nothing si la clé est introuvable ou le paramètre inactif
+    '
+    ' Remarques  :
+    ' - Utilise QueryParametres.SelectValeurParametreByCle (filtre actif = 1)
+    ' - Lecture scalaire (ExecuteScalar), sans filtrage par mode d'accès
+    ' - Destiné aux accès techniques (ex : racine de stockage des documents patients)
+    ' -------------------------------------------------------------------------------------------------
+    Public Function GetValeurParametre(cle As String) As String
+
+        If String.IsNullOrWhiteSpace(cle) Then
+            Return Nothing
+        End If
+
+        Using conn = DatabaseManager.OpenConnection()
+            Using cmd As New MySqlCommand(QueryParametres.SelectValeurParametreByCle, conn)
+
+                cmd.Parameters.AddWithValue("@cle", cle)
+
+                Dim resultat As Object = cmd.ExecuteScalar()
+
+                If resultat Is Nothing OrElse Convert.IsDBNull(resultat) Then
+                    Return Nothing
+                End If
+
+                Return resultat.ToString()
+
+            End Using
+        End Using
+
+    End Function
+
 #End Region
 
 #Region "Ecriture"

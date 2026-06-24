@@ -269,6 +269,9 @@ Public Module UITheme
     Public Const AssetsStandardButton48Path As String =
         "Assets\Boutons_ico_48"
 
+    Public Const AssetsStandardButtonDiversPath As String =
+        "Assets\ico_divers"
+
     Public Const AssetsHomeButtonPath As String =
         "Assets\Boutons_Home"
 

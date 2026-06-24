@@ -155,6 +155,40 @@ AND id_parametre <> @id;
         End Get
     End Property
 
+    ' -------------------------------------------------------------------------------------------------
+    ' Propriété  : SelectValeurParametreByCle
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' Type       : String (ReadOnly)
+    '
+    ' Description : Requête SQL pour lire la valeur d'un paramètre actif identifié par sa clé
+    '
+    ' Rôle       :
+    ' Retourne la valeur (valeur_parametre) du paramètre actif correspondant à la clé fournie.
+    '
+    ' Paramètres SQL :
+    ' - @cle : Clé unique du paramètre à lire (cle_parametre)
+    '
+    ' Utilisé par :
+    ' - GestionParametres.GetValeurParametre
+    '
+    ' Remarques  :
+    ' - Filtre sur actif = 1 (un paramètre désactivé est considéré comme absent)
+    ' - Retourne une seule valeur scalaire (ExecuteScalar), Nothing si la clé n'existe pas
+    ' - Utilisé pour l'accès programmatique aux paramètres (ex : racine de stockage documents)
+    ' -------------------------------------------------------------------------------------------------
+    Public ReadOnly Property SelectValeurParametreByCle As String
+        Get
+            Return "
+SELECT valeur_parametre
+FROM tec_parametres
+WHERE cle_parametre = @cle
+AND actif = 1;
+"
+        End Get
+    End Property
+
 #End Region
 
 #Region "UPDATE"

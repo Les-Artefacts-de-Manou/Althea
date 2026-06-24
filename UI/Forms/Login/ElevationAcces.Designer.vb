@@ -41,7 +41,6 @@ Partial Class ElevationAcces
         pnlTitre = New Panel()
         lblTitreForm = New Label()
         errProvider = New ErrorProvider(components)
-        ttMain = New ToolTip(components)
         pnlForm.SuspendLayout()
         pnlCenter.SuspendLayout()
         tlpElevation.SuspendLayout()
@@ -168,7 +167,7 @@ Partial Class ElevationAcces
         ' 
         ' pnlActions
         ' 
-        pnlActions.BackColor = Color.Transparent
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
         pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
         pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.FixedSingle
@@ -311,6 +310,5 @@ Partial Class ElevationAcces
     Friend WithEvents lblTitreForm As Label
     Friend WithEvents cboRoleDemande As ComboBox
     Friend WithEvents errProvider As ErrorProvider
-    Friend WithEvents ttMain As ToolTip
     Friend WithEvents lblRole As Label
 End Class

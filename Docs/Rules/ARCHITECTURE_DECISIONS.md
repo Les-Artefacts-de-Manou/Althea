@@ -4,7 +4,7 @@
 > Chaque ADR explique le **contexte**, les **options envisagées**, la **décision retenue** et ses **conséquences**.  
 > Une décision actée ne doit être remise en cause que via un nouvel ADR explicite.
 
-> *Dernière mise à jour : 10/06/2026*
+> *Dernière mise à jour : 19/06/2026*
 ---
 
 ## Cadre d'utilisation (gouvernance ADR)
@@ -45,7 +45,7 @@ Ce document sert de référence pour :
 | [ADR-07](#adr-07--démarrage-applicatif-bloquant) | Démarrage applicatif bloquant (DB obligatoire) | Actée | `Core/Startup/AppStartupManager.vb`, `UI/Forms/Home.vb` |
 | [ADR-08](#adr-08--système-de-rôles-à-3-niveaux) | Système de rôles à 3 niveaux | Actée | `Core/Security/AppRole.vb`, `Core/Security/UserSession.vb` |
 | [ADR-09](#adr-09--navigation-centralisée-via-navigationmanager) | Navigation centralisée via `NavigationManager` | Actée | `UI/Navigation/NavigationManager.vb`, `UI/Context/UserControlContext.vb` |
-| [ADR-10](#adr-10--gestion-des-utilisateurs-avec-modes-dédition-distincts) | Gestion des utilisateurs avec modes d'édition distincts | Actée | `UI/Forms/Utilisateur/UtilisateurEdition.vb`, `Metier/Security/GestionUtilisateurs.vb` |
+| [ADR-10](#adr-10--gestion-des-utilisateurs-avec-modes-dédition-distincts) | Gestion des utilisateurs avec modes d'édition distincts | Actée | `UI/Forms/Utilisateur/UtilisateurEdition.vb`, `Metier/Security/GestionUtilisateurs.vb`, `UI/Forms/Patients/ContactEdition.vb`, `UI/Forms/Patients/IntervenantEdition.vb`, `UI/Forms/Patients/TherapeuteEdition.vb` |
 | [ADR-11](#adr-11--dialogchoix-remplacement-systématique-des-messagebox) | DialogChoix : remplacement systématique des MessageBox | Actée | `UI/Forms/Communs/DialogChoix.vb` |
 | [ADR-12](#adr-12--centralisation-des-icônes-détat-via-utilsicons) | Centralisation des icônes d'état via UtilsIcons | Actée | `Utils/UI/UtilsIcons.vb` |
 | [ADR-13](#adr-13--intégration-du-module-documents-v1-depuis-poc) | Intégration du module Documents V1 depuis POC | À instruire | `Docs/Poc/Gestion_documentaire_Althea.md`, `Docs/ETAT_DU_PROJET.md` |
@@ -55,6 +55,8 @@ Ce document sert de référence pour :
 | [ADR-17](#adr-17--renommages-de-schéma-domaines-thérapeutes--réseau-dintervenants) | Renommages de schéma (domaines, thérapeutes) + réseau d'intervenants | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §3-§4 |
 | [ADR-18](#adr-18--référentiels-uc-physique--classe-de-base-uc_referentielbase) | Référentiels : UC physique + classe de base `UC_ReferentielBase` | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §7.3 |
 | [ADR-19](#adr-19--anticipation-multi-utilisateur-id_utilisateur-nullable) | Anticipation multi-utilisateur (`id_utilisateur` nullable) | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §12 BD-9 |
+| [ADR-20](#adr-20--identification-des-fichiers-patients-par-code_patient-pa000003-et-non-par-id) | Identification des fichiers patients par `code_patient` (PA000003) et non par `id` | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §8.1, `Docs/Rules/Rules.md` §23, `Utils/Helpers/CheminsPatientHelper.vb` |
+| [ADR-21](#adr-21--export-documentaire-délégué-par-événement-dans-uc_richtexteditor) | Export documentaire délégué par événement dans `UC_RichTextEditor` | Actée | `Docs/Conception/Plan_Conception_Metier_Althea.md` §8.3, `Docs/Rules/Rules.md` §24, `UI/Controls/Communs/UC_RichTextEditor.vb` |
 
 ---
 
@@ -429,6 +431,25 @@ La gestion des utilisateurs applicatifs nécessite des workflows différenciés 
 - Toutes les actions de sécurité sont journalisées avec catégorie `Security`.
 - Validation exhaustive du formulaire (champs obligatoires, cohérence rôles).
 - Utilisation de `LASTVAL(seq_sec_utilisateurs)` pour récupérer l'ID généré par la séquence MariaDB.
+
+### Application — Motif « consultation d'abord » des dialogues patients (18/06/2026)
+
+Le principe de modes d'édition distincts est généralisé aux dialogues modaux de la fiche patient (`ContactEdition`, `IntervenantEdition`) sous une forme **allégée**, sans différenciation par rôle :
+
+- **Drapeau booléen** `_consultation` (et non l'enum `ModeUtilisateurEdition`), piloté par un paramètre constructeur `ouvrirEnConsultation As Boolean = False`.
+- **Double-clic** sur une ligne de grille → ouverture en **consultation** (lecture seule) ; les boutons **Ajouter** (création) et **Modifier** (de la grille) ouvrent directement en édition.
+- Bascule consultation → édition via le bouton **Modifier** interne au dialogue ; sortie via **Fermer** (consultation) ou **Annuler** (édition).
+- Verrouillage centralisé par `AppliquerMode()` / `DefinirEtatChamps(editable)` (champs de saisie, boutons annexes `[+]`, `ReadOnlyMode` du commentaire). Les champs *snapshot* d'`IntervenantEdition` restent en lecture seule permanente (trace pilotée par la sélection du thérapeute).
+
+Ce motif reste cohérent avec la décision : la consultation par défaut sur double-clic et l'enregistrement explicite après passage en édition s'appliquent désormais aussi aux entités liées du patient.
+
+### Application — Harmonisation du contexte UI des dialogues modaux (01/07/2026)
+
+Les dialogues modaux ouverts en contexte (`ContactEdition`, `IntervenantEdition`, `TherapeuteEdition`, `UtilisateurEdition`) sont harmonisés sur le contexte partagé `UserControlContext` fourni par `Home` :
+
+- **Infobulles et statut via `_context`** : les modales implémentent `IContextAwareForm` ; le statut (`SetStatus`) est routé vers la barre partagée de `Home` (messages affichés **toujours au même endroit**) et les infobulles via `SetToolTip`. Un repli sur le `ToolTip` local est conservé si aucun contexte n'est injecté (robustesse).
+- **`ErrorProvider` conservé local** : contrairement aux UserControls hébergés dans `Home`, une Form modale `ShowDialog` garde son `ErrorProvider` local. Son `ContainerControl` est la modale elle-même : un provider partagé positionnerait les icônes d'erreur sur `Home` en arrière-plan. C'est une exception **assumée** à la règle « pas de composants locaux ».
+- **Timing d'injection** : l'initialisation des infobulles est déplacée dans le handler `Load` (le contexte n'est injecté qu'après le constructeur, via `SetContext` appelé avant `ShowDialog`).
 
 ---
 
@@ -906,6 +927,86 @@ Anticipation **à coût minimal**, sans implémenter le partage en V1 :
 
 - Bascule multi-user future **sans migration douloureuse**.
 - Colonnes inertes en V1 (toujours l'utilisateur unique).
+
+---
+
+## ADR-20 - Identification des fichiers patients par `code_patient` (PA000003) et non par `id`
+
+**Date** : 14/06/2026
+**Statut** : ✅ Acté
+
+### Contexte
+
+Les fichiers liés à un patient (photo, exports, documents) doivent être rangés dans un dossier déterministe sur le système de fichiers. La question se posait : nommer ce dossier avec l'`id_patient` (entier) ou avec le `code_patient` (ex. `PA000003`).
+
+### Décision
+
+**Les dossiers et chemins physiques utilisent le `code_patient`** (valeur calculée `PA` + identifiant 6 chiffres zéro-paddés), jamais l'`id_patient` nu.
+
+Arborescence : `{PATH_GENERAL}\{PATH_DOCUMENT}\{code_patient}\` → ex. `D:\Althea_Data\Documents\PA000003\`
+
+### Justification
+
+- Plus **lisible** pour l'utilisateur qui explore le système de fichiers.
+- Reproduit la colonne générée MariaDB (`concat('PA', lpad(id_patient, 6, '0'))`), donc toujours recalculable.
+- Cohérent avec la convention du projet (affichage du code patient dans le bandeau, grilles, etc.).
+- `CheminsPatientHelper.FormaterCodePatient(idPatient)` fournit le code quand seul l'`id` est disponible (ex. après création avant rechargement).
+
+### Règle associée
+
+La DB ne stocke **jamais de chemin absolu** (ADR-16). Elle stocke le nom de fichier seul (ex. `patients.photo_fichier = 'Identite.jpg'`). Le chemin complet est toujours recalculé depuis (`code_patient`, `nom_fichier`) via `CheminsPatientHelper.GetCheminFichierPatient`.
+
+### Conséquences
+
+- Tout nouveau fichier patient est écrit dans `{PATH_GENERAL}\{PATH_DOCUMENT}\{code_patient}\`.
+- La photo d'identité est nommée de façon déterministe `Identite.{ext}` (nom fixe, remplacement à l'upload).
+- Les exports documentaires utilisent un nom horodaté : `anamnese_{code}_{yyyyMMdd_HHmmss}.{ext}`.
+- `CheminsPatientHelper` est le **point d'entrée unique** pour tout calcul de chemin patient.
+
+---
+
+## ADR-21 - Export documentaire délégué par événement dans `UC_RichTextEditor`
+
+**Date** : 14/06/2026
+**Statut** : ✅ Acté
+
+### Contexte
+
+`UC_RichTextEditor` est un contrôle réutilisable générique. Ses boutons d'export (PDF/Word) ouvraient jusqu'ici un `SaveFileDialog` directement dans le contrôle. Pour l'anamnèse patient, l'export doit aller dans un dossier déterministe avec un nom horodaté — sans coupler le contrôle à la logique métier patient.
+
+### Décision
+
+**Mécanisme d'export délégué par événements** :
+
+1. Le contrôle expose un événement `ExportRequested(sender, e As ExportRequestedEventArgs)` avant l'export.
+2. Le conteneur s'abonne (`Handles`) et renseigne `e.DestinationPath` (chemin calculé côté conteneur).
+3. Si `DestinationPath` est fourni → **export direct** vers ce chemin.
+4. Si personne n'abonne ou si `DestinationPath` reste vide → **fallback `SaveFileDialog`** (comportement générique inchangé).
+5. Après un export contextuel réussi, le contrôle lève `ExportCompleted(sender, e As ExportCompletedEventArgs)` que le conteneur peut utiliser (ouverture du fichier, traçabilité future dans `documents`).
+
+### Classes introduites
+
+| Classe | Rôle |
+|---|---|
+| `ExportFormat` (enum) | `Pdf` / `Word` |
+| `ExportRequestedEventArgs` | `Format`, `NomFichierInitial`, `DestinationPath` (rempli par le conteneur) |
+| `ExportCompletedEventArgs` | `Format`, `DestinationPath`, `Success` |
+
+### Application côté `UC_PatientFiche`
+
+- `rteAnamnese_ExportRequested` : calcule `…\Documents\{code_patient}\anamnese_{code}_{yyyyMMdd_HHmmss}.ext`, garantit l'existence du dossier (`AssurerDossierPatient`).
+- `rteAnamnese_ExportCompleted` : ouvre le fichier exporté (`Process.Start`, `UseShellExecute=True`).
+- Abonnement déclaratif via `Handles` (idiomatique VB.NET WinForms, pas de risque d'abonnement multiple).
+
+### Règle d'extension future
+
+Quand la brique **Documents** sera construite, `rteAnamnese_ExportCompleted` sera le point naturel pour tracer le fichier dans la table `documents` (cf. commentaires `TODO` dans `UC_PatientFiche.vb` et `Docs/Todo/ToDo.md §D1`). Le contrôle restera inchangé.
+
+### Conséquences
+
+- `UC_RichTextEditor` reste **100 % générique** : aucune dépendance à la logique patient.
+- Le form `TestRichTextEditor` (jetable) continue de fonctionner avec le fallback dialogue.
+- Tout futur conteneur peut implémenter un export contextuel en s'abonnant à `ExportRequested`.
 
 ---
 

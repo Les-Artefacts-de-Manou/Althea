@@ -197,17 +197,19 @@
 
 ### Icônes d'état (DataGridView, listes)
 
-| Nom       | Image                                                        | Fonction                          | Module      |
-| --------- | ------------------------------------------------------------ | --------------------------------- | ----------- |
-| OFF_32x32 | <img src="../../Assets/Tech_Ico/OFF_32x32.png" style="zoom:100%;" /> | Non OK discret / Inactif          | UtilsIcons  |
-| OK_32x32  | <img src="../../Assets/Tech_Ico/OK_32x32.png" style="zoom:100%;" /> | OK / Actif (ColorSaugeFonce 95; 125; 110) | UtilsIcons  |
-| LOCK_32x32 | <img src="../../Assets/Tech_Ico/LOCK_32x32.png" style="zoom:100%;" /> | Compte verrouillé (priorité haute) | UtilsIcons |
-| NO_32x32 | <img src="../../Assets/Tech_Ico/NO_32x32.png" style="zoom:100%;" /> | Refus / Désactivé | UtilsIcons |
+| Nom       | Image                                                        | Fonction                          | Module      | Taille |
+| --------- | ------------------------------------------------------------ | --------------------------------- | ----------- | --------- |
+| OFF_32x32 | <img src="../../Assets/Tech_Ico/OFF_32x32.png" style="zoom:100%;" /> | Non OK discret / Inactif          | UtilsIcons  | 32x32, 20x20, 26x26, 16x16 |
+| OK_32x32  | <img src="../../Assets/Tech_Ico/OK_32x32.png" style="zoom:100%;" /> | OK / Actif (ColorSaugeFonce 95; 125; 110) | UtilsIcons  | 32x32, 20x20, 26x26, 16x16 |
+| LOCK_32x32 | <img src="../../Assets/Tech_Ico/LOCK_32x32.png" style="zoom:100%;" /> | Compte verrouillé (priorité haute) | UtilsIcons | 32x32, 20x20, 26x26, 16x16 |
+| NO_32x32 | <img src="../../Assets/Tech_Ico/NO_32x32.png" style="zoom:100%;" /> | Refus / Désactivé | UtilsIcons | 32x32, 20x20, 26x26, 16x16 |
+| patientEncours_20 | <img src="../../Assets/Tech_Ico/patientEncours_20.png" style="zoom:100%;" /> | Patient avec un dossier en suivi |  | 20x20 |
+| patientNonEncours_20 | <img src="../../Assets/Tech_Ico/patientNonEncours_20.png" style="zoom:100%;" /> | Patient avec un dossier clôturé ou archivé |  | 20x20 |
 
 
 - Répertoire : /Assets/Tech_Ico/
 - Format : .png
-- Size : 32x32
+- Size : 32x32, 20x20, 26x26, 16x16
 - Usage : DataGridView, PictureBox, ImageList
 - Gestion centralisée via `Utils/UtilsIcons.vb`
 - **Règle de priorité** : Verrouillé > Actif > Inactif
@@ -232,56 +234,123 @@
 
 ------
 
+### Icônes divers
+
+| Nom                                         | Image                                                        | Fonction                | Tag                     |
+| ------------------------------------------- | ------------------------------------------------------------ | ----------------------- | ----------------------- |
+| flechebas_24_normal (+disabled & Hover)     | ![flechebas_24_normal](../../Assets/Ico_divers/flechebas_24_normal.png) |                         | flechebas_24_normal     |
+| photo_20x20                                 | ![photo_20x20](../../Assets/Ico_divers/photo_20x20.png)      |                         |                         |
+| Plus_22x22                                  | ![Plus_22x22](../../Assets/Ico_divers/Plus_22x22.png)        |                         |                         |
+| plus_24_normal (+disabled & Hover)          | ![plus_24_normal ](../../Assets/Ico_divers/plus_24_normal.png) |                         | plus_24_normal          |
+| recherche_24_normal (+disabled & Hover)     | ![recherche_24_normal](../../Assets/Ico_divers/recherche_24_normal.png) |                         | recherche_24_normal     |
+| reinitialiser_24_normal (+disabled & Hover) | ![reinitialiser_24_normal](../../Assets/Ico_divers/reinitialiser_24_normal.png) |                         | reinitialiser_24_normal |
+| non_24                                      | ![reinitialiser_24_normal](../../Assets/Ico_divers/non_24.png) | fond foncé, icone blanc |                         |
+| ok_24                                       | ![reinitialiser_24_normal](../../Assets/Ico_divers/non_24.png) | fond foncé, icone blanc |                         |
+| annuler_24                                  | ![reinitialiser_24_normal](../../Assets/Ico_divers/annuler_24.png) | fond foncé, icone blanc |                         |
+
+- Répertoire : /Assets/Ico_divers/
+- Format : .png
+- Tailles recommandées : 24x24, 20x20, 22x22
+- Usage : surtout à l'intérieur des UC/Forms, hors pnlAction : ex Recherche, DialogChoix
+- Affichage dynamique selon le `TypeDialogue`
+
 <a id="annexe-icones"></a>
 
-## Annexe - Bibliothèque d'icônes
+### Boutons : Home, Standards et Tuiles
 
-### Boutons : catalogue détaillé
+##### _normal, _hover et _disabled
 
-| Type     | png _normal                                                  | png_hover/selected                                           | png_Disabled                                                 | Tag                          |
-| -------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ---------------------------- |
-| Home     | <img src="../../Assets/Boutons_Home/accueil_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/accueil_selected.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/accueil_disabled.png" style="zoom:100%;" /> | accueil                      |
-| Home     | <img src="../../Assets/Boutons_Home/agenda_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/agenda_selected.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/agenda_disabled.png" style="zoom:100%;" /> | agenda                       |
-| Home     | <img src="../../Assets/Boutons_Home/documents_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/documents_selected.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/documents_disabled.png" style="zoom:100%;" /> | documents                    |
-| Home     | <img src="../../Assets/Boutons_Home/domaines_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/domaines_selected.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/domaines_disabled.png" style="zoom:100%;" /> | domaines                     |
-| Home     | <img src="../../Assets/Boutons_Home/outils_admin_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/outils_admin_selected.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/outils_admin_disabled.png" style="zoom:100%;" /> | outils_admin                 |
-| Home     | <img src="../../Assets/Boutons_Home/patients_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/patients_selected.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/patients_disabled.png" style="zoom:100%;" /> | patients                     |
-| Home     | <img src="../../Assets/Boutons_Home/referentiels_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/referentiels_selected.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_Home/referentiels_disabled.png" style="zoom:100%;" /> | referentiels                 |
-| Home     | ![forcer_password](../../Assets/Boutons_Home/forcer_password.png) |                                                              |                                                              | forcer_password              |
-| Standard | <img src="../../Assets/Boutons_ico_32/annuler_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/annuler_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/annuler_disabled.png" style="zoom:100%;" /> | annuler_normal               |
-| Standard | <img src="../../Assets/Boutons_ico_32/eleverAcces_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/eleverAcces_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/eleverAcces_disabled.png" style="zoom:100%;" /> | eleverAcces_normal           |
-| Standard | <img src="../../Assets/Boutons_ico_32/enregistrer_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/enregistrer_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/enregistrer_disabled.png" style="zoom:100%;" /> | enregistrer_normal           |
-| Standard | <img src="../../Assets/Boutons_ico_32/fermer_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/fermer_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/fermer_disabled.png" style="zoom:100%;" /> | fermer_normal                |
-| Standard | <img src="../../Assets/Boutons_ico_32/login_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/login_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/login_disabled.png" style="zoom:100%;" /> | login_normal                 |
-| Standard | <img src="../../Assets/Boutons_ico_32/modifier_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/modifier_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/modifier_disabled.png" style="zoom:100%;" /> | modifier_normal              |
-| Standard | <img src="../../Assets/Boutons_ico_32/modifierPW_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/modifierPW_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/modifierPW_disabled.png" style="zoom:100%;" /> | modifierPW_normal            |
-| Standard | <img src="../../Assets/Boutons_ico_32/nouveau_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/nouveau_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/nouveau_disabled.png" style="zoom:100%;" /> | nouveau_normal               |
-| Standard | ![no_normal](../../Assets/Boutons_ico_32/no_normal.png)      | ![no_normal](../../Assets/Boutons_ico_32/no_hover.png)       | ![no_normal](../../Assets/Boutons_ico_32/no_disabled.png)    | no_normal                    |
-| Standard | <img src="../../Assets/Boutons_ico_32/retourRole_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/retourRole_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/retourRole_disabled.png" style="zoom:100%;" /> | retourRole_normal            |
-| Standard | <img src="../../Assets/Boutons_ico_32/testerConnexion_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/testerConnexion_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/testerConnexion_disabled.png" style="zoom:100%;" /> | testerConnexion_normal       |
-| Standard | <img src="../../Assets/Boutons_ico_32/valider_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/valider_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/valider_disabled.png" style="zoom:100%;" /> | valider_normal               |
-| Standard | <img src="../../Assets/Boutons_ico_32/voir_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/voir_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/voir_disabled.png" style="zoom:100%;" /> | voir_normal                  |
-| Standard | <img src="../../Assets/Boutons_ico_32/Verrouiller_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/verrouiller_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/verrouiller_disabled.png" style="zoom:100%;" /> | verrouiller_normal           |
-| Standard | <img src="../../Assets/Boutons_ico_32/reset_password_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/reset_password_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/reset_password_disabled.png" style="zoom:100%;" /> | reset_password_normal        |
-| Standard | ![no_normal](../../Assets/Boutons_ico_32/resetText_normal.png) | ![no_normal](../../Assets/Boutons_ico_32/resetText_hover.png) | ![no_normal](../../Assets/Boutons_ico_32/resetText_disabled.png) | resetText_normal             |
-| Standard | <img src="../../Assets/Boutons_ico_32/activer_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/activer_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/activer_disabled.png" style="zoom:100%;" /> | activer_normal               |
-| Standard | <img src="../../Assets/Boutons_ico_32/actualiser_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/actualiser_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/actualiser_disabled.png" style="zoom:100%;" /> | actualiser_normal            |
-| Standard | <img src="../../Assets/Boutons_ico_32/rechercherUser_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/rechercherUser_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_32/rechercherUser_disabled.png" style="zoom:100%;" /> | rechercherUser_normal        |
-| Standard | ![no_normal](../../Assets/Boutons_ico_32/yes_normal.png)     | ![no_normal](../../Assets/Boutons_ico_32/yes_hover.png)      | ![no_normal](../../Assets/Boutons_ico_32/yes_disabled.png)   | yes_normal                   |
-| Tuile    | <img src="../../Assets/Boutons_ico_48/configurationDatabase_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/configurationDatabase_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/configurationDatabase_disabled.png" style="zoom:100%;" /> | configurationDatabase_normal |
-| Tuile    | <img src="../../Assets/Boutons_ico_48/logs_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/logs_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/logs_disabled.png" style="zoom:100%;" /> | logs_normal                  |
-| Tuile    | <img src="../../Assets/Boutons_ico_48/parametres_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/parametres_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/parametres_disabled.png" style="zoom:100%;" /> | parametres_normal            |
-| Tuile    | <img src="../../Assets/Boutons_ico_48/sauvegarde_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/sauvegarde_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/sauvegarde_disabled.png" style="zoom:100%;" /> | sauvegarde_normal            |
-| Tuile    | <img src="../../Assets/Boutons_ico_48/utilisateurs_normal.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/utilisateurs_hover.png" style="zoom:100%;" /> | <img src="../../Assets/Boutons_ico_48/utilisateurs_disabled.png" style="zoom:100%;" /> | utilisateurs_normal          |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/domaines_normal.png) |                                                              |                                                              | domaines_normal              |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/liensPatient_normal.png) |                                                              |                                                              | liensPatient_normal          |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/roleIntervenant_normal.png) |                                                              |                                                              | roleIntervenant_normal       |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/situationFamiliale_normal.png) |                                                              |                                                              | situationFamiliale_normal    |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/statutDossier_normal.png) |                                                              |                                                              | statutDossier_normal         |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/statutSeance_normal.png) |                                                              |                                                              | statutSeance_normal          |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/typeDocument_normal.png) |                                                              |                                                              | typeDocument_normal          |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/typeRendezvous_normal.png) |                                                              |                                                              | typeRendezvous_normal        |
-| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/typeSeance_normal.png) |                                                              |                                                              | typeSeance_normal            |
+| Type     | png _normal                                                  | Tag                          |
+| -------- | ------------------------------------------------------------ | ---------------------------- |
+| Home     | <img src="../../Assets/Boutons_Home/accueil_normal.png" style="zoom:100%;" /> | accueil                      |
+| Home     | <img src="../../Assets/Boutons_Home/agenda_normal.png" style="zoom:100%;" /> | agenda                       |
+| Home     | <img src="../../Assets/Boutons_Home/documents_normal.png" style="zoom:100%;" /> | documents                    |
+| Home     | <img src="../../Assets/Boutons_Home/domaines_normal.png" style="zoom:100%;" /> | domaines                     |
+| Home     | <img src="../../Assets/Boutons_Home/outils_admin_normal.png" style="zoom:100%;" /> | outils_admin                 |
+| Home     | <img src="../../Assets/Boutons_Home/patients_normal.png" style="zoom:100%;" /> | patients                     |
+| Home     | <img src="../../Assets/Boutons_Home/referentiels_normal.png" style="zoom:100%;" /> | referentiels                 |
+| Home     | ![forcer_password](../../Assets/Boutons_Home/forcer_password.png) | forcer_password              |
+| Standard | <img src="../../Assets/Boutons_ico_32/annuler_normal.png" style="zoom:100%;" /> | annuler_normal               |
+| Standard | <img src="../../Assets/Boutons_ico_32/eleverAcces_normal.png" style="zoom:100%;" /> | eleverAcces_normal           |
+| Standard | <img src="../../Assets/Boutons_ico_32/enregistrer_normal.png" style="zoom:100%;" /> | enregistrer_normal           |
+| Standard | <img src="../../Assets/Boutons_ico_32/fermer_normal.png" style="zoom:100%;" /> | fermer_normal                |
+| Standard | <img src="../../Assets/Boutons_ico_32/login_normal.png" style="zoom:100%;" /> | login_normal                 |
+| Standard | <img src="../../Assets/Boutons_ico_32/modifier_normal.png" style="zoom:100%;" /> | modifier_normal              |
+| Standard | <img src="../../Assets/Boutons_ico_32/modifierPW_normal.png" style="zoom:100%;" /> | modifierPW_normal            |
+| Standard | <img src="../../Assets/Boutons_ico_32/nouveau_normal.png" style="zoom:100%;" /> | nouveau_normal               |
+| Standard | <img src="../../Assets/Boutons_ico_32/retourRole_normal.png" style="zoom:100%;" /> | retourRole_normal            |
+| Standard | <img src="../../Assets/Boutons_ico_32/testerConnexion_normal.png" style="zoom:100%;" /> | testerConnexion_normal       |
+| Standard | <img src="../../Assets/Boutons_ico_32/valider_normal.png" style="zoom:100%;" /> | valider_normal               |
+| Standard | <img src="../../Assets/Boutons_ico_32/voir_normal.png" style="zoom:100%;" /> | voir_normal                  |
+| Standard | <img src="../../Assets/Boutons_ico_32/Verrouiller_normal.png" style="zoom:100%;" /> | verrouiller_normal           |
+| Standard | <img src="../../Assets/Boutons_ico_32/reset_password_normal.png" style="zoom:100%;" /> | reset_password_normal        |
+| Standard | ![no_normal](../../Assets/Boutons_ico_32/resetText_normal.png) | resetText_normal             |
+| Standard | <img src="../../Assets/Boutons_ico_32/activer_normal.png" style="zoom:100%;" /> | activer_normal               |
+| Standard | <img src="../../Assets/Boutons_ico_32/actualiser_normal.png" style="zoom:100%;" /> | actualiser_normal            |
+| Standard | <img src="../../Assets/Boutons_ico_32/rechercherUser_normal.png" style="zoom:100%;" /> | rechercherUser_normal        |
+| Standard | ![ajouter_normal](../../Assets/Boutons_ico_32/ajouter_normal.png) | ajouter_normal               |
+| Standard | ![open_normal](../../Assets/Boutons_ico_32/open_normal.png)  | open_normal                  |
+| Standard | ![supprimer_normal](../../Assets/Boutons_ico_32/supprimer_normal.png) | supprimer_normal             |
+| Tuile    | <img src="../../Assets/Boutons_ico_48/configurationDatabase_normal.png" style="zoom:100%;" /> | configurationDatabase_normal |
+| Tuile    | <img src="../../Assets/Boutons_ico_48/logs_normal.png" style="zoom:100%;" /> | logs_normal                  |
+| Tuile    | <img src="../../Assets/Boutons_ico_48/parametres_normal.png" style="zoom:100%;" /> | parametres_normal            |
+| Tuile    | <img src="../../Assets/Boutons_ico_48/sauvegarde_normal.png" style="zoom:100%;" /> | sauvegarde_normal            |
+| Tuile    | <img src="../../Assets/Boutons_ico_48/utilisateurs_normal.png" style="zoom:100%;" /> | utilisateurs_normal          |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/domaines_normal.png) | domaines_normal              |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/liensPatient_normal.png) | liensPatient_normal          |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/roleIntervenant_normal.png) | roleIntervenant_normal       |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/situationsFamiliales_normal.png) | situationsFamiliales_normal  |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/statutDossier_normal.png) | statutDossier_normal         |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/statutSeance_normal.png) | statutSeance_normal          |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/typeDocument_normal.png) | typeDocument_normal          |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/typeRendezvous_normal.png) | typeRendezvous_normal        |
+| Tuile    | ![no_normal](../../Assets/Boutons_ico_48/typeSeance_normal.png) | typeSeance_normal            |
+| Tuile    | ![rolesLegaux_normal](../../Assets/Boutons_ico_48/rolesLegaux_normal.png) | rolesLegaux_normal           |
+| Tuile    | ![therapeutes_normal](../../Assets/Boutons_ico_48/therapeutes_normal.png) | therapeutes_normal           |
+
+- Répertoires 
+  - Home : /Assets/BoutonsHome/
+  - Standard : /Assets/Boutons_ico_32/
+  - Tuile : /Assets/Boutons_ico_48/
+
+- Format : .png
+- Tailles recommandées : Home et Tuile 48x48, Standard 32x32
+- Home : Fond clair - Standard et Tuiles : Fond foncé
+- Usage :
+  - Home : Dans la page Home
+  - Standard : pnlActions généralement
+  - Tuile : UC_xxxxHome
+
+### Icones RichTextEditor
+
+| Nom                             | Image                                                        |
+| ------------------------------- | ------------------------------------------------------------ |
+| alignCenter_24                  | ![supprimer_normal](../../Assets/Editor_Ico/alignCenter_24.png) |
+| alignLeft_24                    | ![supprimer_normal](../../Assets/Editor_Ico/alignLeft_24.png) |
+| alignRight_24                   | ![supprimer_normal](../../Assets/Editor_Ico/alignRight_24.png) |
+| annuler_22 & annuler_18         | ![supprimer_normal](../../Assets/Editor_Ico/annuler_22.png)  |
+| clearFormat_24 & clearFormat_18 | ![supprimer_normal](../../Assets/Editor_Ico/clearFormat_24.png) |
+| coller_22                       | ![supprimer_normal](../../Assets/Editor_Ico/coller_22.png)   |
+| copier_22                       | ![supprimer_normal](../../Assets/Editor_Ico/copier_22.png)   |
+| couper_22                       | ![supprimer_normal](../../Assets/Editor_Ico/couper_22.png)   |
+| highlight_24                    | ![supprimer_normal](../../Assets/Editor_Ico/highlight_24.png) |
+| InsererDate_22 & InsererDate_18 | ![supprimer_normal](../../Assets/Editor_Ico/InsererDate_22.png) |
+| miseEnPage_22                   | ![supprimer_normal](../../Assets/Editor_Ico/miseEnPage_22.png) |
+| pdf_24                          | ![supprimer_normal](../../Assets/Editor_Ico/pdf_24.png)      |
+| print_22                        | ![supprimer_normal](../../Assets/Editor_Ico/print_22.png)    |
+| puce_24                         | ![supprimer_normal](../../Assets/Editor_Ico/puce_24.png)     |
+| refaire_22 & refaire_18         | ![supprimer_normal](../../Assets/Editor_Ico/refaire_22.png)  |
+| retraitDroit_22                 | ![supprimer_normal](../../Assets/Editor_Ico/retraitDroit_22.png) |
+| retraitGauche_22                | ![supprimer_normal](../../Assets/Editor_Ico/retraitGauche_22.png) |
+| word_24                         | ![supprimer_normal](../../Assets/Editor_Ico/word_24.png)     |
+
+- Répertoire Home : /Assets/Editor_ico/
+- Format : .png
+- Tailles recommandées : 24x24 et 22x22 et 18x18 pour RichTextEditorSimple
+
+
+
+
 
 ------
 
@@ -290,8 +359,11 @@
 > Projet réalisé pour ma fille, Psychologue et Graphologue, pour l'aider à gérer ses patients et documents de manière structurée, fiable et évolutive.
 > - Site web P.Nguyen Duy: https://pearlnguyenduy.be/
 > - mailto: `joelle@nguyen.eu`
->
 > - GitHub privé: Althea https://github.com/AngeljoNG/Althea
-> - GitHub public : Althea None
+> - GitHub public : https://github.com/Les-Artefacts-de-Manou/Althea
+
+------
+
+
 
 [TOC]

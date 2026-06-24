@@ -39,7 +39,7 @@ Partial Class UC_ReferentielBase
     'Ne la modifiez pas à l'aide de l'éditeur de code.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        components = New ComponentModel.Container()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(UC_ReferentielBase))
         pnlForm = New Panel()
         pnlCenter = New Panel()
         dgvReferentiel = New DataGridView()
@@ -73,8 +73,6 @@ Partial Class UC_ReferentielBase
         lblTop = New Label()
         lblTitreForm = New Label()
         picTitre = New PictureBox()
-        errProvider = New ErrorProvider(components)
-        ttMain = New ToolTip(components)
         pnlForm.SuspendLayout()
         pnlCenter.SuspendLayout()
         CType(dgvReferentiel, ComponentModel.ISupportInitialize).BeginInit()
@@ -84,12 +82,13 @@ Partial Class UC_ReferentielBase
         pnlActions.SuspendLayout()
         pnlTitre.SuspendLayout()
         CType(picTitre, ComponentModel.ISupportInitialize).BeginInit()
-        CType(errProvider, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
         ' pnlForm
         ' 
         pnlForm.BackColor = Color.FromArgb(CByte(244), CByte(239), CByte(234))
+        pnlForm.BackgroundImage = My.Resources.Resources.Fond_1000x770_FeuilleCoupee1
+        pnlForm.BackgroundImageLayout = ImageLayout.Stretch
         pnlForm.Controls.Add(pnlCenter)
         pnlForm.Controls.Add(pnlActions)
         pnlForm.Controls.Add(pnlTitre)
@@ -318,7 +317,9 @@ Partial Class UC_ReferentielBase
         ' 
         ' pnlActions
         ' 
-        pnlActions.BackColor = Color.FromArgb(CByte(237), CByte(231), CByte(224))
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
+        pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
+        pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.Fixed3D
         pnlActions.Controls.Add(btnEnregistrer)
         pnlActions.Controls.Add(btnAnnuler)
@@ -341,6 +342,7 @@ Partial Class UC_ReferentielBase
         btnEnregistrer.FlatAppearance.BorderSize = 0
         btnEnregistrer.FlatStyle = FlatStyle.Flat
         btnEnregistrer.ForeColor = Color.White
+        btnEnregistrer.Image = CType(resources.GetObject("btnEnregistrer.Image"), Image)
         btnEnregistrer.ImageAlign = ContentAlignment.MiddleLeft
         btnEnregistrer.Location = New Point(720, 6)
         btnEnregistrer.Name = "btnEnregistrer"
@@ -359,6 +361,7 @@ Partial Class UC_ReferentielBase
         btnAnnuler.FlatAppearance.BorderSize = 0
         btnAnnuler.FlatStyle = FlatStyle.Flat
         btnAnnuler.ForeColor = Color.White
+        btnAnnuler.Image = CType(resources.GetObject("btnAnnuler.Image"), Image)
         btnAnnuler.ImageAlign = ContentAlignment.MiddleLeft
         btnAnnuler.Location = New Point(838, 6)
         btnAnnuler.Name = "btnAnnuler"
@@ -377,6 +380,7 @@ Partial Class UC_ReferentielBase
         btnActiverDesactiver.FlatAppearance.BorderSize = 0
         btnActiverDesactiver.FlatStyle = FlatStyle.Flat
         btnActiverDesactiver.ForeColor = Color.White
+        btnActiverDesactiver.Image = CType(resources.GetObject("btnActiverDesactiver.Image"), Image)
         btnActiverDesactiver.ImageAlign = ContentAlignment.MiddleLeft
         btnActiverDesactiver.Location = New Point(366, 6)
         btnActiverDesactiver.Name = "btnActiverDesactiver"
@@ -395,6 +399,7 @@ Partial Class UC_ReferentielBase
         btnActualiser.FlatAppearance.BorderSize = 0
         btnActualiser.FlatStyle = FlatStyle.Flat
         btnActualiser.ForeColor = Color.White
+        btnActualiser.Image = CType(resources.GetObject("btnActualiser.Image"), Image)
         btnActualiser.ImageAlign = ContentAlignment.MiddleLeft
         btnActualiser.Location = New Point(247, 6)
         btnActualiser.Name = "btnActualiser"
@@ -413,6 +418,7 @@ Partial Class UC_ReferentielBase
         btnNouveau.FlatAppearance.BorderSize = 0
         btnNouveau.FlatStyle = FlatStyle.Flat
         btnNouveau.ForeColor = Color.White
+        btnNouveau.Image = CType(resources.GetObject("btnNouveau.Image"), Image)
         btnNouveau.ImageAlign = ContentAlignment.MiddleLeft
         btnNouveau.Location = New Point(10, 6)
         btnNouveau.Name = "btnNouveau"
@@ -431,6 +437,7 @@ Partial Class UC_ReferentielBase
         btnModifier.FlatAppearance.BorderSize = 0
         btnModifier.FlatStyle = FlatStyle.Flat
         btnModifier.ForeColor = Color.White
+        btnModifier.Image = CType(resources.GetObject("btnModifier.Image"), Image)
         btnModifier.ImageAlign = ContentAlignment.MiddleLeft
         btnModifier.Location = New Point(128, 6)
         btnModifier.Name = "btnModifier"
@@ -456,11 +463,11 @@ Partial Class UC_ReferentielBase
         ' 
         ' lblTop
         ' 
-        lblTop.Font = New Font("Calibri", 11F)
+        lblTop.Font = New Font("Calibri", 12F)
         lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
-        lblTop.Location = New Point(386, 16)
+        lblTop.Location = New Point(281, 16)
         lblTop.Name = "lblTop"
-        lblTop.Size = New Size(563, 26)
+        lblTop.Size = New Size(512, 26)
         lblTop.TabIndex = 3
         lblTop.Text = "Consultez et gérez les valeurs de référence."
         ' 
@@ -489,10 +496,6 @@ Partial Class UC_ReferentielBase
         picTitre.TabIndex = 2
         picTitre.TabStop = False
         ' 
-        ' errProvider
-        ' 
-        errProvider.ContainerControl = Me
-        ' 
         ' UC_ReferentielBase
         ' 
         AutoScaleDimensions = New SizeF(7F, 15F)
@@ -516,7 +519,6 @@ Partial Class UC_ReferentielBase
         pnlTitre.ResumeLayout(False)
         pnlTitre.PerformLayout()
         CType(picTitre, ComponentModel.ISupportInitialize).EndInit()
-        CType(errProvider, ComponentModel.ISupportInitialize).EndInit()
         ResumeLayout(False)
     End Sub
 
@@ -553,7 +555,5 @@ Partial Class UC_ReferentielBase
     Friend WithEvents numOrdre As NumericUpDown
     Friend WithEvents lblActif As Label
     Friend WithEvents chkActif As CheckBox
-    Friend WithEvents errProvider As ErrorProvider
-    Friend WithEvents ttMain As ToolTip
 
 End Class

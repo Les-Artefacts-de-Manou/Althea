@@ -262,6 +262,21 @@ Valider le bon fonctionnement complet du système de dialogues personnalisés `D
 
 ---
 
-> **Contact** : ***Joëlle (Manou) - Les Artefacts de Manou***
 > 
-> Projet Althéa - Tests DialogChoix
+>
+> ------
+>
+> > **Contact** : ***Joëlle (Manou) - Les Artefacts de Manou***
+> >
+> > Projet réalisé pour ma fille, Psychologue et Graphologue, pour l'aider à gérer ses patients et documents de manière structurée, fiable et évolutive.
+> >
+> > - Site web P.Nguyen Duy: https://pearlnguyenduy.be/
+> > - mailto: `joelle@nguyen.eu`
+> > - GitHub privé: Althea https://github.com/AngeljoNG/Althea
+> > - GitHub public : https://github.com/Les-Artefacts-de-Manou/Althea
+>
+> ------
+>
+
+[TOC]
+

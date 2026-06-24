@@ -62,6 +62,21 @@ Public Class UC_ReferentielBase
 
 #End Region
 
+#Region "Événements"
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Événement : EnregistrementEffectue
+    ' Rôle      : Notifie qu'un enregistrement (création ou modification) vient de réussir.
+    '
+    ' Remarques :
+    ' - Sert principalement à l'usage « en contexte » (hôte modal ReferentielModalHost) pour
+    '   proposer un retour automatique vers l'écran appelant (ex. fiche patient).
+    ' - L'usage normal (navigation depuis AdminHome) ne s'y abonne pas : aucun impact sur ce flux.
+    ' -------------------------------------------------------------------------------------------------
+    Public Event EnregistrementEffectue As EventHandler
+
+#End Region
+
 #Region "Points d'extension - Métadonnées (Overridable)"
 
     ' -------------------------------------------------------------------------------------------------
@@ -815,6 +830,9 @@ Public Class UC_ReferentielBase
             _idEnCours = 0
             PasserEnMode(ModeReferentiel.Consultation)
             ChargerListe()
+
+            ' Notifie un éventuel hôte (modal en contexte) qu'un enregistrement a réussi.
+            RaiseEvent EnregistrementEffectue(Me, EventArgs.Empty)
 
         Catch ex As Exception
             GestionLog.EcrireException($"Erreur lors de l'enregistrement dans le référentiel '{TitreReferentiel}'.", ex,

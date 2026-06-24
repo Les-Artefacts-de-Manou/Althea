@@ -78,7 +78,7 @@ Partial Class DialogChoix
         pnlContenu.Location = New Point(93, 0)
         pnlContenu.Name = "pnlContenu"
         pnlContenu.Padding = New Padding(13, 19, 13, 9)
-        pnlContenu.Size = New Size(371, 156)
+        pnlContenu.Size = New Size(371, 168)
         pnlContenu.TabIndex = 0
         ' 
         ' lblMessage
@@ -94,15 +94,17 @@ Partial Class DialogChoix
         ' 
         ' pnlBoutons
         ' 
-        pnlBoutons.BackColor = Color.Transparent
+        pnlBoutons.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
+        pnlBoutons.BackgroundImage = CType(resources.GetObject("pnlBoutons.BackgroundImage"), Image)
+        pnlBoutons.BackgroundImageLayout = ImageLayout.Stretch
         pnlBoutons.Controls.Add(btn3)
         pnlBoutons.Controls.Add(btn2)
         pnlBoutons.Controls.Add(btn1)
         pnlBoutons.Dock = DockStyle.Bottom
-        pnlBoutons.Location = New Point(0, 156)
+        pnlBoutons.Location = New Point(0, 168)
         pnlBoutons.Name = "pnlBoutons"
         pnlBoutons.Padding = New Padding(13, 9, 13, 14)
-        pnlBoutons.Size = New Size(464, 56)
+        pnlBoutons.Size = New Size(464, 44)
         pnlBoutons.TabIndex = 2
         ' 
         ' btn3
@@ -111,13 +113,14 @@ Partial Class DialogChoix
         btn3.BackColor = Color.FromArgb(CByte(122), CByte(155), CByte(135))
         btn3.BackgroundImageLayout = ImageLayout.None
         btn3.DialogResult = DialogResult.Cancel
+        btn3.FlatAppearance.BorderSize = 0
         btn3.FlatStyle = FlatStyle.Flat
         btn3.ForeColor = Color.White
         btn3.Image = CType(resources.GetObject("btn3.Image"), Image)
         btn3.ImageAlign = ContentAlignment.MiddleLeft
-        btn3.Location = New Point(259, 7)
+        btn3.Location = New Point(291, 6)
         btn3.Name = "btn3"
-        btn3.Size = New Size(90, 42)
+        btn3.Size = New Size(115, 32)
         btn3.TabIndex = 2
         btn3.Tag = "annuler_normal"
         btn3.Text = "Annuler"
@@ -129,13 +132,14 @@ Partial Class DialogChoix
         ' 
         btn2.Anchor = AnchorStyles.Right
         btn2.BackColor = Color.FromArgb(CByte(122), CByte(155), CByte(135))
+        btn2.FlatAppearance.BorderSize = 0
         btn2.FlatStyle = FlatStyle.Flat
         btn2.ForeColor = Color.White
         btn2.Image = CType(resources.GetObject("btn2.Image"), Image)
         btn2.ImageAlign = ContentAlignment.MiddleLeft
-        btn2.Location = New Point(182, 7)
+        btn2.Location = New Point(175, 6)
         btn2.Name = "btn2"
-        btn2.Size = New Size(73, 42)
+        btn2.Size = New Size(115, 32)
         btn2.TabIndex = 1
         btn2.Tag = "no_normal"
         btn2.Text = "Non"
@@ -147,13 +151,14 @@ Partial Class DialogChoix
         ' 
         btn1.Anchor = AnchorStyles.Right
         btn1.BackColor = Color.FromArgb(CByte(122), CByte(155), CByte(135))
+        btn1.FlatAppearance.BorderSize = 0
         btn1.FlatStyle = FlatStyle.Flat
         btn1.ForeColor = Color.White
         btn1.Image = CType(resources.GetObject("btn1.Image"), Image)
         btn1.ImageAlign = ContentAlignment.MiddleLeft
-        btn1.Location = New Point(107, 7)
+        btn1.Location = New Point(59, 6)
         btn1.Name = "btn1"
-        btn1.Size = New Size(71, 42)
+        btn1.Size = New Size(115, 32)
         btn1.TabIndex = 0
         btn1.Tag = "yes_normal"
         btn1.Text = "Oui"

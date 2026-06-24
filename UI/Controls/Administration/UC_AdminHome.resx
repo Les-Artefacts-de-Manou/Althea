@@ -413,18 +413,6 @@
         uq8DLwAAAABJRU5ErkJggg==
 </value>
   </data>
-  <data name="btnRetourRoleBase.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
-        JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAC4iAAAuIgGq4t2SAAAAB3RJ
-        TUUH6gUMCgIc0p0ZlwAAASVJREFUWEftl01qQjEUhe2w4ChZR6ERuppOxYluo1vQDb2uo4WchZQDN/I8
-        5P1Irn0O3gdBOTfkfjdO4maz8oyEmHYhpn2I6eC0eNZO+1QJMZ1DTJ19ei6eedF+N9jkXQjvL1prhWea
-        xPBN2FWdNffCbmKv+RX7vR4tcND8yiowJgDgE8CH5gr3cK/mpFWAB/+MSUztaRIg1uC31mCsVmgWILUp
-        a1kNFwHSn3bO5AU3AdKbenLygqsAAfDGpfkQTQIAvgAcNVe4h3s1J00COectgA7ASWsFa/4NYKs10iRA
-        xiSsOWvV5qRZgNQkpiYvuAiQngQbT05ecBMgPYmO37Vew1WA5JxfuTQfwl3gXuYILP4kW/ZRSszyUc/y
-        ebe76B+Tlf/mD5qfZ4qMEgCgAAAAAElFTkSuQmCC
-</value>
-  </data>
   <data name="btnEleverAcces.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
@@ -441,6 +429,18 @@
         GrAdaAbeASMXjDHgD6k3sHF0tzwIjc4B18MqXA2mphtde9iiU8A14NJEGdgVTGwFfjtcMUAH0GtutqVW
         VzCAx8AKmy8awBNgzLt/wgEuhosnjh9AwuoKBvARWJcVxV1+byCRSJTYfNH4GwxU2dwk/xW/AP/SjU34
         aZ25AAAAAElFTkSuQmCC
+</value>
+  </data>
+  <data name="btnRetourRoleBase.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
+        JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAC4iAAAuIgGq4t2SAAAAB3RJ
+        TUUH6gUMCgIc0p0ZlwAAASVJREFUWEftl01qQjEUhe2w4ChZR6ERuppOxYluo1vQDb2uo4WchZQDN/I8
+        5P1Irn0O3gdBOTfkfjdO4maz8oyEmHYhpn2I6eC0eNZO+1QJMZ1DTJ19ei6eedF+N9jkXQjvL1prhWea
+        xPBN2FWdNffCbmKv+RX7vR4tcND8yiowJgDgE8CH5gr3cK/mpFWAB/+MSUztaRIg1uC31mCsVmgWILUp
+        a1kNFwHSn3bO5AU3AdKbenLygqsAAfDGpfkQTQIAvgAcNVe4h3s1J00COectgA7ASWsFa/4NYKs10iRA
+        xiSsOWvV5qRZgNQkpiYvuAiQngQbT05ecBMgPYmO37Vew1WA5JxfuTQfwl3gXuYILP4kW/ZRSszyUc/y
+        ebe76B+Tlf/mD5qfZ4qMEgCgAAAAAElFTkSuQmCC
 </value>
   </data>
   <data name="picTitre.BackgroundImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

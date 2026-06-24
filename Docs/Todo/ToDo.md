@@ -3,7 +3,7 @@
 > Backlog actionnable, aligné sur l'état réel du dépôt.
 > Plan directeur de la phase métier : `../Conception/Plan_Conception_Metier_Althea.md` (décisions actées D-13 à D-19).
 > Référence d'avancement détaillée : `Checklist_projet_V1.md`.
-> >  *Dernière mise à jour : 10/06/2026*
+> >  *Dernière mise à jour : 14/06/2026*
 
 ---
 
@@ -78,15 +78,34 @@
 
 ## C. Cœur métier V1 (objectif principal restant)
 
+### C0. Briques transverses (pré-requis cœur métier)
+
+- [ ] Ajouter une **mini-pile de navigation** (Push/Pop + conservation du dernier filtre) dans `NavigationManager` (D-Q15)
+- [ ] Créer un **hôte modal générique de référentiel** réutilisant les `UC_Ref<X>` existants, déclenché par bouton `[+]` près des combos, avec contrôle de droit + élévation (D-Q17)
+- [x] **Helper de chemins déterministes** `CheminsPatientHelper` (refactoré : `code_patient` PA000003, `PATH_GENERAL\PATH_DOCUMENT\{code}`, `AssurerDossierPatient`, `GetNomFichierPhotoIdentite`) (D-Q13 / ADR-20)
+- [x] **Migrations DB préalables** : `patients.alerte_rtf/alerte_txt` ✅, `patients.photo_fichier` ✅, `patients.anamnese_rtf/anamnese_txt` ✅ (v2.3), `tec_parametres PATH_GENERAL/PATH_DOCUMENT` ✅
+
 ### C1. Patients
 
-- [ ] Créer module métier gestion patients (`GestionPatients.vb`)
-- [ ] Créer requêtes SQL patients (`QueryPatients.vb`)
-- [ ] Créer UI recherche patients (filtres + résultats)
-- [ ] Créer UI fiche patient (onglets : identité, administratif, famille, suivi, documents, facturation, archive)
-- [ ] Implémenter le réseau d'intervenants externes (N-N via `autres_suivis_patient` + `ref_roles_intervenant`)
-- [ ] Ajouter validations et règles de saisie
+- [x] Créer module métier gestion patients (`GestionPatients.vb`) + `UpdatePhotoPatient`
+- [x] Créer requêtes SQL patients (`QueryPatients.vb`) — incl. `anamnese_rtf/txt`
+- [x] Créer UI `UC_PatientHome` (recherche multi-critères + liste rapide + bouton Nouveau)
+- [x] Créer UI fiche patient `UC_PatientFiche` — bandeau identité + onglets **Identité / Anamnèse / Famille-Contacts / Intervenants / Dossiers** ; modes Consultation/Création/Modification + activation progressive (D-Q11, D-Q14)
+- [x] Implémenter l'alerte patient RTF (`alerte_rtf/txt` via `UC_RichTextEditorSimple`, bandeau) (D-Q12)
+- [x] **Onglet Anamnèse** : `UC_RichTextEditor` complet, sauvegarde double format, export PDF/Word contextuel horodaté + ouverture auto (ADR-21)
+- [x] **Upload photo d'identité** : `btnUploadPhoto`, filtre formats GDI+, nom fixe `Identite.ext`, `AssurerDossierPatient`, MAJ `patients.photo_fichier` (D-Q13 / ADR-20)
+- [x] Implémenter validations et règles de saisie (NISS, anti-doublon nom+prénom+naissance)
+- [x] Implémenter le réseau d'intervenants externes (N-N via `autres_suivis_patient` + `ref_roles_intervenant`, rôle *Adresseur* inclus) (D-Q16) — **onglet à venir**
 - [ ] Implémenter recherche rapide depuis accueil
+
+### C1bis. Thérapeutes (référentiel riche — hub Référentiels)
+
+> Brique **Gestion des thérapeutes** livrée (modèle `Therapeute` + `QueryTherapeutes` + `GestionTherapeutes` + `UC_Therapeutes` + `TherapeuteEdition` + tuile hub). Source du futur combo des Intervenants.
+> Points d'ancrage `TODO` posés dans le code : `Therapeute.vb`, `TherapeuteEdition.vb`, `QueryTherapeutes.vb`.
+
+- [x] Brique Gestion des thérapeutes (liste + modale, soft-delete, contrôle d'usage, tuile hub Référentiels)
+- [x] **Commentaire thérapeute en RichTextEditorSimple** : transformer le commentaire (TextBox) en `UC_RichTextEditorSimple`. Implique d'ajouter un champ `.rtf` (`commentaire_rtf`, + texte brut pour la recherche) dans la table `therapeutes` et d'adapter les queries de gestion (`QueryTherapeutes` INSERT/UPDATE/SELECT) ainsi que `TherapeuteEdition`.
+- [ ] **Spécialité en table (idée à creuser — décision à prendre)** : mettre la spécialité en référentiel pour unifier la saisie (éviter les variantes). Si oui : créer/migrer la table côté base, remplacer le champ texte `specialite` par une FK, et adapter `TherapeuteEdition` (combo type-ahead + bouton `[+]`).
 
 ### C2. Dossiers
 
@@ -126,6 +145,22 @@
 
 ### D1. Documents
 
+> **Règle fondamentale (à implémenter avec la table `documents`)** : tout document **créé OU uploadé** dans
+> l'application doit avoir une **trace dans `documents`**, couplée à un **modèle de document** et à un **niveau**.
+>
+> **Niveau de document** (décision à trancher au démarrage de la brique) : `patient` (ex. anamnèse, photo
+> d'identité), `dossier`, `seance`, etc. Deux options envisagées :
+> - **Enum publique** dans le code (simple, typé), ou
+> - **Type de paramètre dans `tec_parametres`** (plus cohérent avec le reste de l'appli, valeurs configurables).
+>
+> **Points d'ancrage déjà posés dans le code** (commentaires `TODO`, à compléter à ce moment) :
+> - `UC_PatientFiche.rteAnamnese_ExportCompleted` — trace de l'export anamnèse (PDF/Word), niveau = patient.
+> - `UC_PatientFiche.btnUploadPhoto_Click` — trace de la photo d'identité, niveau = patient.
+>
+> ⚠️ **Ne pas oublier de revenir sur ces deux points** lors de la construction de la brique Documents.
+
+- [ ] **Ajouter le champ `niveau` à la table `documents`** (selon décision Enum vs paramètre ci-dessus)
+- [ ] **Brancher la traçabilité aux points d'ancrage existants** (export anamnèse + upload photo d'identité)
 - [ ] Implémenter le stockage **hors base de données** (système de fichiers, chemin déterministe calculé)
   - [ ] Flux Word local + synchronisation Google Docs à la sauvegarde
   - [ ] Export PDF
@@ -136,6 +171,12 @@
 - [ ] Implémenter recherche documents par patient/dossier/type
 - [ ] Prévoir envoi documents par email (ex. synthèse de séance)
 - [ ] Historique des envois en lien avec le patient/dossier
+
+#### Points différés (notés en cours de développement, à reprendre avec la table `documents`)
+
+- [ ] **Indicateur « dernier export » dans l'onglet Anamnèse** : afficher la date du dernier export documentaire (PDF/Word) + bouton d'ouverture directe. À alimenter par la table `documents` (et non par un scan du dossier patient), pour rester valable pour tous les types de documents. Distinguer clairement « dernier export » (fichier disque, potentiellement périmé) de la « sauvegarde » du contenu (`patients.anamnese_rtf/txt`).
+- [ ] **Nettoyage des photos d'identité multiples** : à l'upload d'une photo d'extension différente (ex. `identite.png` sur `identite.jpg` existant), les deux fichiers coexistent dans `…/Documents/{code_patient}/`. Supprimer les anciennes `identite.*` lors d'un nouvel upload pour lever toute ambiguïté.
+
 
 ### D2. Agenda
 
@@ -286,3 +327,23 @@ Il existe un site web pour Pearl : https://pearlnguyenduy.be/
 ---
 
 **Note importante** : Ces idées seront évaluées et priorisées après la livraison de la V1 stable.
+
+
+
+------
+
+> **Contact** : ***Joëlle (Manou) - Les Artefacts de Manou***
+>
+> Projet réalisé pour ma fille, Psychologue et Graphologue, pour l'aider à gérer ses patients et documents de manière structurée, fiable et évolutive.
+>
+> - Site web P.Nguyen Duy: https://pearlnguyenduy.be/
+> - mailto: `joelle@nguyen.eu`
+> - GitHub privé: Althea https://github.com/AngeljoNG/Althea
+> - GitHub public : https://github.com/Les-Artefacts-de-Manou/Althea
+
+------
+
+
+
+[TOC]
+

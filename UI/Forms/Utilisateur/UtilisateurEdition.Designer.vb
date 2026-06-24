@@ -60,14 +60,13 @@ Partial Class UtilisateurEdition
         lblCodeUtilisateur = New Label()
         lblIdentite = New Label()
         lblNomAffichage = New Label()
-        pnlTop = New Panel()
-        lblTop = New Label()
         pnlActions = New Panel()
         btnResetPassword = New Button()
         btnDeverrouiller = New Button()
         btnAnnuler = New Button()
         btnEnregistrer = New Button()
         pnlTitre = New Panel()
+        lblTop = New Label()
         lblTitreForm = New Label()
         ttMain = New ToolTip(components)
         errProvider = New ErrorProvider(components)
@@ -80,7 +79,6 @@ Partial Class UtilisateurEdition
         tblDroits.SuspendLayout()
         pnlCenter.SuspendLayout()
         tblIdentite.SuspendLayout()
-        pnlTop.SuspendLayout()
         pnlActions.SuspendLayout()
         pnlTitre.SuspendLayout()
         CType(errProvider, ComponentModel.ISupportInitialize).BeginInit()
@@ -95,20 +93,18 @@ Partial Class UtilisateurEdition
         pnlForm.Controls.Add(pnlSecurite)
         pnlForm.Controls.Add(pnlDroits)
         pnlForm.Controls.Add(pnlCenter)
-        pnlForm.Controls.Add(pnlTop)
         pnlForm.Controls.Add(pnlActions)
         pnlForm.Controls.Add(pnlTitre)
-        pnlForm.Dock = DockStyle.Fill
         pnlForm.Font = New Font("Calibri", 9F)
         pnlForm.Location = New Point(0, 0)
         pnlForm.Name = "pnlForm"
-        pnlForm.Size = New Size(884, 711)
+        pnlForm.Size = New Size(884, 667)
         pnlForm.TabIndex = 0
         ' 
         ' pnlAudit
         ' 
         pnlAudit.Controls.Add(tblAudit)
-        pnlAudit.Location = New Point(454, 381)
+        pnlAudit.Location = New Point(450, 339)
         pnlAudit.Name = "pnlAudit"
         pnlAudit.Size = New Size(422, 264)
         pnlAudit.TabIndex = 24
@@ -124,7 +120,6 @@ Partial Class UtilisateurEdition
         tblAudit.Controls.Add(txtDateCreation, 1, 1)
         tblAudit.Controls.Add(lblDateCreation, 0, 1)
         tblAudit.Controls.Add(lblAudit, 0, 0)
-        tblAudit.Dock = DockStyle.Fill
         tblAudit.Location = New Point(0, 0)
         tblAudit.Name = "tblAudit"
         tblAudit.Padding = New Padding(8)
@@ -200,7 +195,7 @@ Partial Class UtilisateurEdition
         ' pnlSecurite
         ' 
         pnlSecurite.Controls.Add(TableLayoutPanel1)
-        pnlSecurite.Location = New Point(8, 381)
+        pnlSecurite.Location = New Point(4, 339)
         pnlSecurite.Name = "pnlSecurite"
         pnlSecurite.Size = New Size(435, 264)
         pnlSecurite.TabIndex = 23
@@ -219,7 +214,6 @@ Partial Class UtilisateurEdition
         TableLayoutPanel1.Controls.Add(lblDateVerrouillage, 0, 3)
         TableLayoutPanel1.Controls.Add(txtDernierLogin, 1, 4)
         TableLayoutPanel1.Controls.Add(lblDernierLogin, 0, 4)
-        TableLayoutPanel1.Dock = DockStyle.Fill
         TableLayoutPanel1.Location = New Point(0, 0)
         TableLayoutPanel1.Name = "TableLayoutPanel1"
         TableLayoutPanel1.Padding = New Padding(8)
@@ -336,7 +330,7 @@ Partial Class UtilisateurEdition
         ' pnlDroits
         ' 
         pnlDroits.Controls.Add(tblDroits)
-        pnlDroits.Location = New Point(454, 106)
+        pnlDroits.Location = New Point(450, 64)
         pnlDroits.Name = "pnlDroits"
         pnlDroits.Size = New Size(422, 264)
         pnlDroits.TabIndex = 22
@@ -354,7 +348,6 @@ Partial Class UtilisateurEdition
         tblDroits.Controls.Add(lblRoleMaxElevation, 0, 2)
         tblDroits.Controls.Add(chkActif, 0, 3)
         tblDroits.Controls.Add(chkMustChangePassword, 1, 3)
-        tblDroits.Dock = DockStyle.Fill
         tblDroits.Location = New Point(0, 0)
         tblDroits.Name = "tblDroits"
         tblDroits.Padding = New Padding(8)
@@ -459,7 +452,7 @@ Partial Class UtilisateurEdition
         ' pnlCenter
         ' 
         pnlCenter.Controls.Add(tblIdentite)
-        pnlCenter.Location = New Point(8, 106)
+        pnlCenter.Location = New Point(4, 64)
         pnlCenter.Name = "pnlCenter"
         pnlCenter.Size = New Size(435, 264)
         pnlCenter.TabIndex = 21
@@ -477,7 +470,6 @@ Partial Class UtilisateurEdition
         tblIdentite.Controls.Add(lblCodeUtilisateur, 0, 1)
         tblIdentite.Controls.Add(lblIdentite, 0, 0)
         tblIdentite.Controls.Add(lblNomAffichage, 0, 3)
-        tblIdentite.Dock = DockStyle.Fill
         tblIdentite.Location = New Point(0, 0)
         tblIdentite.Name = "tblIdentite"
         tblIdentite.Padding = New Padding(8)
@@ -572,32 +564,9 @@ Partial Class UtilisateurEdition
         lblNomAffichage.TabIndex = 21
         lblNomAffichage.Text = "Nom Affichage"
         ' 
-        ' pnlTop
-        ' 
-        pnlTop.BackColor = Color.Transparent
-        pnlTop.Controls.Add(lblTop)
-        pnlTop.Dock = DockStyle.Top
-        pnlTop.Font = New Font("Calibri", 11F)
-        pnlTop.Location = New Point(0, 58)
-        pnlTop.Name = "pnlTop"
-        pnlTop.Padding = New Padding(8)
-        pnlTop.Size = New Size(884, 42)
-        pnlTop.TabIndex = 20
-        ' 
-        ' lblTop
-        ' 
-        lblTop.Dock = DockStyle.Fill
-        lblTop.Font = New Font("Calibri", 10F)
-        lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
-        lblTop.Location = New Point(8, 8)
-        lblTop.Name = "lblTop"
-        lblTop.Size = New Size(868, 26)
-        lblTop.TabIndex = 0
-        lblTop.Text = "Informations utilisateurs"
-        ' 
         ' pnlActions
         ' 
-        pnlActions.BackColor = Color.Transparent
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
         pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
         pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.Fixed3D
@@ -607,7 +576,7 @@ Partial Class UtilisateurEdition
         pnlActions.Controls.Add(btnEnregistrer)
         pnlActions.Dock = DockStyle.Bottom
         pnlActions.Font = New Font("Calibri", 10F)
-        pnlActions.Location = New Point(0, 651)
+        pnlActions.Location = New Point(0, 607)
         pnlActions.Name = "pnlActions"
         pnlActions.Padding = New Padding(8)
         pnlActions.Size = New Size(884, 60)
@@ -692,12 +661,23 @@ Partial Class UtilisateurEdition
         ' pnlTitre
         ' 
         pnlTitre.BackColor = Color.Transparent
+        pnlTitre.Controls.Add(lblTop)
         pnlTitre.Controls.Add(lblTitreForm)
         pnlTitre.Dock = DockStyle.Top
         pnlTitre.Location = New Point(0, 0)
         pnlTitre.Name = "pnlTitre"
         pnlTitre.Size = New Size(884, 58)
         pnlTitre.TabIndex = 4
+        ' 
+        ' lblTop
+        ' 
+        lblTop.Font = New Font("Calibri", 12F)
+        lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
+        lblTop.Location = New Point(339, 16)
+        lblTop.Name = "lblTop"
+        lblTop.Size = New Size(277, 26)
+        lblTop.TabIndex = 0
+        lblTop.Text = "Informations et gestion des utilisateurs"
         ' 
         ' lblTitreForm
         ' 
@@ -706,7 +686,7 @@ Partial Class UtilisateurEdition
         lblTitreForm.BackColor = Color.Transparent
         lblTitreForm.Font = New Font("Calibri", 15F, FontStyle.Bold)
         lblTitreForm.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
-        lblTitreForm.Location = New Point(42, 9)
+        lblTitreForm.Location = New Point(65, 9)
         lblTitreForm.Name = "lblTitreForm"
         lblTitreForm.Padding = New Padding(8, 4, 8, 4)
         lblTitreForm.Size = New Size(224, 32)
@@ -721,7 +701,7 @@ Partial Class UtilisateurEdition
         ' 
         AutoScaleDimensions = New SizeF(7F, 15F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(884, 711)
+        ClientSize = New Size(884, 668)
         Controls.Add(pnlForm)
         Name = "UtilisateurEdition"
         StartPosition = FormStartPosition.CenterParent
@@ -739,7 +719,6 @@ Partial Class UtilisateurEdition
         pnlCenter.ResumeLayout(False)
         tblIdentite.ResumeLayout(False)
         tblIdentite.PerformLayout()
-        pnlTop.ResumeLayout(False)
         pnlActions.ResumeLayout(False)
         pnlTitre.ResumeLayout(False)
         pnlTitre.PerformLayout()
@@ -755,7 +734,6 @@ Partial Class UtilisateurEdition
     Friend WithEvents btnDeverrouiller As Button
     Friend WithEvents btnAnnuler As Button
     Friend WithEvents btnEnregistrer As Button
-    Friend WithEvents pnlTop As Panel
     Friend WithEvents lblTop As Label
     Friend WithEvents pnlCenter As Panel
     Friend WithEvents pnlDroits As Panel

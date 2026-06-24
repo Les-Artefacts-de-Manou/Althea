@@ -353,7 +353,7 @@ Partial Class ConfigurationConnexion
         ' 
         ' lblConnectionResult
         ' 
-        lblConnectionResult.BackColor = Color.FromArgb(CByte(235), CByte(226), CByte(217))
+        lblConnectionResult.BackColor = Color.Transparent
         lblConnectionResult.BorderStyle = BorderStyle.Fixed3D
         lblConnectionResult.Dock = DockStyle.Fill
         lblConnectionResult.Font = New Font("Calibri", 10F)
@@ -367,7 +367,7 @@ Partial Class ConfigurationConnexion
         ' 
         ' pnlActions
         ' 
-        pnlActions.BackColor = Color.Transparent
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
         pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
         pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.Fixed3D
@@ -397,7 +397,7 @@ Partial Class ConfigurationConnexion
         ' lblTop
         ' 
         lblTop.Dock = DockStyle.Fill
-        lblTop.Font = New Font("Calibri", 10F)
+        lblTop.Font = New Font("Calibri", 12F)
         lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
         lblTop.Location = New Point(8, 8)
         lblTop.Name = "lblTop"

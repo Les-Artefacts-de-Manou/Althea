@@ -167,7 +167,7 @@ Partial Class Login
         ' 
         ' pnlActions
         ' 
-        pnlActions.BackColor = Color.Transparent
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
         pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
         pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.Fixed3D

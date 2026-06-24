@@ -399,9 +399,11 @@ Le POC documentaire a **déjà tranché** l'arborescence **niveau dossier** ; on
 ```
 
 - `{RacineDocuments}` = **paramètre `tec_parametres`** (jamais en dur). → vérifier/ajouter la clé.
-- **Niveau patient** (sans dossier) : `…/{id_patient}/Identite.jpg` (nom **fixe**, écrase la précédente) et `…/{id_patient}/Documents/…` (pièces administratives).
+- **Niveau patient** (sans dossier) : `…/{code_patient}/Identite.jpg` (nom **fixe**, écrase la précédente) et `…/{code_patient}/Documents/…` (pièces administratives).
 - **Chemin déterministe** : reconstructible depuis *(nature, `id_patient`, `id_dossier`)* — la DB n'a donc besoin que du **nom de fichier** (D-Q4).
 - Miroir Google Drive `Althea/Patients/{id}/{id}/...` **basé sur les ID**, jamais sur le chemin (cf. POC : `GetOrCreateDriveFolder`).
+
+> 🟢 **Mise à jour (ADR-20, 14/06/2026)** — Le **niveau patient** est nommé d'après le **`code_patient`** (`PA` + 6 chiffres, ex. `PA000003`), **jamais l'`id_patient` nu** (l'arborescence ci-dessus, antérieure, illustre encore `{id_patient}`). Le calcul est centralisé dans `CheminsPatientHelper` (`AssurerDossierPatient`, `GetCheminFichierPatient`). Cf. [ADR-20](../Rules/ARCHITECTURE_DECISIONS.md) et [Rules §23](../Rules/Rules.md).
 
 ### 8.2 Convention de nommage (pour sync bidirectionnelle fiable)
 
@@ -422,6 +424,8 @@ ex : Anamnese_000012_000007_20260608_142530.docx
 - Image métier = **donnée**, jamais remplacée par son PDF ; miniatures **locales uniquement**.
 - Upload Google : **CREATE si `google_file_id` absent, sinon UPDATE** (jamais recréer).
 - MIME type **toujours dynamique**.
+
+> 🟢 **ADR-21 — Export documentaire délégué par événement** : `UC_RichTextEditor` reste **générique** et ne connaît aucune règle métier. L'export contextuel (chemin déterministe `…/{code_patient}/anamnese_{code}_{yyyyMMdd_HHmmss}.ext`, ouverture du fichier) est piloté par le **conteneur** via les événements `ExportRequested`/`ExportCompleted` (abonnement déclaratif `Handles`). Sans abonné → fallback `SaveFileDialog`. Cf. [ADR-21](../Rules/ARCHITECTURE_DECISIONS.md) et [Rules §24](../Rules/Rules.md).
 
 > 🟢 **D-Q7 (acté) — deux flux d'édition de premier plan en V1** :
 > - **Flow 1 — Word local** : édition `.docx` locale, **synchro Drive dès la sauvegarde**, export PDF (cas principal au cabinet).
@@ -550,6 +554,9 @@ La DB est globalement prête. Points à **instruire** (aucun n'est bloquant pour
 | BD-8 | 🟢 **D-Q7bis — Commentaires enrichis** : `famille_contacts.commentaire` et `autres_suivis_patient.commentaire` → `commentaire_rtf` + `commentaire_txt` | Migration colonnes (les autres `commentaire` restent `text`) | **Avant Lot 2** |
 | BD-9 | 🟢 **D-Q9 — Anticipation multi-user** : ajouter `id_utilisateur` **nullable** sur `rendez_vous` et `dossiers` (FK `sec_utilisateurs`) ; prévoir `google_calendar_id` par utilisateur | Migration colonnes (aucune contrainte NOT NULL en V1) | **Avant Lot 3** (dossiers) / Lot 6 (agenda) |
 | BD-10 | **Traçabilité transfert de dossier** (D-Q10) : historiser le changement de `dossiers.id_domaine` | Via `GestionLog` (option : table `tec_transferts_dossier`) | Avant Lot 3 |
+| BD-11 | 🟢 **D-Q12 — Alerte patient enrichie** : `patients.alerte` (text) → `alerte_rtf` + `alerte_txt` (édition via `UC_RichTextEditorSimple`, recherche sur `_txt`) | Migration colonnes (cohérent ADR-15 / D-Q7bis) | **Avant Lot 2** |
+| BD-12 | 🟢 **D-Q13 — Photo patient (voie rapide)** : ajouter `patients.photo_fichier` (varchar, **nom seul**), chemin déterministe `{Racine}/Patients/{id}/…` ; intégration ultérieure via module Documents (type « Identité », même fichier, BD-1) | Migration colonne + helper de chemins | **Avant Lot 2** |
+| BD-13 | 🟢 **D-Q16 — Adresseur via réseau N-N** : abandon du champ libre `dossiers.prescripteur` au profit du rôle *Adresseur* dans `autres_suivis_patient` | Migration : retirer/ignorer la colonne (à confirmer selon données existantes) | **Avant Lot 3** |
 
 > ⚠️ **Toute modification de schéma passe par un script versionné** dans `Docs/Database/` (ADR-01) + une entrée `tec_meta_schema`.
 
@@ -573,6 +580,20 @@ La DB est globalement prête. Points à **instruire** (aucun n'est bloquant pour
 10. ~~**Q10 — Tarifs par domaine**~~ → 🟢 **ACTÉ (D-Q10)** : tarifs **différenciés par domaine** (`ref_types_seance.id_domaine`) ; **transfert de dossier** entre domaines possible, docs/notes/séances **restant attachés**, tarifs passés **figés**.
 
 > 💡 **Nouveau (D-Q1bis)** : renommage `medecins → therapeutes` + **réseau d'intervenants normalisé** (`autres_suivis_patient` devient la liaison N-N patient↔thérapeute↔rôle).
+
+---
+
+### Décisions de design « cœur métier » (actées 11/06/2026)
+
+Décisions complémentaires prises au démarrage de la section C/C1 (mécanique UX patients/dossiers) :
+
+11. 🟢 **D-Q11 — Séparation Patient / Dossier** : la **fiche patient** porte identité, photo, alerte, situation familiale, famille/contacts, réseau d'intervenants (N-N) et **liste des dossiers** ; le **dossier** porte statut, référent, notes RTF, séances, documents, RDV, paiements. **Structure d'onglets identique quel que soit le domaine** ; seul le **contenu des listes** (types de séance/tarifs, modèles de documents) est filtré par domaine.
+12. 🟢 **D-Q12 — Alerte enrichie** : `patients.alerte` traitée comme un commentaire RTF (`alerte_rtf` + `alerte_txt`) via `UC_RichTextEditorSimple` ; recherche sur `_txt`, affichage stylé en bandeau ([§12 BD-11](#12-impacts-base-de-données--ajustements-proposés)).
+13. 🟢 **D-Q13 — Photo patient (double voie)** : ajout possible **à la création ou à l'édition** via `patients.photo_fichier` (nom seul, chemin déterministe) **et** ultérieurement via le module Documents (type/modèle « Identité » pointant le même fichier) ([§12 BD-12](#12-impacts-base-de-données--ajustements-proposés)).
+14. 🟢 **D-Q14 — Fiche patient = UC plein panneau** : bandeau identité **persistant** (photo + alerte) + onglets ; modes Consultation/Création/Modification (pattern `UC_ReferentielBase`) ; **activation progressive** des onglets après obtention de l'`id_patient`.
+15. 🟢 **D-Q15 — Mini-pile de navigation** : `NavigationManager` gère un **historique Push/Pop** (chaîne PatientHome → Fiche → Dossier → retour) en conservant le dernier filtre de recherche.
+16. 🟢 **D-Q16 — Adresseur via réseau N-N** : l'adresseur/prescripteur est modélisé par le rôle *Adresseur* dans `autres_suivis_patient` ; le champ libre `dossiers.prescripteur` est **abandonné** ([§12 BD-13](#12-impacts-base-de-données--ajustements-proposés)).
+17. 🟢 **D-Q17 — Ajout de référentiel en contexte** : un bouton `[+]` près des combos référentiels ouvre l'**écran référentiel existant** (`UC_Ref<X>`) via un **hôte modal générique** (réutilisation, pas de nouvelle UI par référentiel), avec contrôle de droit + élévation (pattern `Home.btnReferentiels_Click`).
 
 ---
 

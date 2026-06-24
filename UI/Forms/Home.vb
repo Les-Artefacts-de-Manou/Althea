@@ -395,26 +395,30 @@ Public Class Home
 
     ' -------------------------------------------------------------------------------------------------
     ' Procédure  : btnPatients_Click
-    ' Version    : V1.0.0
-    ' Date       : 25/04/2026
+    ' Version    : V1.1.0
+    ' Date       : 11/06/2026
     '
     ' Rôle       :
-    ' Active l'environnement Patients (en attente d'implémentation complète).
+    ' Active l'environnement Patients en chargeant l'écran d'accueil des patients (UC_PatientHome).
     '
     ' Paramètres :
     ' - sender : Objet source de l'événement (Object)
     ' - e      : Arguments de l'événement Click (EventArgs)
     '
     ' Remarques  :
-    ' - Actuellement : sélectionne uniquement le bouton et met à jour le statut
-    ' - À terme : devra charger le UserControl de gestion des patients via NavigateTo()
+    ' - Charge une nouvelle instance de UC_PatientHome via NavigateTo() avec btnPatients sélectionné
+    ' - NavigateTo() injecte automatiquement le contexte UI partagé (IContextAwareUserControl)
     '
     ' Exceptions :
-    ' - Aucune
+    ' - Aucune gestion explicite (erreurs propagées par NavigateTo)
     ' -------------------------------------------------------------------------------------------------
     Private Sub btnPatients_Click(sender As Object, e As EventArgs) Handles btnPatients.Click
 
-        SelectHomeMenuButton(btnPatients, "Patients")
+        NavigateTo(
+            New UC_PatientHome(),
+            btnPatients,
+            "Patients"
+        )
 
     End Sub
 
@@ -767,6 +771,8 @@ Public Class Home
     ' - _navManager injecte automatiquement _uiContext aux UserControls implémentant IContextAwareUserControl
     ' - Utilisée par tous les handlers de navigation : btnAccueil_Click, btnAdmin_Click, NavigateToAccueil, etc.
     ' - Méthode centrale de navigation : toute navigation doit passer par ici pour garantir la cohérence UI
+    ' - Réinitialise l'historique de navigation (mini-pile D-Q15) : un clic sur le menu principal est une
+    '   navigation "racine" qui repart d'une chaîne de retour propre
     '
     ' Exceptions :
     ' - Aucune gestion explicite (erreurs propagées par NavigationManager)
@@ -776,6 +782,8 @@ Public Class Home
     selectedButton As Button,
     statusText As String
 )
+
+        _navManager.ClearHistory()
 
         SelectHomeMenuButton(
         selectedButton,
@@ -892,6 +900,353 @@ Public Class Home
     )
 
     End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure  : NavigateToPatients
+    ' Version    : V1.0.0
+    ' Date       : 12/06/2026
+    '
+    ' Rôle       :
+    ' Retourne vers l'écran d'accueil des patients (UC_PatientHome) avec contexte "Patients".
+    '
+    ' Paramètres :
+    ' - Aucun
+    '
+    ' Remarques  :
+    ' - Appelée publiquement par les UserControls patients (ex : UC_PatientFiche) pour revenir
+    '   à la liste lorsque l'historique de navigation est vide
+    ' - Charge une nouvelle instance de UC_PatientHome à chaque appel (pas de réutilisation)
+    '
+    ' Exceptions :
+    ' - Aucune gestion explicite (erreurs propagées par NavigateTo)
+    ' -------------------------------------------------------------------------------------------------
+    Public Sub NavigateToPatients()
+
+        NavigateTo(
+        New UC_PatientHome(),
+        btnPatients,
+        "Patients"
+    )
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure  : NavigateToPatientFiche
+    ' Version    : V1.0.0
+    ' Date       : 12/06/2026
+    '
+    ' Rôle       :
+    ' Ouvre la fiche patient (UC_PatientFiche) en empilant l'écran patients courant dans la
+    ' mini-pile de navigation (D-Q15) pour permettre un retour à la liste avec son filtre restauré.
+    '
+    ' Paramètres :
+    ' - fiche             : Fiche patient déjà instanciée et initialisée (mode défini par l'appelant) (UserControl)
+    ' - contexte          : Libellé de contexte hiérarchique à afficher (ex : "Patients > Nouveau patient") (String)
+    ' - creerEcranCourant : Fabrique recréant l'écran patients courant à l'identique au retour
+    '                       (capture le filtre par closure) (Func(Of UserControl))
+    '
+    ' Remarques  :
+    ' - Appelée publiquement par UC_PatientHome ; encapsule btnPatients (privé) et la construction
+    '   du NavigationEntry pour rester cohérent avec le menu principal
+    ' - Le bouton de menu resélectionné au retour reste btnPatients
+    '
+    ' Exceptions :
+    ' - Aucune gestion explicite (erreurs propagées par NavigateAvecHistorique)
+    ' -------------------------------------------------------------------------------------------------
+    Public Sub NavigateToPatientFiche(
+        fiche As UserControl,
+        contexte As String,
+        creerEcranCourant As Func(Of UserControl)
+    )
+
+        Dim etapeCourante As New NavigationEntry(
+            creerEcranCourant,
+            btnPatients,
+            "Patients"
+        )
+
+        NavigateAvecHistorique(
+            fiche,
+            btnPatients,
+            contexte,
+            etapeCourante
+        )
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure  : NavigateAvecHistorique
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' Rôle       :
+    ' Navigue vers une vue métier en empilant l'écran COURANT dans la mini-pile de navigation (D-Q15),
+    ' afin de permettre un retour ultérieur via NavigateRetour().
+    '
+    ' Paramètres :
+    ' - nouvelleVue    : UserControl à charger dans pnlContent (UserControl)
+    ' - boutonMenu     : Bouton du menu à marquer comme sélectionné (Button)
+    ' - contexte       : Libellé de contexte à afficher (lblContexte / stsLabelStatus) (String)
+    ' - etapeCourante  : Étape décrivant l'écran actuel (fabrique + menu + contexte + filtre) à empiler
+    '                    pour pouvoir y revenir (NavigationEntry)
+    '
+    ' Remarques  :
+    ' - Appelée par les UserControls métier pour enchaîner PatientHome → Fiche → Dossier...
+    ' - etapeCourante.CreerVue doit recréer l'écran courant à l'identique (filtre restauré par closure)
+    ' - Synchronise menu + contexte comme NavigateTo(), tout en alimentant l'historique
+    '
+    ' Exceptions :
+    ' - Aucune gestion explicite (erreurs propagées par NavigationManager)
+    ' -------------------------------------------------------------------------------------------------
+    Public Sub NavigateAvecHistorique(
+        nouvelleVue As UserControl,
+        boutonMenu As Button,
+        contexte As String,
+        etapeCourante As NavigationEntry
+    )
+
+        SelectHomeMenuButton(boutonMenu, contexte)
+
+        _navManager.NavigateAndPush(nouvelleVue, etapeCourante)
+
+        SetContexte(contexte)
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : NavigateRetour
+    ' Type       : Boolean
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' Rôle       :
+    ' Revient à l'écran précédent de la mini-pile de navigation (D-Q15) et restaure son menu et
+    ' son contexte. Le dernier filtre de recherche est rétabli via la fabrique de l'étape.
+    '
+    ' Retour     :
+    ' - True  : si un retour a eu lieu (une étape précédente existait)
+    ' - False : si l'historique était vide (aucune action)
+    '
+    ' Remarques  :
+    ' - Appelée par les UserControls métier (bouton "Retour") pour remonter la chaîne de navigation
+    ' - NavigationManager recrée la vue précédente ; Home resélectionne le bouton et réaffiche le contexte
+    '
+    ' Exceptions :
+    ' - Aucune gestion explicite (erreurs propagées par NavigationManager)
+    ' -------------------------------------------------------------------------------------------------
+    Public Function NavigateRetour() As Boolean
+
+        Dim etapePrecedente As NavigationEntry = _navManager.NavigateBack()
+
+        If etapePrecedente Is Nothing Then
+            Return False
+        End If
+
+        If etapePrecedente.MenuButton IsNot Nothing Then
+            SelectHomeMenuButton(etapePrecedente.MenuButton, etapePrecedente.Contexte)
+        End If
+
+        SetContexte(etapePrecedente.Contexte)
+
+        Return True
+
+    End Function
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : OuvrirReferentielModal
+    ' Type       : Boolean
+    ' Version    : V1.0.0
+    ' Date       : 11/06/2026
+    '
+    ' Rôle       :
+    ' Ouvre un écran de référentiel existant (UC_Ref<X>) dans une fenêtre modale générique
+    ' (ReferentielModalHost), pour permettre l'ajout d'une valeur de référentiel « en contexte »
+    ' depuis un bouton [+] près d'un combo (D-Q17). Réutilise le contrôle de droit et l'élévation
+    ' déjà en place pour l'espace Référentiels (même mécanique que btnReferentiels_Click).
+    '
+    ' Paramètres :
+    ' - vueReferentiel : UserControl de référentiel à héberger (ex : New UC_Domaines()) (UserControl)
+    ' - titre          : Titre de la fenêtre modale (ex : "Domaines") (String)
+    '
+    ' Retour     :
+    ' - True  : si le modal a été affiché (droits suffisants ou élévation acceptée)
+    ' - False : si l'accès a été refusé / annulé (aucun modal affiché)
+    '
+    ' Remarques  :
+    ' - Aucune nouvelle UI par référentiel : on réutilise les UC_Ref<X> existants (pas de duplication)
+    ' - Le contrôle de droit + élévation est centralisé ici (l'hôte modal ne gère pas la sécurité)
+    ' - L'appelant peut utiliser le retour True pour rafraîchir le combo associé après fermeture
+    '
+    ' Exceptions :
+    ' - Toutes les exceptions sont capturées, journalisées (Succinct/UI) et signalées à l'utilisateur
+    ' -------------------------------------------------------------------------------------------------
+    Public Function OuvrirReferentielModal(
+        vueReferentiel As UserControl,
+        titre As String
+    ) As Boolean
+
+        Try
+
+            If Not PeutAccederReferentielHome() Then
+
+                Dim response As DialogResult =
+                    DialogChoix.Confirmer(
+                        "Cette zone nécessite une élévation de privilèges." &
+                        Environment.NewLine &
+                        Environment.NewLine &
+                        "Souhaitez-vous ouvrir une session élevée ?",
+                        "Élévation requise"
+                    )
+
+                If response = DialogResult.No Then
+                    stsLabelStatus.Text = "Ajout de référentiel annulé."
+                    Return False
+                End If
+
+                Using frmElevation As New ElevationAcces(_userSession, _authenticatedUser)
+
+                    Dim elevationResult As DialogResult = frmElevation.ShowDialog(Me)
+
+                    If elevationResult <> DialogResult.OK Then
+                        stsLabelStatus.Text = "Élévation refusée."
+                        Return False
+                    End If
+
+                End Using
+
+                UpdateConnectedUserDisplay()
+
+            End If
+
+            Using frmHost As New ReferentielModalHost(
+                vueReferentiel,
+                titre,
+                _userSession,
+                _authenticatedUser
+            )
+
+                frmHost.ShowDialog(Me)
+
+            End Using
+
+            Return True
+
+        Catch ex As Exception
+
+            GestionLog.EcrireLog(
+                "Erreur OuvrirReferentielModal.",
+                GestionLog.LogLevel.Succinct,
+                GestionLog.LogCategory.UI,
+                ex
+            )
+
+            DialogChoix.Erreur(
+                "Erreur lors de l'ouverture du référentiel.",
+                "Erreur"
+            )
+
+            Return False
+
+        End Try
+
+    End Function
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : OuvrirCreationTherapeuteModal
+    ' Type       : Therapeute
+    ' Version    : V1.0.0
+    ' Date       : 01/07/2026
+    '
+    ' Rôle       :
+    ' Ouvre directement la Form modale de création d'un thérapeute (TherapeuteEdition), sans passer
+    ' par l'écran de liste UC_Therapeutes. Réutilise le contrôle de droit + élévation déjà en place
+    ' pour l'espace Référentiels (même mécanique que OuvrirReferentielModal). Destinée au bouton [+]
+    ' « Ajouter un thérapeute » d'IntervenantEdition : retour immédiat à l'appelant avec le thérapeute
+    ' nouvellement créé, prêt à être sélectionné dans le combo.
+    '
+    ' Paramètres :
+    ' - Aucun
+    '
+    ' Retour     :
+    ' - Le thérapeute créé (si l'enregistrement a réussi)
+    ' - Nothing : si l'accès a été refusé, l'élévation annulée ou la saisie annulée
+    '
+    ' Remarques  :
+    ' - Le contrôle de droit + élévation est centralisé ici (comme OuvrirReferentielModal)
+    ' - Le contexte UI partagé est injecté à la Form si elle implémente IContextAwareForm
+    '
+    ' Exceptions :
+    ' - Toutes les exceptions sont capturées, journalisées (Succinct/UI) et signalées à l'utilisateur
+    ' -------------------------------------------------------------------------------------------------
+    Public Function OuvrirCreationTherapeuteModal() As Therapeute
+
+        Try
+
+            If Not PeutAccederReferentielHome() Then
+
+                Dim response As DialogResult =
+                    DialogChoix.Confirmer(
+                        "Cette zone nécessite une élévation de privilèges." &
+                        Environment.NewLine &
+                        Environment.NewLine &
+                        "Souhaitez-vous ouvrir une session élevée ?",
+                        "Élévation requise"
+                    )
+
+                If response = DialogResult.No Then
+                    stsLabelStatus.Text = "Ajout de thérapeute annulé."
+                    Return Nothing
+                End If
+
+                Using frmElevation As New ElevationAcces(_userSession, _authenticatedUser)
+
+                    Dim elevationResult As DialogResult = frmElevation.ShowDialog(Me)
+
+                    If elevationResult <> DialogResult.OK Then
+                        stsLabelStatus.Text = "Élévation refusée."
+                        Return Nothing
+                    End If
+
+                End Using
+
+                UpdateConnectedUserDisplay()
+
+            End If
+
+            Using frm As New TherapeuteEdition(Nothing)
+
+                Dim contextAwareForm As IContextAwareForm = TryCast(frm, IContextAwareForm)
+                If contextAwareForm IsNot Nothing Then
+                    contextAwareForm.SetContext(_uiContext)
+                End If
+
+                If frm.ShowDialog(Me) = DialogResult.OK Then
+                    Return frm.TherapeuteEnregistre
+                End If
+
+            End Using
+
+            Return Nothing
+
+        Catch ex As Exception
+
+            GestionLog.EcrireLog(
+                "Erreur OuvrirCreationTherapeuteModal.",
+                GestionLog.LogLevel.Succinct,
+                GestionLog.LogCategory.UI,
+                ex
+            )
+
+            DialogChoix.Erreur(
+                "Erreur lors de l'ouverture de la création d'un thérapeute.",
+                "Erreur"
+            )
+
+            Return Nothing
+
+        End Try
+
+    End Function
 
 #End Region
 

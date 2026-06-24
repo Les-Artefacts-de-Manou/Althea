@@ -98,6 +98,7 @@
 - Module métier `GestionDossiers` + `QueryDossiers`
 - Gestion dossiers + statuts (actif/pause/clôturé/archivé)
 - Transitions de statuts sécurisées, réouverture (même domaine) et transfert inter-domaines
+- À brancher : les transitions de statut devront mettre à jour `patients.suivi_en_cours` (1 = au moins un dossier en cours, 0 = tous clôturés/archivés), colonne déjà exploitée par le filtre de `UC_PatientHome`
 
 **Objectif de sortie de phase :**
 - Parcours patient opérationnel minimal en production interne
@@ -276,3 +277,27 @@
 - Tests manuels complets effectués
 - Bugs identifiés et corrigés
 - Workflows validés
+
+
+
+
+
+
+
+------
+
+> **Contact** : ***Joëlle (Manou) - Les Artefacts de Manou***
+>
+> Projet réalisé pour ma fille, Psychologue et Graphologue, pour l'aider à gérer ses patients et documents de manière structurée, fiable et évolutive.
+>
+> - Site web P.Nguyen Duy: https://pearlnguyenduy.be/
+> - mailto: `joelle@nguyen.eu`
+> - GitHub privé: Althea https://github.com/AngeljoNG/Althea
+> - GitHub public : https://github.com/Les-Artefacts-de-Manou/Althea
+
+------
+
+
+
+[TOC]
+

@@ -1,6 +1,6 @@
 # Architecture technique de la base de données
 
- *Dernière mise à jour : 10/06/2026 — Lot 0 complet (référentiels + UC_RichTextEditorSimple)*
+ *Dernière mise à jour : 13/06/2026 — Migration v2.2.0 Lot 2 (contacts : ref_role_legal + famille_contacts.id_role_legal en remplacement des 4 booléens cumulables)*
 
 Document consolidé et dédupliqué à partir des sources SQL (`backup_NoData_althea.sql` et `backup_WithData_althea.sql`).
 
@@ -35,6 +35,7 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 
 - `ref_domaines`
 - `ref_liens_patient`
+- `ref_role_legal`
 - `ref_roles_intervenant`
 - `ref_situations_familiales`
 - `ref_statuts_dossier`
@@ -128,7 +129,8 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | `lieu` | `varchar(150)` | OUI | NULL | - | - | - |
 | `date_debut` | `date` | OUI | NULL | - | - | - |
 | `date_fin` | `date` | OUI | NULL | - | - | - |
-| `commentaire` | `text` | OUI | NULL | - | - | - |
+| `commentaire_rtf` | `longtext` | OUI | NULL | - | - | - |
+| `commentaire_txt` | `longtext` | OUI | NULL | - | - | - |
 | `date_creation` | `datetime NOT NULL` | NON | current_timestamp() | - | - | - |
 | `date_modification` | `datetime NOT NULL` | NON | current_timestamp() | - | - | - |
 
@@ -208,7 +210,6 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | `id_statut_dossier` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_dossiers_ref_statuts_dossier` | `ref_statuts_dossier.id_statut_dossier` | - |
 | `date_ouverture` | `date NOT NULL` | NON | - | - | - | - |
 | `date_cloture` | `date` | OUI | NULL | - | - | - |
-| `prescripteur` | `varchar(150)` | OUI | NULL | - | - | - |
 | `modalites_paiement` | `varchar(150)` | OUI | NULL | - | - | - |
 | `id_therapeute_traitant` | `bigint(20) unsigned` | OUI | NULL | FK `fk_dossiers_therapeutes` | `therapeutes.id_therapeute` | - |
 | `motif_suivi_rtf` | `longtext` | OUI | NULL | - | - | - |
@@ -236,6 +237,8 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 
 `id_lien_patient` → `ref_liens_patient.id_lien_patient`, 
 
+`id_role_legal` → `ref_role_legal.id_role_legal`, 
+
 `id_patient` → `patients.id_patient`
 
 **Références entrantes**: —
@@ -256,12 +259,10 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | `code_postal` | `varchar(20)` | OUI | NULL | - | - | - |
 | `localite` | `varchar(100)` | OUI | NULL | - | - | - |
 | `pays` | `varchar(100)` | OUI | NULL | - | - | - |
-| `autorite_parentale` | `tinyint(1) NOT NULL` | NON | 0 | - | - | - |
-| `representant_legal` | `tinyint(1) NOT NULL` | NON | 0 | - | - | - |
-| `personne_autorisee` | `tinyint(1) NOT NULL` | NON | 0 | - | - | - |
-| `contact_urgence` | `tinyint(1) NOT NULL` | NON | 0 | - | - | - |
+| `id_role_legal` | `bigint(20) unsigned NOT NULL` | NON | - | FK `fk_famille_contacts_ref_role_legal` | `ref_role_legal.id_role_legal` | - |
 | `ordre_affichage` | `int(11) NOT NULL` | NON | 0 | - | - | - |
-| `commentaire` | `text` | OUI | NULL | - | - | - |
+| `commentaire_rtf` | `longtext` | OUI | NULL | - | - | - |
+| `commentaire_txt` | `longtext` | OUI | NULL | - | - | - |
 | `date_creation` | `datetime NOT NULL` | NON | current_timestamp() | - | - | - |
 | `date_modification` | `datetime NOT NULL` | NON | current_timestamp() | - | - | - |
 
@@ -380,7 +381,12 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | `email` | `varchar(150)` | OUI | NULL | - | - | NULL |
 | `mutualite` | `varchar(100)` | OUI | NULL | - | - | NULL |
 | `id_situation_familiale` | `bigint(20) unsigned` | OUI | NULL | FK `fk_patients_ref_situations_familiales` | `ref_situations_familiales.id_situation_familiale` | 9 |
-| `alerte` | `text` | OUI | NULL | - | - | NULL |
+| `photo_fichier` | `varchar(255)` | OUI | NULL | - | - | 'Identite.jpg' |
+| `alerte_rtf` | `longtext` | OUI | NULL | - | - | NULL |
+| `alerte_txt` | `longtext` | OUI | NULL | - | - | NULL |
+| `anamnese_rtf` | `longtext` | OUI | NULL | - | - | NULL |
+| `anamnese_txt` | `longtext` | OUI | NULL | - | - | NULL |
+| suivi_en_cours | tinyint | OUI | '1' |  |  |  |
 | `date_creation` | `datetime NOT NULL` | NON | current_timestamp() | - | - | '2026-03-31 18:20:12' |
 | `date_modification` | `datetime NOT NULL` | NON | current_timestamp() | - | - | '2026-03-31 18:20:12' |
 
@@ -485,6 +491,25 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 | `libelle_lien_patient` | `varchar(100) NOT NULL` | NON | - | UQ `uq_ref_liens_patient_libelle` | - | 'Mère' |
 | `actif` | `tinyint(1) NOT NULL` | NON | 1 | - | - | 1 |
 | `ordre_affichage` | `int(11) NOT NULL` | NON | 0 | - | - | 10 |
+
+#### `ref_role_legal`
+
+**Rôle**: Référentiel des rôles légaux d'un contact (mono-valeur par contact : autorité parentale, représentant légal, personne autorisée, contact d'urgence).
+
+**Références sortantes**: —
+
+**Références entrantes**: 
+
+`famille_contacts.id_role_legal`
+
+| Champ | Type SQL | Null | Défaut / Généré | Clé / contrainte | Référence | Exemple |
+|---|---|---|---|---|---|---|
+| `id_role_legal` | `bigint(20) unsigned NOT NULL` | NON | AUTO_INCREMENT | PK | - | 1 |
+| `code_role_legal` | `varchar(30) NOT NULL` | NON | - | UQ `uq_ref_role_legal_code` | - | 'AUTORITE_PARENTALE' |
+| `libelle_role_legal` | `varchar(100) NOT NULL` | NON | - | UQ `uq_ref_role_legal_libelle` | - | 'Autorité parentale' |
+| `actif` | `tinyint(1) NOT NULL` | NON | 1 | - | - | 1 |
+| `ordre_affichage` | `int(11) NOT NULL` | NON | 0 | - | - | 10 |
+
 
 #### `ref_situations_familiales`
 
@@ -783,3 +808,27 @@ Permettre de comprendre rapidement la base, table par table, sans outil de gesti
 - Vue globale (toutes tables): `Docs/Database/Diagrams/althea_All.png`
 - Vue globale (clés): `Docs/Database/Diagrams/althea_Key.png`
 - Diagrammes détaillés par table: dossier `Docs/Database/Diagrams/`
+
+
+
+
+
+------
+
+> **Contact** : ***Joëlle (Manou) - Les Artefacts de Manou***
+>
+> Projet réalisé pour ma fille, Psychologue et Graphologue, pour l'aider à gérer ses patients et documents de manière structurée, fiable et évolutive.
+>
+> - Site web P.Nguyen Duy: https://pearlnguyenduy.be/
+> - mailto: `joelle@nguyen.eu`
+> - GitHub privé: Althea https://github.com/AngeljoNG/Althea
+> - GitHub public : https://github.com/Les-Artefacts-de-Manou/Althea
+
+------
+
+
+
+
+
+[TOC]
+

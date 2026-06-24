@@ -38,7 +38,7 @@ Friend Module Program
 
         ' Enregistrer la licence Syncfusion (Community gratuite)
         ' IMPORTANT : Remplacer "VOTRE-CLE-SYNCFUSION" par votre vraie clé de licence
-        SyncfusionLicenseProvider.RegisterLicense("my KEY")
+        SyncfusionLicenseProvider.RegisterLicense("")
 
         ' Lancement de la Form principale
         AppStartupManager.Run()

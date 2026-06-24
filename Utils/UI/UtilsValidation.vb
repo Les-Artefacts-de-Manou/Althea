@@ -31,8 +31,10 @@
 
 ' Imports :
 ' - System.Globalization
+' - System.Text.RegularExpressions
 ' -------------------------------------------------------------------------------------------------
 Imports System.Globalization
+Imports System.Text.RegularExpressions
 
 Public Module UtilsValidation
 
@@ -199,6 +201,108 @@ Public Module UtilsValidation
 
         messageErreur = "La valeur doit être une date valide."
         Return False
+
+    End Function
+
+#End Region
+
+#Region "Validations contact (email / téléphone)"
+
+    ' Expression de validation d'une adresse e-mail (souple, usage courant : un @, un domaine avec point).
+    Private ReadOnly _regexEmail As New Regex(
+        "^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        RegexOptions.Compiled Or RegexOptions.IgnoreCase
+    )
+
+    ' Caractères autorisés dans un numéro de téléphone (après nettoyage du préfixe +).
+    Private ReadOnly _regexTelephoneCaracteres As New Regex(
+        "^\+?[0-9 ./()-]+$",
+        RegexOptions.Compiled
+    )
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : IsValidEmail
+    ' Version    : V1.0.0
+    ' Date       : 12/06/2026
+    '
+    ' Rôle       : Valide qu'une adresse e-mail a un format plausible (validation souple).
+    '
+    ' Paramètres : value         - L'adresse e-mail à valider.
+    '              messageErreur - Message d'erreur en cas de validation échouée.
+    '
+    ' Retour     : True si l'e-mail est vide (champ optionnel) ou de format valide, False sinon.
+    '
+    ' Remarques  : Un e-mail vide est considéré valide ; l'obligation éventuelle est gérée par l'appelant.
+    ' -------------------------------------------------------------------------------------------------
+    Public Function IsValidEmail(value As String,
+                                 ByRef messageErreur As String) As Boolean
+
+        messageErreur = String.Empty
+
+        Dim normalized As String = If(value, "").Trim()
+
+        If normalized.Length = 0 Then
+            Return True
+        End If
+
+        If _regexEmail.IsMatch(normalized) Then
+            Return True
+        End If
+
+        messageErreur = "L'adresse e-mail n'est pas valide (format attendu : nom@domaine.ext)."
+        Return False
+
+    End Function
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction   : IsValidTelephone
+    ' Version    : V1.0.0
+    ' Date       : 12/06/2026
+    '
+    ' Rôle       : Valide souplement un numéro de téléphone (Belgique / France / Luxembourg et voisins).
+    '
+    ' Paramètres : value         - Le numéro de téléphone à valider.
+    '              messageErreur - Message d'erreur en cas de validation échouée.
+    '
+    ' Retour     : True si le numéro est vide (champ optionnel) ou plausible, False sinon.
+    '
+    ' Remarques  :
+    ' - Validation souple : accepte un préfixe international (+32, +33, +352, …), des espaces,
+    '   points, tirets, barres obliques et parenthèses ; refuse lettres et longueurs aberrantes.
+    ' - On compte les chiffres réels : entre 6 et 15 (recommandation E.164) après nettoyage.
+    ' -------------------------------------------------------------------------------------------------
+    Public Function IsValidTelephone(value As String,
+                                     ByRef messageErreur As String) As Boolean
+
+        messageErreur = String.Empty
+
+        Dim normalized As String = If(value, "").Trim()
+
+        If normalized.Length = 0 Then
+            Return True
+        End If
+
+        ' Caractères autorisés uniquement (chiffres, séparateurs courants, + en tête)
+        If Not _regexTelephoneCaracteres.IsMatch(normalized) Then
+            messageErreur = "Le numéro de téléphone contient des caractères non autorisés."
+            Return False
+        End If
+
+        ' Le + n'est autorisé qu'en première position (indicatif international)
+        If normalized.IndexOf("+"c) > 0 Then
+            messageErreur = "Le signe « + » n'est autorisé qu'en tête (indicatif international)."
+            Return False
+        End If
+
+        ' Comptage des chiffres réels
+        Dim nbChiffres As Integer = normalized.Count(Function(c) Char.IsDigit(c))
+
+        If nbChiffres < 6 OrElse nbChiffres > 15 Then
+            messageErreur = "Le numéro de téléphone doit comporter entre 6 et 15 chiffres."
+            Return False
+        End If
+
+        Return True
 
     End Function
 

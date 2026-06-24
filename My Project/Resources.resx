@@ -118,113 +118,122 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Althea_A _96x96" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Appli_Ico\Althea_A _96x96.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-    <comment>Icones de Appli et des Forms (pour l'instant)</comment>
+  <data name="NO_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\NO_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Error_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Error_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Success_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Success_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Error_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Error_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Processing_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Processing_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Fond_480x240" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Fond\Fond_480x240.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="OK_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OK_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Fond_1000x770_FeuilleCoupee1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Fond\Fond_1000x770_FeuilleCoupee1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-    <comment>Image de fond pour pnlForm (UC)</comment>
+  <data name="OFF_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OFF_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OFF_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OFF_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lock_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\Lock_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Fond_1000x800_Feuille4" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Fond\Fond_1000x800_Feuille4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
     <comment>Image de fond pour pnlForm (Forms)</comment>
   </data>
+  <data name="Fond_480x240" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Fond\Fond_480x240.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Althea_A _96x96" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Appli_Ico\Althea_A _96x96.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <comment>Icones de Appli et des Forms (pour l'instant)</comment>
+  </data>
   <data name="Fond_icone_Transp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Logos\Fond_icone_Transp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
     <comment>Logo picTitre de pnlTitre pour UC_</comment>
   </data>
-  <data name="Information_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Information_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Information_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Information_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Loading_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Loading_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Loading_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Loading_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lock_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\Lock_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lock_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\Lock_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lock_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\Lock_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lock_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\Lock_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NO_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\NO_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NO_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\NO_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NO_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\NO_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NO_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\NO_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OFF_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OFF_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OFF_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OFF_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OFF_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OFF_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OFF_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OFF_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OK_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OK_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OK_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OK_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OK_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OK_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="OK_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Tech_Ico\OK_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Processing_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Processing_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Processing_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Processing_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Warning_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Warning_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Question_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Gif_Animated\Question_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="NO_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\NO_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lock_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\Lock_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NO_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\NO_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Loading_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Loading_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Fond_1000x770_FeuilleCoupee1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Fond\Fond_1000x770_FeuilleCoupee1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <comment>Image de fond pour pnlForm (UC)</comment>
+  </data>
+  <data name="OK_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OK_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Question_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Gif_Animated\Question_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Success_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Success_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Success_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Gif_Animated\Success_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Information_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Information_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Error_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Error_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Warning_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Gif_Animated\Warning_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Warning_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Gif_Animated\Warning_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Lock_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\Lock_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Error_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Error_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OFF_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OFF_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OK_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OK_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OK_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OK_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Loading_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Loading_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Processing_88" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Processing_88.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lock_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\Lock_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NO_26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\NO_26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OFF_20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\OFF_20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Information_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Gif_Animated\Information_64.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Plus_22x22" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Ico_divers\Plus_22x22.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="patientEncours_20" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\patientEncours_20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="patientNonEncours_20" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Tech_Ico\patientNonEncours_20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

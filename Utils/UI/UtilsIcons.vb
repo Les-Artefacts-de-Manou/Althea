@@ -1,4 +1,4 @@
-' -------------------------------------------------------------------------------------------------
+﻿' -------------------------------------------------------------------------------------------------
 ' Module      : UtilsIcons
 ' Projet      : Althéa
 ' Version     : V1.0.0
@@ -150,6 +150,42 @@ Public Class UtilsIcons
             Case Else
                 Return My.Resources.NO_32x32
         End Select
+    End Function
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction : IconPatientEnCours (Shared)
+    ' Version   : V1.0.0
+    ' Date      : 19/07/2026
+    '
+    ' Rôle      :
+    ' Retourne l'icône représentant un patient dont le suivi est en cours (patientEncours_20).
+    '
+    ' Retour    :
+    ' - Image : Icône « suivi en cours » (20x20)
+    '
+    ' Remarques :
+    ' - Disponible uniquement en 20x20 (icône d'état pour la liste des patients).
+    ' -------------------------------------------------------------------------------------------------
+    Public Shared Function IconPatientEnCours() As Image
+        Return My.Resources.patientEncours_20
+    End Function
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Fonction : IconPatientNonEnCours (Shared)
+    ' Version   : V1.0.0
+    ' Date      : 19/07/2026
+    '
+    ' Rôle      :
+    ' Retourne l'icône représentant un patient dont le suivi est clôturé/archivé (patientNonEncours_20).
+    '
+    ' Retour    :
+    ' - Image : Icône « suivi clôturé / archivé » (20x20)
+    '
+    ' Remarques :
+    ' - Disponible uniquement en 20x20 (icône d'état pour la liste des patients).
+    ' -------------------------------------------------------------------------------------------------
+    Public Shared Function IconPatientNonEnCours() As Image
+        Return My.Resources.patientNonEncours_20
     End Function
 
 End Class

@@ -1,6 +1,6 @@
 # Processus Althéa - Documentation technique
 
-> *Dernière mise à jour : 10/06/2026*
+> *Dernière mise à jour : 19/06/2026*
 
 Ce document décrit les processus métier et techniques clés de l'application Althéa.
 Chaque processus est détaillé avec son statut, ses fichiers associés, et un diagramme Mermaid pour visualiser le flux.
@@ -2398,6 +2398,421 @@ flowchart TD
 
 ---
 
+# Processus 11 – Gestion des patients (liste + fiche)
+
+**Statut : Implémenté**
+
+**Traçabilité mainteneur (VB) :**
+- [`UI/Controls/Patients/UC_PatientHome.vb`](../UI/Controls/Patients/UC_PatientHome.vb)
+- [`UI/Controls/Patients/UC_PatientFiche.vb`](../UI/Controls/Patients/UC_PatientFiche.vb)
+- [`Metier/Patients/GestionPatients.vb`](../Metier/Patients/GestionPatients.vb)
+- [`Metier/Patients/Patient.vb`](../Metier/Patients/Patient.vb)
+- [`Utils/Helpers/CheminsPatientHelper.vb`](../Utils/Helpers/CheminsPatientHelper.vb)
+
+## Objectif
+
+Permettre la **recherche, la consultation, la création et la modification** d'un patient, en respectant :
+
+- la **séparation UI / métier** (aucun accès DB dans les UserControls),
+- l'**activation progressive** des onglets de la fiche dépendant de l'`id_patient` (D-Q14),
+- la **conservation du filtre de recherche** au retour depuis la fiche (mini-pile de navigation D-Q15).
+
+## Vue d'ensemble du flow
+
+1. L'utilisateur navigue vers **Patients** → `UC_PatientHome` se charge.
+2. `ChargerPatients()` alimente la grille (tri par date de modification décroissante) ; par défaut, seuls les patients **en cours** (`suivi_en_cours = 1`) sont affichés.
+3. L'utilisateur filtre en mémoire (`AppliquerFiltres`) : texte multi-critères et/ou statut de suivi (`cboFiltreSuivi` : en cours / clôturé-archivé / tous).
+4. Action **Nouveau / Modifier / Ouvrir** → `UC_PatientFiche` se charge dans le mode correspondant.
+5. La fiche affiche le bandeau identité (photo + alerte) et l'onglet Identité ; les autres onglets restent **désactivés** tant qu'aucun `id_patient` n'est obtenu.
+6. En création, `ValiderSaisie()` (champs requis, unicité NISS, détection de doublon) puis `Enregistrer()` via `GestionPatients` ; l'`id_patient` obtenu **active progressivement** les onglets Famille/Contacts, Intervenants et Dossiers.
+7. Le bouton **Fermer** revient à `UC_PatientHome` en **restaurant le filtre** précédent (D-Q15).
+
+## Étapes détaillées
+
+### 1. Liste et recherche (`UC_PatientHome`)
+
+```
+UC_PatientHome_Load()
+├── ChargerPatients()                 → GestionPatients (List(Of PatientListeItem))
+├── InitialiserFiltres()             → remplit cboFiltreSuivi (défaut « Suivi en cours »)
+├── AppliquerFiltreInitial()          → restaure le filtre mémorisé (D-Q15)
+└── AppliquerFiltres()                → filtrage en mémoire (texte + statut de suivi)
+```
+
+### 2. Ouverture de la fiche
+
+| Action     | Mode fiche    | Méthode                          |
+|------------|---------------|----------------------------------|
+| Nouveau    | Création      | `InitialiserPourCreation()`      |
+| Modifier   | Modification  | `InitialiserPourPatient()`       |
+| Ouvrir     | Consultation  | `InitialiserPourPatient()`       |
+
+### 3. Modes et activation progressive (`UC_PatientFiche`)
+
+```
+AppliquerMode(Consultation | Creation | Modification)
+└── DefinirEtatChampsIdentite()
+tabFiche_Selecting()                  → bloque les onglets dépendants sans id_patient
+Enregistrer()                         → id_patient obtenu → onglets activés (D-Q14)
+```
+
+### 4. Validation et persistance
+
+```
+ValiderSaisie()
+├── Champs requis (nom, prénom, ...)
+├── Unicité NISS
+└── ConfirmerDoublonEventuel()        → détection de doublon (nom + date naissance)
+Enregistrer() → AlimenterPatientDepuisChamps() → GestionPatients (INSERT/UPDATE)
+```
+
+### 5. Retour à la liste
+
+```
+btnFermer_Click() → RetournerListe()  → UC_PatientHome (filtre restauré, D-Q15)
+```
+
+## Règles importantes
+
+- **Aucun accès DB** dans les UserControls : tout passe par `GestionPatients`.
+- **Activation progressive** : les onglets Famille/Contacts, Intervenants et Dossiers ne sont accessibles qu'après obtention de l'`id_patient`.
+- **Filtrage en mémoire** pour la réactivité ; le filtre courant est mémorisé et restauré au retour (mini-pile D-Q15).
+- **Photo** résolue par chemin déterministe (`CheminsPatientHelper`), hors base de données.
+- L'onglet **Dossiers** reste inactif tant que la brique Dossier n'est pas implémentée. À terme, l'ouverture/clôture/archivage d'un dossier pilotera la colonne `patients.suivi_en_cours` (1 = au moins un suivi en cours, 0 = clôturé/archivé), aujourd'hui exploitée par le filtre de la liste patients.
+
+## Flowchart – Processus 11 (Gestion des patients)
+
+```mermaid
+flowchart TD
+    A[Menu Patients] --> B[UC_PatientHome\nChargerPatients]
+    B --> C[Filtrage mémoire\ntexte + statut de suivi]
+    C --> D{Action?}
+    D -->|Nouveau| E[UC_PatientFiche\nMode Création]
+    D -->|Modifier| F[UC_PatientFiche\nMode Modification]
+    D -->|Ouvrir| G[UC_PatientFiche\nMode Consultation]
+    E --> H[Onglet Identité\nautres onglets désactivés]
+    F --> H
+    G --> H
+    H --> I{Enregistrer?}
+    I -->|Non| H
+    I -->|Oui| J[ValiderSaisie\nNISS + doublon]
+    J --> K{Valide?}
+    K -->|Non| L[Erreur affichée\nRetour saisie]
+    K -->|Oui| M[GestionPatients\nINSERT/UPDATE]
+    M --> N[id_patient obtenu\nActivation progressive onglets]
+    N --> O{Fermer?}
+    O -->|Non| H
+    O -->|Oui| P[Retour UC_PatientHome\nFiltre restauré D-Q15]
+```
+
+---
+
+# Processus 12 – Gestion des contacts famille
+
+**Statut : Implémenté**
+
+**Traçabilité mainteneur (VB) :**
+- [`UI/Controls/Patients/UC_PatientFiche.vb`](../UI/Controls/Patients/UC_PatientFiche.vb)
+- [`UI/Forms/Patients/ContactEdition.vb`](../UI/Forms/Patients/ContactEdition.vb)
+- [`Metier/Patients/GestionFamilleContacts.vb`](../Metier/Patients/GestionFamilleContacts.vb)
+- [`Metier/Patients/FamilleContact.vb`](../Metier/Patients/FamilleContact.vb)
+- [`Metier/Referentiels/GestionLiensPatient.vb`](../Metier/Referentiels/GestionLiensPatient.vb)
+- [`Metier/Referentiels/GestionRoleLegal.vb`](../Metier/Referentiels/GestionRoleLegal.vb)
+
+## Objectif
+
+Gérer l'**entourage d'un patient** (table `famille_contacts`) depuis l'onglet « Famille / Contacts » de la fiche patient :
+
+- saisir un contact avec son **lien** (`ref_liens_patient`) et son **rôle légal** (`ref_role_legal`),
+- valider les coordonnées **country-aware** (téléphone / e-mail selon le pays),
+- proposer l'ajout d'un lien ou d'un rôle manquant **sans quitter la saisie** (bouton `[+]`).
+
+## Vue d'ensemble du flow
+
+1. Depuis `UC_PatientFiche`, l'onglet **Famille / Contacts** charge la grille (`ChargerContacts` → `GestionFamilleContacts`).
+2. L'utilisateur recherche/filtre les contacts en mémoire (`AppliquerFiltresContacts`).
+3. Ouverture modale `ContactEdition` (`OuvrirEditionContact`) selon l'action : **double-clic** → **consultation** (lecture seule, `ouvrirEnConsultation:=True`) ; **Ajouter** → création ; **Modifier** → édition directe. En consultation, le bouton **Modifier** du dialogue bascule en édition.
+4. Le formulaire alimente les combos Lien et Rôle légal ; les boutons `[+]` ouvrent le référentiel correspondant en modal (`Home.OuvrirReferentielModal`) avec **auto-sélection** au retour.
+5. `ValiderSaisie()` contrôle les champs requis et le téléphone/e-mail selon le pays.
+6. `Enregistrer()` persiste via `GestionFamilleContacts` ; retour `DialogResult.OK`.
+7. La fiche **recharge** la grille des contacts.
+
+## Étapes détaillées
+
+### 1. Chargement et filtrage (onglet Famille)
+
+```
+tabFiche_Selected(Famille)
+├── ChargerContacts()                 → GestionFamilleContacts (List(Of FamilleContact))
+├── AppliquerFiltresContacts()        → filtrage mémoire (CorrespondRechercheContact)
+└── RafraichirEtatBoutonsContacts()   → activation selon sélection
+```
+
+### 2. Édition d'un contact (`ContactEdition`)
+
+```
+New(...) → InitialiserCombos()
+├── ChargerLiens()                    → cboLien (ref_liens_patient)
+├── ChargerRolesLegaux()              → cboRoleLegal (ref_role_legal)
+├── SelectionnerLienParDefaut() / SelectionnerRoleParDefaut()
+└── RemplirChamps() (modification)
+```
+
+### 3. Ajout d'un référentiel via `[+]`
+
+```
+btnAjouterLien_Click()  → Home.OuvrirReferentielModal(UC_LiensPatient) → recharge + auto-sélection
+btnAjouterRole_Click()  → Home.OuvrirReferentielModal(UC_RoleLegal)    → recharge + auto-sélection
+```
+
+### 4. Validation et persistance
+
+```
+ValiderSaisie()
+├── Nom / prénom requis
+├── txtTelephone_Leave() + cboPays    → UtilsTelephone (country-aware)
+└── e-mail                            → UtilsValidation
+Enregistrer() → GestionFamilleContacts (INSERT/UPDATE) → DialogResult.OK
+```
+
+## Règles importantes
+
+- Le patient doit être **déjà enregistré** (`idPatient > 0`) — garanti par l'activation progressive de la fiche.
+- **Country-aware** : téléphone et e-mail validés selon le pays sélectionné.
+- Les boutons `[+]` réutilisent le pipeline référentiel (droits + élévation) via `Home.OuvrirReferentielModal`.
+- **Aucun accès DB** dans l'UI : tout passe par `GestionFamilleContacts`.
+- `btnCopierAdressePatient` recopie l'adresse du patient pour accélérer la saisie.
+- **Consultation d'abord** (ADR-10) : le double-clic ouvre le contact en lecture seule ; champs et boutons annexes (`[+]`, copie d'adresse) sont verrouillés jusqu'au clic sur **Modifier**. Sortie via **Fermer** (consultation) ou **Annuler** (édition).
+
+## Flowchart – Processus 12 (Contacts famille)
+
+```mermaid
+flowchart TD
+    A[UC_PatientFiche\nOnglet Famille/Contacts] --> B[ChargerContacts\nGestionFamilleContacts]
+    B --> C[Filtrage mémoire\nrecherche contacts]
+    C --> D{Action?}
+    D -->|Double-clic| P[ContactEdition\nMode Consultation]
+    D -->|Ajouter| E[ContactEdition\nMode Création]
+    D -->|Modifier| F[ContactEdition\nMode Modification]
+    D -->|Supprimer| G[Confirmation\nGestionFamilleContacts.Supprimer]
+    P -->|btnModifier| F
+    P -->|btnFermer| O
+    E --> H[Combos Lien + Rôle légal]
+    F --> H
+    H --> I{Bouton +?}
+    I -->|Oui| J[Home.OuvrirReferentielModal\nUC_LiensPatient / UC_RoleLegal]
+    J --> K[Recharge combo\nAuto-sélection]
+    K --> L[ValiderSaisie\ncountry-aware]
+    I -->|Non| L
+    L --> M{Valide?}
+    M -->|Non| H
+    M -->|Oui| N[GestionFamilleContacts\nINSERT/UPDATE]
+    N --> O[DialogResult.OK\nGrille rechargée]
+    G --> O
+```
+
+---
+
+# Processus 13 – Réseau d'intervenants du patient
+
+**Statut : Implémenté**
+
+**Traçabilité mainteneur (VB) :**
+- [`UI/Controls/Patients/UC_PatientFiche.vb`](../UI/Controls/Patients/UC_PatientFiche.vb)
+- [`UI/Forms/Patients/IntervenantEdition.vb`](../UI/Forms/Patients/IntervenantEdition.vb)
+- [`Metier/Patients/GestionSuivisIntervenants.vb`](../Metier/Patients/GestionSuivisIntervenants.vb)
+- [`Metier/Patients/SuiviIntervenant.vb`](../Metier/Patients/SuiviIntervenant.vb)
+- [`Metier/Referentiels/GestionRolesIntervenant.vb`](../Metier/Referentiels/GestionRolesIntervenant.vb)
+- [`Metier/Referentiels/GestionTherapeutes.vb`](../Metier/Referentiels/GestionTherapeutes.vb)
+
+## Objectif
+
+Gérer le **réseau de suivi pluridisciplinaire** d'un patient (table de liaison N-N `autres_suivis_patient` — D-Q1bis) depuis l'onglet « Intervenants » de la fiche patient :
+
+- rattacher un **thérapeute** du référentiel (obligatoire) au patient,
+- préciser un **rôle** d'intervenant (optionnel, `ref_roles_intervenant`),
+- documenter l'identité texte libre, la **période de suivi** et un commentaire enrichi.
+
+## Vue d'ensemble du flow
+
+1. Depuis `UC_PatientFiche`, l'onglet **Intervenants** charge la grille (`ChargerIntervenants` → `GestionSuivisIntervenants`).
+2. L'utilisateur recherche/filtre les intervenants en mémoire (`AppliquerFiltresIntervenants`).
+3. Ouverture modale `IntervenantEdition` (`OuvrirEditionIntervenant`) selon l'action : **double-clic** → **consultation** (lecture seule, `ouvrirEnConsultation:=True`) ; **Ajouter** → création ; **Modifier** → édition directe. En consultation, le bouton **Modifier** du dialogue bascule en édition.
+4. Le combo **Thérapeute** est alimenté depuis `GestionTherapeutes` ; la sélection remplit automatiquement nom/spécialité/lieu (`AppliquerSnapshotTherapeute`).
+5. Les boutons `[+]` permettent d'ajouter un thérapeute (`UC_Therapeutes`) ou un rôle (`UC_RolesIntervenant`) sans quitter la saisie.
+6. `ValiderSaisie()` impose le **thérapeute** et le nom, et contrôle la cohérence des dates.
+7. `Enregistrer()` persiste la liaison N-N via `GestionSuivisIntervenants` ; la grille est rechargée.
+
+## Étapes détaillées
+
+### 1. Chargement et filtrage (onglet Intervenants)
+
+```
+tabFiche_Selected(Intervenants)
+├── ChargerIntervenants()             → GestionSuivisIntervenants (List(Of SuiviIntervenant))
+├── AppliquerFiltresIntervenants()    → filtrage mémoire (CorrespondRechercheIntervenant)
+└── RafraichirEtatBoutonsIntervenants()
+```
+
+### 2. Édition d'un intervenant (`IntervenantEdition`)
+
+```
+New(...) → InitialiserCombos()
+├── ChargerTherapeutes()              → cboTherapeute (obligatoire)
+├── ChargerRoles()                    → cboRole (optionnel)
+└── RemplirChamps() (modification)
+cboTherapeute_SelectedIndexChanged()  → AppliquerSnapshotTherapeute() (nom/spécialité/lieu)
+```
+
+### 3. Ajout d'un référentiel via `[+]`
+
+```
+btnAjouterTherapeute_Click() → Home.OuvrirReferentielModal(UC_Therapeutes)     → recharge + auto-sélection
+btnAjouterRole_Click()       → Home.OuvrirReferentielModal(UC_RolesIntervenant) → recharge + auto-sélection
+```
+
+### 4. Validation et persistance
+
+```
+ValiderSaisie()
+├── Thérapeute requis (IdTherapeuteNonSelectionne = 0 invalide)
+├── Nom requis
+└── Cohérence des dates (début ≤ fin)
+Enregistrer() → GestionSuivisIntervenants (INSERT/UPDATE liaison N-N) → DialogResult.OK
+```
+
+## Règles importantes
+
+- **Thérapeute obligatoire** (sentinelle `IdTherapeuteNonSelectionne = 0`) ; **rôle optionnel** (`IdRoleNonPrecise = 0`).
+- Le snapshot (nom/spécialité/lieu, téléphone) est une **trace en lecture seule permanente** : il est rempli depuis le thérapeute choisi (`AppliquerSnapshotTherapeute`, neutralisé pendant le chargement par `_chargementEnCours`) et n'est jamais saisi directement.
+- Le patient doit être **déjà enregistré** (`idPatient > 0`).
+- **Aucun accès DB** dans l'UI : tout passe par `GestionSuivisIntervenants`.
+- Liaison **N-N** : un même thérapeute peut suivre plusieurs patients et inversement.
+- **Consultation d'abord** (ADR-10) : le double-clic ouvre l'intervenant en lecture seule ; combos, dates, commentaire et boutons annexes (`[+]`) sont verrouillés jusqu'au clic sur **Modifier**. Sortie via **Fermer** (consultation) ou **Annuler** (édition).
+- **Flux thérapeute « friendly »** : `btnAjouterTherapeute` ouvre **directement** la création d'un thérapeute (`Home.OuvrirCreationTherapeuteModal`) et présélectionne le thérapeute créé ; `btnVoirTherapeutes` ouvre la **liste** `UC_Therapeutes` pour consulter / compléter une fiche (bouton actif même en consultation). Les écrans de référentiel ouverts en contexte (`ReferentielModalHost`) offrent un bouton **« Fermer »** (touche Échap) pour un retour explicite sans enregistrer.
+- **Contexte UI** : `IntervenantEdition` (comme `ContactEdition`, `TherapeuteEdition`, `UtilisateurEdition`) implémente `IContextAwareForm` : statut et infobulles passent par le contexte partagé de `Home` ; l'`ErrorProvider` reste local (cf. `Rules.md` §15).
+
+## Flowchart – Processus 13 (Réseau d'intervenants)
+
+```mermaid
+flowchart TD
+    A[UC_PatientFiche\nOnglet Intervenants] --> B[ChargerIntervenants\nGestionSuivisIntervenants]
+    B --> C[Filtrage mémoire\nrecherche intervenants]
+    C --> D{Action?}
+    D -->|Double-clic| Q[IntervenantEdition\nMode Consultation]
+    D -->|Ajouter| E[IntervenantEdition\nMode Création]
+    D -->|Modifier| F[IntervenantEdition\nMode Modification]
+    D -->|Supprimer| G[Confirmation\nSupprimer liaison N-N]
+    Q -->|btnModifier| F
+    Q -->|btnFermer| P
+    E --> H[cboTherapeute obligatoire\ncboRole optionnel]
+    F --> H
+    H --> I[Sélection thérapeute\nAppliquerSnapshotTherapeute]
+    I --> J{Action thérapeute / rôle?}
+    J -->|btnAjouterTherapeute| K1[Home.OuvrirCreationTherapeuteModal\nTherapeuteEdition création directe]
+    J -->|btnVoirTherapeutes| K2[Home.OuvrirReferentielModal\nUC_Therapeutes liste / consultation]
+    J -->|btnAjouterRole| K3[Home.OuvrirReferentielModal\nUC_RolesIntervenant]
+    K1 --> L[Recharge combo\nAuto-sélection]
+    K2 --> L
+    K3 --> L
+    J -->|Aucune| M[ValiderSaisie\nthérapeute + nom + dates]
+    L --> M
+    M --> N{Valide?}
+    N -->|Non| H
+    N -->|Oui| O[GestionSuivisIntervenants\nINSERT/UPDATE N-N]
+    O --> P[DialogResult.OK\nGrille rechargée]
+    G --> P
+```
+
+---
+
+# Processus 14 – Référentiel des thérapeutes
+
+**Statut : Implémenté**
+
+**Traçabilité mainteneur (VB) :**
+- [`UI/Controls/Referentiels/UC_Therapeutes.vb`](../UI/Controls/Referentiels/UC_Therapeutes.vb)
+- [`UI/Forms/Therapeute/TherapeuteEdition.vb`](../UI/Forms/Therapeute/TherapeuteEdition.vb)
+- [`Metier/Referentiels/GestionTherapeutes.vb`](../Metier/Referentiels/GestionTherapeutes.vb)
+- [`Metier/Referentiels/Therapeute.vb`](../Metier/Referentiels/Therapeute.vb)
+
+## Objectif
+
+Gérer le **référentiel entité riche** des thérapeutes du réseau de soins. Contrairement aux référentiels simples (`code` / `libellé` héritant de `UC_ReferentielBase`), un thérapeute porte une **identité complète**, des **coordonnées country-aware** et un **commentaire**, ce qui justifie un écran de liste dédié (`UC_Therapeutes`) et une Form d'édition propre (`TherapeuteEdition`).
+
+Ce référentiel **alimente** le combo Thérapeute du Processus 13.
+
+## Vue d'ensemble du flow
+
+1. Depuis le hub `UC_ReferentielHome`, la tuile **Thérapeutes** charge `UC_Therapeutes`.
+2. `ChargerTherapeutes()` alimente la grille ; recherche et filtre « inactifs » appliqués en mémoire.
+3. Action **Nouveau / Modifier** → ouverture modale `TherapeuteEdition` (`OuvrirEdition`).
+4. `ValiderSaisie()` impose le nom et contrôle le téléphone/e-mail selon le pays.
+5. `Enregistrer()` persiste via `GestionTherapeutes` ; la liste est rechargée.
+6. **Activer/Désactiver** applique le soft-delete ; **Supprimer** n'est possible que si le thérapeute n'est référencé par aucun suivi.
+
+## Étapes détaillées
+
+### 1. Liste et recherche (`UC_Therapeutes`)
+
+```
+UC_Therapeutes_Load()
+├── ChargerTherapeutes()              → GestionTherapeutes (List(Of Therapeute))
+├── AppliquerFiltres()                → recherche + chkAfficherInactifs
+└── MettreAJourEtatBoutons()          → activation selon sélection
+```
+
+### 2. Édition d'un thérapeute (`TherapeuteEdition`)
+
+```
+New(...) → InitialiserCombos() / InitialiserFenetre()
+├── RemplirChamps() (modification)
+├── SelectionnerPays()
+└── txtTelephone_Leave() + cboPays    → UtilsTelephone (country-aware)
+ValiderSaisie() → Enregistrer() → GestionTherapeutes (INSERT/UPDATE)
+```
+
+### 3. Soft-delete et suppression
+
+```
+btnActiverDesactiver_Click() → GestionTherapeutes (soft-delete : Actif = False/True)
+btnSupprimer_Click()         → suppression physique uniquement si non référencé
+```
+
+## Règles importantes
+
+- `UC_Therapeutes` est une **entité riche**, pas un référentiel `code/libellé` : il **n'hérite pas** de `UC_ReferentielBase`.
+- **Soft-delete prioritaire** : un thérapeute référencé par `autres_suivis_patient` ne peut être que désactivé ; suppression physique seulement si non utilisé.
+- **Country-aware** : téléphone et e-mail validés selon le pays sélectionné.
+- **Aucun accès DB** dans l'UI : tout passe par `GestionTherapeutes`.
+- Accessible depuis le hub Référentiels **et** depuis le bouton `[+]` d'`IntervenantEdition`.
+
+## Flowchart – Processus 14 (Référentiel des thérapeutes)
+
+```mermaid
+flowchart TD
+    A[UC_ReferentielHome\nTuile Thérapeutes] --> B[UC_Therapeutes\nChargerTherapeutes]
+    B --> C[Recherche + filtre inactifs\nmémoire]
+    C --> D{Action?}
+    D -->|Nouveau| E[TherapeuteEdition\nMode Création]
+    D -->|Modifier| F[TherapeuteEdition\nMode Modification]
+    D -->|Activer/Désactiver| G[GestionTherapeutes\nSoft-delete]
+    D -->|Supprimer| H{Référencé\npar un suivi?}
+    H -->|Oui| I[Refus\nProposer désactivation]
+    H -->|Non| J[Suppression physique]
+    E --> K[ValiderSaisie\nnom + country-aware]
+    F --> K
+    K --> L{Valide?}
+    L -->|Non| E
+    L -->|Oui| M[GestionTherapeutes\nINSERT/UPDATE]
+    M --> N[Liste rechargée]
+    G --> N
+    I --> N
+    J --> N
+```
+
+---
+
 > **Contact** : ***Joëlle (Manou)  - Les Artefacts de Manou***
 >
 > Projet réalisé pour ma fille, Psychologue et Graphologue, pour l'aider à gérer ses patients et documents de manière structurée, fiable et évolutive.
@@ -2410,4 +2825,7 @@ flowchart TD
 >
 > ---
 
+
+
 [TOC]
+

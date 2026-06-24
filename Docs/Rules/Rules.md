@@ -1,6 +1,6 @@
 # Rules – Althéa
 
-> *Dernière mise à jour : 10/06/2026*
+> *Dernière mise à jour : 19/06/2026*
 
 ## Objectif
 Ce document fixe les règles de conception et de développement pour maintenir une application fiable, lisible et reprise facilement.
@@ -224,10 +224,21 @@ End Class
 - Utiliser `IContextAwareForm`.
 - Appeler `SetContext(...)` avant `ShowDialog(...)`.
 - Restaurer le contexte précédent après contexte temporaire.
+- **Statut et infobulles via `_context`** : router les messages de statut (`SetStatus`) et les infobulles (`SetToolTip`) vers le contexte partagé de `Home`, afin que les messages s'affichent toujours au même endroit. Prévoir un repli sur le `ToolTip` local si `_context` est `Nothing`.
+- **`ErrorProvider` conservé local** : une Form modale `ShowDialog` garde son `ErrorProvider` local (son `ContainerControl` est la modale). Un provider partagé positionnerait les icônes d'erreur sur `Home` en arrière-plan. Exception assumée à la règle « pas de composants locaux ».
+- **Init des infobulles dans `Load`** (et non le constructeur) : le contexte n'est injecté qu'après construction, via `SetContext` appelé avant `ShowDialog`.
+- Référence : `ContactEdition`, `IntervenantEdition`, `TherapeuteEdition`, `UtilisateurEdition`.
+
+### Édition d'un élément existant — consultation d'abord
+- Ouvrir un élément **existant** (double-clic en grille) en **consultation** (lecture seule) ; la **création** ouvre directement en saisie.
+- En consultation : champs **et** actions annexes (`[+]`, copie d'adresse…) désactivés ; bouton **Modifier** pour basculer en édition, bouton **Fermer** pour sortir sans rien changer.
+- Centraliser le basculement dans une méthode unique (`AppliquerMode` + `DefinirEtatChamps(editable)`) pilotée par un drapeau `ouvrirEnConsultation`.
+- Référence : `ContactEdition`, `IntervenantEdition` (cohérent avec ADR-10).
 
 ### ToolTips
 - Initialisation dans une méthode dédiée (`InitializeToolTips` ou `InitialiserToolTips`).
 - Pas de ToolTips dispersés dans les événements.
+- Dans une modale `IContextAwareForm`, router les infobulles via `_context.SetToolTip` (repli local si pas de contexte) ; appeler l'initialisation dans `Load`, pas dans le constructeur.
 
 ## 16. Règles issues de `UC_Parametres` (référence) et évolutions DialogChoix
 
@@ -508,7 +519,41 @@ ORDER BY score DESC, b.date_bilan DESC;
 - Les hooks champ supplémentaire (`ConfigurerChampSupplementaire`, etc.) sont no-op par défaut ; seul `UC_TypesSeance` les surcharge pour `tarif_defaut`.
 - Soft-delete prioritaire : si `<X>EstUtilise()` retourne `True`, désactiver uniquement (jamais supprimer physiquement).
 - Cf. ADR-18.
-- 
+
+## 23. Chemins fichiers patients — code_patient et helper unique
+
+**Principe** : Tout chemin fichier lié à un patient est calculé de façon **déterministe** par `CheminsPatientHelper`. La DB ne stocke jamais de chemin absolu, uniquement le **nom de fichier** (ADR-16 + ADR-20).
+
+### Règles
+
+- Le dossier patient est `{PATH_GENERAL}\{PATH_DOCUMENT}\{code_patient}\` (ex. `D:\Althea_Data\Documents\PA000003\`).
+- **`code_patient`** (ex. `PA000003`) est toujours utilisé, jamais l'`id_patient` nu.
+- `CheminsPatientHelper` est le **point d'entrée unique** : ne jamais construire un chemin patient manuellement.
+- **Créer le dossier** avant toute écriture : `CheminsPatientHelper.AssurerDossierPatient(codePatient)`.
+- Photo d'identité : nom déterministe `Identite.{ext}` (extension d'origine, minuscule) — une nouvelle photo remplace la précédente (`overwrite:=True`).
+- Exports documentaires : nom horodaté `{prefixe}_{code}_{yyyyMMdd_HHmmss}.{ext}` (chaque export est un fichier distinct).
+- Après un upload réussi, **mettre à jour la colonne DB** (`patients.photo_fichier`) et l'objet DTO en mémoire.
+
+### Formats d'image acceptés (PictureBox / GDI+)
+
+`.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tif`, `.tiff` — validation défensive côté code (indépendante du filtre dialogue).
+
+## 24. Export documentaire — délégation par événement (`UC_RichTextEditor`)
+
+**Principe** : `UC_RichTextEditor` reste un contrôle **générique**. L'export contextuel (chemin déterministe, nom métier) est délégué au **conteneur** via des événements — le contrôle ne connaît aucune règle métier (ADR-21).
+
+### Règles
+
+- Le contrôle lève `ExportRequested` avant l'export : le conteneur renseigne `e.DestinationPath`.
+- Si `DestinationPath` est renseigné → export direct ; sinon → fallback `SaveFileDialog` (comportement générique).
+- Le contrôle lève `ExportCompleted` après un export contextuel réussi (le conteneur peut ouvrir le fichier ou tracer).
+- L'abonnement se fait de façon **déclarative** via `Handles` (`Friend WithEvents`) — jamais via `AddHandler` dans un handler de chargement (risque d'abonnement multiple).
+- À la construction de la brique **Documents**, les handlers `ExportCompleted` et `btnUploadPhoto_Click` des conteneurs sont les **points d'ancrage** pour tracer dans la table `documents` (cf. commentaires `TODO` dans le code et `ToDo.md §D1`).
+
+### Décision différée
+
+Le **niveau de document** (`patient`, `dossier`, `seance`…) à stocker dans la table `documents` reste à arbitrer (Enum publique vs type de paramètre dans `tec_parametres`) lors du démarrage de la brique Documents.
+
 ---
 
 > **Contact**: **Joëlle (Manou) - Les Artefacts de Manou**  

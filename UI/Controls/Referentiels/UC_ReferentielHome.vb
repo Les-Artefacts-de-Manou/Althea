@@ -279,6 +279,8 @@ Public Class UC_ReferentielHome
         btnTypesDocuments.Enabled = True
         btnTypesRendezVous.Enabled = True
         btnTypesSeance.Enabled = True
+        btnRoleLegal.Enabled = True
+        btnTherapeutes.Enabled = True
 
     End Sub
 
@@ -307,12 +309,34 @@ Public Class UC_ReferentielHome
         btnTypesDocuments.Enabled = False
         btnTypesRendezVous.Enabled = False
         btnTypesSeance.Enabled = False
+        btnRoleLegal.Enabled = False
+        btnTherapeutes.Enabled = False
 
     End Sub
 
 #End Region
 
 #Region "Initialisation"
+
+    Private Sub InitialiserToolTips()
+
+        If _context Is Nothing Then Exit Sub
+
+        _context.SetToolTip(btnEleverAcces, "Élever les droits de l'utilisateur.")
+        _context.SetToolTip(btnRetourRoleBase, "Retourner au rôle de base.")
+        _context.SetToolTip(btnDomaines, "Gérer les domaines.")
+        _context.SetToolTip(btnLiensPatient, "Gérer les liens patients.")
+        _context.SetToolTip(btnRolesIntervenant, "Gérer les rôles des intervenants.")
+        _context.SetToolTip(btnSituationsFamiliales, "Gérer les situations familiales.")
+        _context.SetToolTip(btnStatutsDossier, "Gérer les statuts des dossiers.")
+        _context.SetToolTip(btnStatutsSeance, "Gérer les statuts des séances.")
+        _context.SetToolTip(btnTypesDocuments, "Gérer les types de documents.")
+        _context.SetToolTip(btnTypesRendezVous, "Gérer les types de rendez-vous.")
+        _context.SetToolTip(btnTypesSeance, "Gérer les types de séances.")
+        _context.SetToolTip(btnRoleLegal, "Gérer les rôles légaux.")
+        _context.SetToolTip(btnTherapeutes, "Gérer les thérapeutes.")
+
+    End Sub
 
     ' -------------------------------------------------------------------------------------------------
     ' Procédure  : UC_ReferentielHome_Load
@@ -354,10 +378,14 @@ Public Class UC_ReferentielHome
         UtilsButtons.InitLargeIconButton(btnTypesDocuments)
         UtilsButtons.InitLargeIconButton(btnTypesRendezVous)
         UtilsButtons.InitLargeIconButton(btnTypesSeance)
+        UtilsButtons.InitLargeIconButton(btnRoleLegal)
+        UtilsButtons.InitLargeIconButton(btnTherapeutes)
 
         'Boutons Standards
         UtilsButtons.InitStandardButton(btnEleverAcces)
         UtilsButtons.InitStandardButton(btnRetourRoleBase)
+
+        InitialiserToolTips()
 
     End Sub
 
@@ -441,6 +469,86 @@ Public Class UC_ReferentielHome
         homeForm.NavigateToReferentielView(
             New UC_LiensPatient(),
             "Liens patient"
+        )
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure  : btnRoleLegal_Click
+    ' Version    : V1.0.0
+    ' Date       : 14/06/2026
+    '
+    ' Rôle       :
+    ' Ouvre l'écran de gestion du référentiel des rôles légaux des contacts (UserControl UC_RoleLegal).
+    '
+    ' Responsabilités :
+    ' - Récupérer la Form parente Home via FindForm()
+    ' - Naviguer vers UC_RoleLegal via Home.NavigateToReferentielView()
+    '
+    ' Paramètres :
+    ' - sender : Objet source de l'événement
+    ' - e      : Arguments de l'événement
+    '
+    ' Remarques  :
+    ' - Accès réservé aux rôles SuperUser et Admin (tuile désactivée sinon)
+    '
+    ' Exceptions :
+    ' - Aucune (gestion silencieuse si Home est introuvable)
+    ' -------------------------------------------------------------------------------------------------
+    Private Sub btnRoleLegal_Click(
+        sender As Object,
+        e As EventArgs
+    ) Handles btnRoleLegal.Click
+
+        Dim homeForm = TryCast(FindForm(), Home)
+
+        If homeForm Is Nothing Then
+            Return
+        End If
+
+        homeForm.NavigateToReferentielView(
+            New UC_RoleLegal(),
+            "Rôles légaux"
+        )
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure  : btnTherapeutes_Click
+    ' Version    : V1.0.0
+    ' Date       : 16/06/2026
+    '
+    ' Rôle       :
+    ' Ouvre l'écran de gestion du référentiel des thérapeutes (UserControl UC_Therapeutes).
+    '
+    ' Responsabilités :
+    ' - Récupérer la Form parente Home via FindForm()
+    ' - Naviguer vers UC_Therapeutes via Home.NavigateToReferentielView()
+    '
+    ' Paramètres :
+    ' - sender : Objet source de l'événement
+    ' - e      : Arguments de l'événement
+    '
+    ' Remarques  :
+    ' - Accès réservé aux rôles SuperUser et Admin (tuile désactivée sinon)
+    '
+    ' Exceptions :
+    ' - Aucune (gestion silencieuse si Home est introuvable)
+    ' -------------------------------------------------------------------------------------------------
+    Private Sub btnTherapeutes_Click(
+        sender As Object,
+        e As EventArgs
+    ) Handles btnTherapeutes.Click
+
+        Dim homeForm = TryCast(FindForm(), Home)
+
+        If homeForm Is Nothing Then
+            Return
+        End If
+
+        homeForm.NavigateToReferentielView(
+            New UC_Therapeutes(),
+            "Thérapeutes"
         )
 
     End Sub
@@ -637,10 +745,7 @@ Public Class UC_ReferentielHome
     ' Exceptions :
     ' - Exception : Loguée via GestionLog ; MessageBox affiché à l'utilisateur
     ' -------------------------------------------------------------------------------------------------
-    Private Sub btnRetourRoleBase_Click(
-        sender As Object,
-        e As EventArgs
-    ) Handles btnRetourRoleBase.Click
+    Private Sub btnRetourRoleBase_Click_1(sender As Object, e As EventArgs) Handles btnRetourRoleBase.Click
 
         Try
 
@@ -658,13 +763,13 @@ Public Class UC_ReferentielHome
 
             _userSession.ResetElevation()
 
-            GestionLog.EcrireLog(
+            EcrireLog(
                 $"Retour au rôle de base ({_userSession.UserName}, rôle={_userSession.CurrentRole}).",
-                GestionLog.LogLevel.Rapide,
-                GestionLog.LogCategory.Security
+                LogLevel.Rapide,
+                LogCategory.Security
             )
 
-            Dim homeForm As Home =
+            Dim homeForm =
                 TryCast(FindForm(), Home)
 
             If homeForm IsNot Nothing Then
@@ -685,10 +790,10 @@ Public Class UC_ReferentielHome
 
         Catch ex As Exception
 
-            GestionLog.EcrireLog(
+            EcrireLog(
                 "Erreur btnRetourRoleBase_Click.",
-                GestionLog.LogLevel.Succinct,
-                GestionLog.LogCategory.Security,
+                LogLevel.Succinct,
+                LogCategory.Security,
                 ex
             )
 
@@ -730,10 +835,7 @@ Public Class UC_ReferentielHome
     ' Exceptions :
     ' - Exception : Loguée via GestionLog ; MessageBox affiché à l'utilisateur
     ' -------------------------------------------------------------------------------------------------
-    Private Sub btnEleverAcces_Click(
-        sender As Object,
-        e As EventArgs
-    ) Handles btnEleverAcces.Click
+    Private Sub btnEleverAcces_Click_1(sender As Object, e As EventArgs) Handles btnEleverAcces.Click
 
         Try
 
@@ -745,7 +847,7 @@ Public Class UC_ReferentielHome
 
             End If
 
-            Dim homeForm As Home =
+            Dim homeForm =
                 TryCast(FindForm(), Home)
 
             If homeForm Is Nothing Then
@@ -756,7 +858,7 @@ Public Class UC_ReferentielHome
 
             End If
 
-            Dim contextePrecedent As String =
+            Dim contextePrecedent =
                 homeForm.PushContexteTemporaire(
                     homeForm.BuildReferentielContexte("Élévation d'accès")
                 )
@@ -770,7 +872,7 @@ Public Class UC_ReferentielHome
 
                     frmElevation.SetContext(_context)
 
-                    Dim result As DialogResult =
+                    Dim result =
                         frmElevation.ShowDialog(homeForm)
 
                     If result <> DialogResult.OK Then
@@ -793,20 +895,20 @@ Public Class UC_ReferentielHome
 
             homeForm.UpdateConnectedUserDisplay()
 
-            GestionLog.EcrireLog(
+            EcrireLog(
                 $"Élévation appliquée depuis ReferentielHome ({_userSession.UserName} -> {_userSession.CurrentRole}).",
-                GestionLog.LogLevel.Rapide,
-                GestionLog.LogCategory.Security
+                LogLevel.Rapide,
+                LogCategory.Security
             )
 
             SetStatus($"Rôle courant : {_userSession.CurrentRole}")
 
         Catch ex As Exception
 
-            GestionLog.EcrireLog(
+            EcrireLog(
                 "Erreur btnEleverAcces_Click.",
-                GestionLog.LogLevel.Succinct,
-                GestionLog.LogCategory.Security,
+                LogLevel.Succinct,
+                LogCategory.Security,
                 ex
             )
 

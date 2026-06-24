@@ -251,7 +251,7 @@ Partial Class ChangePassword
         ' 
         ' pnlActions
         ' 
-        pnlActions.BackColor = Color.Transparent
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
         pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
         pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.Fixed3D
@@ -347,7 +347,7 @@ Partial Class ChangePassword
         lblTitreForm.BackColor = Color.Transparent
         lblTitreForm.Font = New Font("Calibri", 15F, FontStyle.Bold)
         lblTitreForm.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
-        lblTitreForm.Location = New Point(26, 9)
+        lblTitreForm.Location = New Point(30, 9)
         lblTitreForm.Margin = New Padding(2, 0, 2, 0)
         lblTitreForm.Name = "lblTitreForm"
         lblTitreForm.Padding = New Padding(6, 4, 6, 4)

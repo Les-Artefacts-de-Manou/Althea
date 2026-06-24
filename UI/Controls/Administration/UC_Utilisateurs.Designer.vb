@@ -22,7 +22,6 @@ Partial Class UC_Utilisateurs
     'Ne la modifiez pas à l'aide de l'éditeur de code.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        components = New ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(UC_Utilisateurs))
         pnlForm = New Panel()
         pnlCenter = New Panel()
@@ -62,8 +61,6 @@ Partial Class UC_Utilisateurs
         lblTop = New Label()
         lblTitreForm = New Label()
         picTitre = New PictureBox()
-        errProvider = New ErrorProvider(components)
-        ttMain = New ToolTip(components)
         pnlForm.SuspendLayout()
         pnlCenter.SuspendLayout()
         CType(dgvUtilisateurs, ComponentModel.ISupportInitialize).BeginInit()
@@ -71,7 +68,6 @@ Partial Class UC_Utilisateurs
         pnlActions.SuspendLayout()
         pnlTitre.SuspendLayout()
         CType(picTitre, ComponentModel.ISupportInitialize).BeginInit()
-        CType(errProvider, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
         ' pnlForm
@@ -249,9 +245,9 @@ Partial Class UC_Utilisateurs
         btnRechercher.ImageAlign = ContentAlignment.MiddleLeft
         btnRechercher.Location = New Point(25, 68)
         btnRechercher.Name = "btnRechercher"
-        btnRechercher.Size = New Size(120, 38)
+        btnRechercher.Size = New Size(120, 32)
         btnRechercher.TabIndex = 19
-        btnRechercher.Tag = "rechercherUser_normal"
+        btnRechercher.Tag = "recherche_24_normal"
         btnRechercher.Text = "Rechercher"
         btnRechercher.TextAlign = ContentAlignment.MiddleRight
         btnRechercher.UseVisualStyleBackColor = False
@@ -266,9 +262,9 @@ Partial Class UC_Utilisateurs
         btnReinitialiserFiltres.ImageAlign = ContentAlignment.MiddleLeft
         btnReinitialiserFiltres.Location = New Point(155, 68)
         btnReinitialiserFiltres.Name = "btnReinitialiserFiltres"
-        btnReinitialiserFiltres.Size = New Size(120, 38)
+        btnReinitialiserFiltres.Size = New Size(120, 32)
         btnReinitialiserFiltres.TabIndex = 21
-        btnReinitialiserFiltres.Tag = "resetText_normal"
+        btnReinitialiserFiltres.Tag = "reinitialiser_24_normal"
         btnReinitialiserFiltres.Text = "Réinitialiser"
         btnReinitialiserFiltres.TextAlign = ContentAlignment.MiddleRight
         btnReinitialiserFiltres.UseVisualStyleBackColor = False
@@ -361,6 +357,7 @@ Partial Class UC_Utilisateurs
         ' 
         ' pnlActions
         ' 
+        pnlActions.BackColor = Color.FromArgb(CByte(231), CByte(223), CByte(214))
         pnlActions.BackgroundImage = CType(resources.GetObject("pnlActions.BackgroundImage"), Image)
         pnlActions.BackgroundImageLayout = ImageLayout.Stretch
         pnlActions.BorderStyle = BorderStyle.Fixed3D
@@ -466,7 +463,7 @@ Partial Class UC_Utilisateurs
         ' 
         ' lblTop
         ' 
-        lblTop.Font = New Font("Calibri", 11F)
+        lblTop.Font = New Font("Calibri", 12F)
         lblTop.ForeColor = Color.FromArgb(CByte(95), CByte(125), CByte(110))
         lblTop.Location = New Point(228, 16)
         lblTop.Name = "lblTop"
@@ -499,10 +496,6 @@ Partial Class UC_Utilisateurs
         picTitre.TabIndex = 2
         picTitre.TabStop = False
         ' 
-        ' errProvider
-        ' 
-        errProvider.ContainerControl = Me
-        ' 
         ' UC_Utilisateurs
         ' 
         AutoScaleDimensions = New SizeF(7F, 15F)
@@ -523,7 +516,6 @@ Partial Class UC_Utilisateurs
         pnlTitre.ResumeLayout(False)
         pnlTitre.PerformLayout()
         CType(picTitre, ComponentModel.ISupportInitialize).EndInit()
-        CType(errProvider, ComponentModel.ISupportInitialize).EndInit()
         ResumeLayout(False)
     End Sub
 
@@ -551,8 +543,6 @@ Partial Class UC_Utilisateurs
     Friend WithEvents btnRechercher As Button
     Friend WithEvents btnReinitialiserFiltres As Button
     Friend WithEvents btnActualiser As Button
-    Friend WithEvents errProvider As ErrorProvider
-    Friend WithEvents ttMain As ToolTip
     Friend WithEvents colEtat As DataGridViewImageColumn
     Friend WithEvents colLoginUtilisateur As DataGridViewTextBoxColumn
     Friend WithEvents colNomAffichage As DataGridViewTextBoxColumn

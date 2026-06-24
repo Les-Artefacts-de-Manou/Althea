@@ -1,4 +1,4 @@
-' -------------------------------------------------------------------------------------------------
+﻿' -------------------------------------------------------------------------------------------------
 ' UserControl : UC_RichTextEditor
 ' Projet      : Althéa
 ' Version     : V1.0
@@ -13,6 +13,7 @@
 ' - Fournir une barre d'outils complète pour le formatage de texte
 ' - Exposer les propriétés RtfContent et TextContent pour sauvegarde en base de données
 ' - Gérer les événements de modification de contenu
+' - Déléguer l'export (PDF/Word) au conteneur via l'événement ExportRequested (export contextuel)
 ' - Supporter le mode lecture seule (ReadOnlyMode)
 ' - Permettre de masquer/afficher la barre d'outils (ShowToolbar)
 ' - Implémenter IContextAwareUserControl pour accès au contexte partagé
@@ -49,6 +50,23 @@ Public Class UC_RichTextEditor
     Private Const EC_LEFTMARGIN As Integer = &H1
     Private Const EC_RIGHTMARGIN As Integer = &H2
 
+    ' -------------------------------------------------------------------------------------------------
+    ' Déclaration : SendMessage
+    ' API         : user32.dll (P/Invoke)
+    '
+    ' Rôle        : Envoie un message Windows directement au handle d'un contrôle (interopérabilité Win32).
+    '               Utilisée ici avec EM_SETMARGINS (&HD3) pour définir les marges intérieures gauche
+    '               et droite du RichTextBox, fonctionnalité non exposée nativement par WinForms.
+    '
+    ' Paramètres  :
+    ' - hWnd   : Handle de la fenêtre cible (handle du RichTextBox)
+    ' - msg    : Identifiant du message Windows (ici EM_SETMARGINS = &HD3)
+    ' - wParam : Masque des marges à modifier (EC_LEFTMARGIN Or EC_RIGHTMARGIN)
+    ' - lParam : Valeurs des marges, gauche en bits 0-15 et droite en bits 16-31 (en pixels)
+    '
+    ' Retour      :
+    ' - IntPtr : Résultat du message (non utilisé pour EM_SETMARGINS)
+    ' -------------------------------------------------------------------------------------------------
     <DllImport("user32.dll", CharSet:=CharSet.Auto)>
     Private Shared Function SendMessage(hWnd As IntPtr, msg As Integer, wParam As IntPtr, lParam As IntPtr) As IntPtr
     End Function
@@ -203,6 +221,36 @@ Public Class UC_RichTextEditor
 
 #End Region
 
+#Region "Méthodes publiques"
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure  : ChargerContenu
+    ' Version    : V1.0
+    ' Date       : 14/06/2026
+    '
+    ' Rôle       : Charge le contenu de l'éditeur depuis le RTF, avec repli sur le texte brut.
+    ' Paramètres :
+    ' - rtfContent  : Contenu RTF (peut être vide/Nothing)
+    ' - txtFallback : Texte brut affiché si le RTF est vide ou invalide
+    ' Remarques  :
+    ' - Force la création du handle si nécessaire pour fiabiliser l'affectation du RTF
+    '   (un RichTextBox sans handle peut ignorer silencieusement le contenu).
+    ' - Symétrique de UC_RichTextEditorSimple.ChargerContenu (même comportement de repli).
+    ' -------------------------------------------------------------------------------------------------
+    Public Sub ChargerContenu(rtfContent As String, txtFallback As String)
+
+        If Not rtbEditor.IsHandleCreated Then
+            rtbEditor.CreateControl()
+        End If
+
+        _isLoading = True
+        RichTextEditorHelper.ChargerContenu(rtbEditor, rtfContent, txtFallback)
+        _isLoading = False
+
+    End Sub
+
+#End Region
+
 #Region "Événements"
 
     ' -------------------------------------------------------------------------------------------------
@@ -237,6 +285,43 @@ Public Class UC_RichTextEditor
     ' - Aucune
     ' -------------------------------------------------------------------------------------------------
     Public Event ContentSaved(sender As Object, e As EventArgs)
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Événement  : ExportRequested
+    ' Version    : V1.0
+    ' Date       : 14/06/2026
+    '
+    ' Rôle       :
+    ' Déclenché lorsque l'utilisateur demande un export (PDF ou Word) depuis la barre d'outils.
+    ' Permet au conteneur de décider, par délégation, de l'emplacement et du nom du fichier (export
+    ' contextuel) sans coupler le contrôle générique à une logique métier (ex. dossier patient).
+    '
+    ' Remarques  :
+    ' - Le conteneur renseigne e.DestinationPath pour un export direct (sans dialogue).
+    ' - Si aucun abonné ne fournit de chemin, le contrôle retombe sur un SaveFileDialog (générique).
+    '
+    ' Exceptions :
+    ' - Aucune
+    ' -------------------------------------------------------------------------------------------------
+    Public Event ExportRequested(sender As Object, e As ExportRequestedEventArgs)
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Événement  : ExportCompleted
+    ' Version    : V1.0
+    ' Date       : 14/06/2026
+    '
+    ' Rôle       :
+    ' Déclenché après un export contextuel (chemin fourni par le conteneur), une fois le fichier écrit.
+    ' Permet au conteneur de réagir (ouvrir le fichier, tracer le document en base ultérieurement).
+    '
+    ' Remarques  :
+    ' - Non déclenché pour le fallback dialogue (le helper gère déjà son propre retour).
+    ' - e.Success indique si l'export a réussi ; e.DestinationPath porte le chemin écrit.
+    '
+    ' Exceptions :
+    ' - Aucune
+    ' -------------------------------------------------------------------------------------------------
+    Public Event ExportCompleted(sender As Object, e As ExportCompletedEventArgs)
 
 #End Region
 
@@ -374,6 +459,13 @@ Public Class UC_RichTextEditor
 
     ' -------------------------------------------------------------------------------------------------
     ' Groupe : Presse-papiers
+    ' Version    : V1.0
+    ' Date       : 16/05/2026
+    '
+    ' Actions :
+    ' - Couper
+    ' - Copier
+    ' - Coller
     ' -------------------------------------------------------------------------------------------------
 
     Private Sub btnCut_Click(sender As Object, e As EventArgs) Handles btnCut.Click
@@ -393,8 +485,17 @@ Public Class UC_RichTextEditor
 
     ' -------------------------------------------------------------------------------------------------
     ' Groupe : Formatage de caractères
+    ' Version    : V1.0
+    ' Date       : 16/05/2026
+    '
+    ' Actions :
+    ' - Gras
+    ' - Italique
+    ' - Souligné
+    ' - Barre
+    ' - Couleur
+    ' - Highlight
     ' -------------------------------------------------------------------------------------------------
-
     Private Sub btnBold_Click(sender As Object, e As EventArgs) Handles btnBold.Click
         RichTextEditorHelper.BasculerGras(rtbEditor)
         rtbEditor.Focus()
@@ -437,6 +538,12 @@ Public Class UC_RichTextEditor
 
     ' -------------------------------------------------------------------------------------------------
     ' Groupe : Police
+    ' Version    : V1.0
+    ' Date       : 16/05/2026
+    '
+    ' Actions :
+    ' - Changer la police
+    ' - Changer la taille de la police
     ' -------------------------------------------------------------------------------------------------
 
     Private Sub cmbFontFamily_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFontFamily.SelectedIndexChanged
@@ -458,6 +565,16 @@ Public Class UC_RichTextEditor
 
     ' -------------------------------------------------------------------------------------------------
     ' Groupe : Paragraphe
+    ' Version    : V1.0
+    ' Date       : 16/05/2026
+    '
+    ' Actions :
+    ' - Aligner à gauche
+    ' - Aligner au centre
+    ' - Aligner à droite
+    ' - Basculer les puces
+    ' - Augmenter le retrait
+    ' - Diminuer le retrait
     ' -------------------------------------------------------------------------------------------------
 
     Private Sub btnAlignLeft_Click(sender As Object, e As EventArgs) Handles btnAlignLeft.Click
@@ -492,6 +609,13 @@ Public Class UC_RichTextEditor
 
     ' -------------------------------------------------------------------------------------------------
     ' Groupe : Actions
+    ' Version    : V1.0
+    ' Date       : 16/05/2026
+    '
+    ' Actions :
+    ' - Annuler
+    ' - Annuler
+    ' - Effacer le formatage
     ' -------------------------------------------------------------------------------------------------
 
     Private Sub btnUndo_Click(sender As Object, e As EventArgs) Handles btnUndo.Click
@@ -509,12 +633,17 @@ Public Class UC_RichTextEditor
     End Sub
 
     Private Sub btnClearFormatting_Click(sender As Object, e As EventArgs) Handles btnClearFormatting.Click
-        RichTextEditorHelper.EffacerFormatage(rtbEditor)
+        EffacerFormatage(rtbEditor)
         rtbEditor.Focus()
     End Sub
 
     ' -------------------------------------------------------------------------------------------------
     ' Groupe : Insertion
+    ' Version    : V1.0
+    ' Date       : 16/05/2026
+    '
+    ' Actions :
+    ' - Inserer une date et une heure
     ' -------------------------------------------------------------------------------------------------
 
     Private Sub btnInsertDateTime_Click(sender As Object, e As EventArgs) Handles btnInsertDateTime.Click
@@ -524,6 +653,14 @@ Public Class UC_RichTextEditor
 
     ' -------------------------------------------------------------------------------------------------
     ' Groupe : Outils
+    ' Version    : V1.0
+    ' Date       : 16/05/2026
+    '
+    ' Actions :
+    ' - Imprimer
+    ' - Configurer la mise en page
+    ' - Exporter en PDF
+    ' - Exporter en Word
     ' -------------------------------------------------------------------------------------------------
 
     Private Sub btnPrint_Click(sender As Object, e As EventArgs) Handles btnPrint.Click
@@ -537,13 +674,59 @@ Public Class UC_RichTextEditor
     End Sub
 
     Private Sub btnExportPDF_Click(sender As Object, e As EventArgs) Handles btnExportPDF.Click
-        RichTextEditorHelper.ExporterPDFAvecDialogue(rtbEditor, "Notes_Althea.pdf")
+        DemanderExport(ExportFormat.Pdf, "Notes_Althea.pdf")
         rtbEditor.Focus()
     End Sub
 
     Private Sub btnExportWord_Click(sender As Object, e As EventArgs) Handles btnExportWord.Click
-        RichTextEditorHelper.ExporterWordAvecDialogue(rtbEditor, "Notes_Althea.docx")
+        DemanderExport(ExportFormat.Word, "Notes_Althea.docx")
         rtbEditor.Focus()
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure  : DemanderExport
+    ' Version    : V1.0
+    ' Date       : 14/06/2026
+    '
+    ' Rôle       :
+    ' Centralise la logique d'export par délégation : lève ExportRequested pour laisser le conteneur
+    ' fournir un chemin de destination (export contextuel). Si un chemin est fourni, exporte
+    ' directement ; sinon, retombe sur le SaveFileDialog générique (comportement par défaut).
+    '
+    ' Paramètres :
+    ' - format          : Format d'export demandé (Pdf ou Word)
+    ' - nomFichierInitial : Nom proposé par défaut pour le fallback dialogue
+    '
+    ' Remarques  :
+    ' - Le contrôle reste générique : il ne connaît pas la règle de nommage/dossier du conteneur.
+    ' -------------------------------------------------------------------------------------------------
+    Private Sub DemanderExport(format As ExportFormat, nomFichierInitial As String)
+
+        Dim args As New ExportRequestedEventArgs(format, nomFichierInitial)
+        RaiseEvent ExportRequested(Me, args)
+
+        Dim cheminFourni As Boolean = Not String.IsNullOrWhiteSpace(args.DestinationPath)
+
+        Select Case format
+
+            Case ExportFormat.Pdf
+                If cheminFourni Then
+                    Dim ok As Boolean = RichTextEditorHelper.ExporterPDF(rtbEditor, args.DestinationPath)
+                    RaiseEvent ExportCompleted(Me, New ExportCompletedEventArgs(format, args.DestinationPath, ok))
+                Else
+                    RichTextEditorHelper.ExporterPDFAvecDialogue(rtbEditor, nomFichierInitial)
+                End If
+
+            Case ExportFormat.Word
+                If cheminFourni Then
+                    Dim ok As Boolean = RichTextEditorHelper.ExporterWord(rtbEditor, args.DestinationPath)
+                    RaiseEvent ExportCompleted(Me, New ExportCompletedEventArgs(format, args.DestinationPath, ok))
+                Else
+                    RichTextEditorHelper.ExporterWordAvecDialogue(rtbEditor, nomFichierInitial)
+                End If
+
+        End Select
+
     End Sub
 
 #End Region
@@ -696,5 +879,80 @@ Public Class UC_RichTextEditor
     End Sub
 
 #End Region
+
+End Class
+
+' -------------------------------------------------------------------------------------------------
+' Enum        : ExportFormat
+' Projet      : Althéa
+' Version     : V1.0
+' Date        : 14/06/2026
+'
+' Rôle        :
+' Formats d'export proposés par UC_RichTextEditor (utilisés dans ExportRequestedEventArgs).
+' -------------------------------------------------------------------------------------------------
+Public Enum ExportFormat
+    Pdf
+    Word
+End Enum
+
+' -------------------------------------------------------------------------------------------------
+' Classe      : ExportRequestedEventArgs
+' Projet      : Althéa
+' Version     : V1.0
+' Date        : 14/06/2026
+'
+' Rôle        :
+' Arguments de l'événement ExportRequested : transporte le format demandé et permet au conteneur
+' de fournir, par délégation, le chemin de destination (export contextuel).
+'
+' Propriétés  :
+' - Format          : Format d'export demandé (Pdf ou Word)
+' - NomFichierInitial : Nom proposé par défaut pour le fallback dialogue (lecture seule)
+' - DestinationPath : Chemin complet de destination, renseigné par le conteneur (Nothing = fallback)
+'
+' Remarques   :
+' - Si DestinationPath reste Nothing/vide après l'événement, le contrôle ouvre un SaveFileDialog.
+' -------------------------------------------------------------------------------------------------
+Public Class ExportRequestedEventArgs
+    Inherits EventArgs
+
+    Public ReadOnly Property Format As ExportFormat
+    Public ReadOnly Property NomFichierInitial As String
+    Public Property DestinationPath As String
+
+    Public Sub New(exportFormat As ExportFormat, nomFichierInitial As String)
+        Me.Format = exportFormat
+        Me.NomFichierInitial = nomFichierInitial
+    End Sub
+
+End Class
+
+' -------------------------------------------------------------------------------------------------
+' Classe      : ExportCompletedEventArgs
+' Projet      : Althéa
+' Version     : V1.0
+' Date        : 14/06/2026
+'
+' Rôle        :
+' Arguments de l'événement ExportCompleted : informe le conteneur de la fin d'un export contextuel.
+'
+' Propriétés  :
+' - Format          : Format exporté (Pdf ou Word)
+' - DestinationPath : Chemin complet du fichier écrit
+' - Success         : Indique si l'export a réussi
+' -------------------------------------------------------------------------------------------------
+Public Class ExportCompletedEventArgs
+    Inherits EventArgs
+
+    Public ReadOnly Property Format As ExportFormat
+    Public ReadOnly Property DestinationPath As String
+    Public ReadOnly Property Success As Boolean
+
+    Public Sub New(exportFormat As ExportFormat, destinationPath As String, success As Boolean)
+        Me.Format = exportFormat
+        Me.DestinationPath = destinationPath
+        Me.Success = success
+    End Sub
 
 End Class

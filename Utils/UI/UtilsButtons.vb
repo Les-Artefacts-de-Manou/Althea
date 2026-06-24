@@ -46,6 +46,7 @@ Module UtilsButtons
     Private Enum ButtonImageFolder
         Standard32
         Standard48
+        StandardDivers
     End Enum
 
     ' Dictionnaire pour stocker le dossier d'images associé à chaque bouton standard
@@ -110,6 +111,17 @@ Module UtilsButtons
 
     End Sub
 
+    Public Sub InitDiversIconButton(
+        btn As Button
+    )
+
+        InitStandardButton(
+            btn,
+            ButtonImageFolder.StandardDivers
+        )
+
+    End Sub
+
     ' -------------------------------------------------------------------------------------------------
     ' Procédure  : InitStandardButton (Privée)
     ' Version    : V1.0.0
@@ -158,7 +170,7 @@ Module UtilsButtons
         btn.FlatAppearance.BorderSize = 0
         btn.FlatAppearance.MouseOverBackColor = UITheme.ButtonStandardBackHover
         btn.FlatAppearance.MouseDownBackColor = UITheme.ButtonStandardBackDown
-        btn.FlatAppearance.BorderColor = btn.BackColor
+        ' btn.FlatAppearance.BorderColor = btn.BackColor
         btn.UseMnemonic = False
         btn.UseVisualStyleBackColor = False
 
@@ -513,14 +525,17 @@ Module UtilsButtons
 ) As String
 
         If btn IsNot Nothing AndAlso
-       _buttonImageFolders.ContainsKey(btn) AndAlso
-       _buttonImageFolders(btn) = ButtonImageFolder.Standard48 Then
-
-            Return UITheme.AssetsStandardButton48Path
+       _buttonImageFolders.ContainsKey(btn) Then
+            Select Case _buttonImageFolders(btn)
+                Case ButtonImageFolder.Standard48
+                    Return UITheme.AssetsStandardButton48Path
+                Case ButtonImageFolder.StandardDivers
+                    Return UITheme.AssetsStandardButtonDiversPath
+                Case ButtonImageFolder.Standard32
+                    Return UITheme.AssetsStandardButton32Path
+            End Select
 
         End If
-
-        Return UITheme.AssetsStandardButton32Path
 
     End Function
 

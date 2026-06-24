@@ -1320,3 +1320,23 @@ pas appliquées de manière rigide.
 **Toute nouvelle classe/form/module doit suivre ces standards.**
 
 *Dernière mise à jour : 16/05/2026*
+
+
+
+------
+
+> **Contact** : ***Joëlle (Manou) - Les Artefacts de Manou***
+>
+> Projet réalisé pour ma fille, Psychologue et Graphologue, pour l'aider à gérer ses patients et documents de manière structurée, fiable et évolutive.
+>
+> - Site web P.Nguyen Duy: https://pearlnguyenduy.be/
+> - mailto: `joelle@nguyen.eu`
+> - GitHub privé: Althea https://github.com/AngeljoNG/Althea
+> - GitHub public : https://github.com/Les-Artefacts-de-Manou/Althea
+
+------
+
+
+
+[TOC]
+

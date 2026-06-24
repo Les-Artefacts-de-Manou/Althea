@@ -218,10 +218,29 @@ Public Class UtilisateurEdition
     ' -------------------------------------------------------------------------------------------------
     Private Sub InitialiserToolTips()
 
-        ttMain.SetToolTip(btnEnregistrer, "Enregistrer les modifications.")
-        ttMain.SetToolTip(btnAnnuler, "Fermer sans enregistrer.")
-        ttMain.SetToolTip(btnDeverrouiller, "Déverrouiller le compte utilisateur.")
-        ttMain.SetToolTip(btnResetPassword, "Réinitialiser le mot de passe utilisateur.")
+        DefinirToolTip(btnEnregistrer, "Enregistrer les modifications.")
+        DefinirToolTip(btnAnnuler, "Fermer sans enregistrer.")
+        DefinirToolTip(btnDeverrouiller, "Déverrouiller le compte utilisateur.")
+        DefinirToolTip(btnResetPassword, "Réinitialiser le mot de passe utilisateur.")
+
+    End Sub
+
+    ' -------------------------------------------------------------------------------------------------
+    ' Procédure : DefinirToolTip
+    ' Version   : V1.0.0
+    ' Date      : 01/07/2026
+    '
+    ' Rôle      :
+    ' Définit une infobulle en privilégiant le contexte partagé de Home (_context) pour harmoniser
+    ' le comportement ; repli sur le ToolTip local (ttMain) si aucun contexte n'est injecté.
+    ' -------------------------------------------------------------------------------------------------
+    Private Sub DefinirToolTip(control As Control, message As String)
+
+        If _context IsNot Nothing Then
+            _context.SetToolTip(control, message)
+        Else
+            ttMain.SetToolTip(control, message)
+        End If
 
     End Sub
 

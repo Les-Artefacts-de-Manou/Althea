@@ -111,7 +111,6 @@ Public Class DialogChoix
     ' - ArgumentNullException si aucun bouton n'est configuré
     '
     ' -------------------------------------------------------------------------------------------------
-
     Public Sub SetBoutons(bouton1 As String)
         btn1.Text = bouton1
         btn2.Visible = False
@@ -188,7 +187,6 @@ Public Class DialogChoix
     ' Remarques  :
     ' - Cette procédure est appelée lors du chargement de la form
     ' -----------------------------------------------------------------------------------------------
-
     Private Sub AppliquerTheme()
 
         'Panel
@@ -231,7 +229,6 @@ Public Class DialogChoix
     ' - Les icônes sont chargées depuis My.Resources 
     ' - Gif animés 
     ' -----------------------------------------------------------------------------------------------
-
     Private Sub AfficherIcone()
 
         Try
@@ -269,7 +266,6 @@ Public Class DialogChoix
     ' Remarques  :
     ' - Cette procédure est appelée lors du chargement de la form
     ' -----------------------------------------------------------------------------------------------
-
     Private Sub AjusterTaille()
         ' Mesurer la taille du texte
         Dim graphics As Graphics = lblMessage.CreateGraphics()
@@ -526,8 +522,6 @@ Public Class DialogChoix
         dlg.SetBoutons("Oui", "Non", "Annuler")
         Return dlg.ShowDialog()
     End Function
-
-
 
 #End Region
 

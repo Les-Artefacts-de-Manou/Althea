@@ -321,6 +321,20 @@ Public Class UC_AdminHome
 
     End Sub
 
+    Private Sub InitialiserToolTips()
+
+        If _context Is Nothing Then Exit Sub
+
+        _context.SetToolTip(btnEleverAcces, "Élever les droits de l'utilisateur.")
+        _context.SetToolTip(btnRetourRoleBase, "Retourner au rôle de base.")
+        _context.SetToolTip(btnParametres, "Ouvrir les paramètres de l'application.")
+        _context.SetToolTip(btnUtilisateurs, "Gérer les utilisateurs et leur rôle.")
+        _context.SetToolTip(btnLogs, "Afficher les journaux d'activité.")
+        _context.SetToolTip(btnSauvegardes, "Gérer les sauvegardes de l'application.")
+        _context.SetToolTip(btnConnexionDatabase, "Configurer la connexion à la base de données.")
+
+    End Sub
+
     ' -------------------------------------------------------------------------------------------------
     ' Procédure  : DesactiverTousLesBoutonsAdmin
     ' Version    : V1.2.0
@@ -392,6 +406,9 @@ Public Class UC_AdminHome
         'Boutons Standards
         UtilsButtons.InitStandardButton(btnEleverAcces)
         UtilsButtons.InitStandardButton(btnRetourRoleBase)
+
+        'ToolTips
+        InitialiserToolTips()
 
     End Sub
 
@@ -599,10 +616,7 @@ Public Class UC_AdminHome
     ' Exceptions :
     ' - Exception : Loguée via GestionLog ; MessageBox affiché à l'utilisateur
     ' -------------------------------------------------------------------------------------------------
-    Private Sub btnRetourRoleBase_Click(
-        sender As Object,
-        e As EventArgs
-    ) Handles btnRetourRoleBase.Click
+    Private Sub btnRetourRoleBase_Click_1(sender As Object, e As EventArgs) Handles btnRetourRoleBase.Click
 
         Try
 
@@ -623,13 +637,13 @@ Public Class UC_AdminHome
 
             _userSession.ResetElevation()
 
-            GestionLog.EcrireLog(
+            EcrireLog(
             $"Retour au rôle de base ({_userSession.UserName}, rôle={_userSession.CurrentRole}).",
-            GestionLog.LogLevel.Rapide,
-            GestionLog.LogCategory.Security
+            LogLevel.Rapide,
+            LogCategory.Security
         )
 
-            Dim homeForm As Home =
+            Dim homeForm =
             CType(FindForm(), Home)
 
             If homeForm IsNot Nothing Then
@@ -657,10 +671,10 @@ Public Class UC_AdminHome
 
         Catch ex As Exception
 
-            GestionLog.EcrireLog(
+            EcrireLog(
             "Erreur btnRetourRoleBase_Click.",
-            GestionLog.LogLevel.Succinct,
-            GestionLog.LogCategory.Security,
+            LogLevel.Succinct,
+            LogCategory.Security,
             ex
         )
 
@@ -702,10 +716,7 @@ Public Class UC_AdminHome
     ' Exceptions :
     ' - Exception : Loguée via GestionLog ; MessageBox affiché à l'utilisateur
     ' -------------------------------------------------------------------------------------------------
-    Private Sub btnEleverAcces_Click(
-        sender As Object,
-        e As EventArgs
-    ) Handles btnEleverAcces.Click
+    Private Sub btnEleverAcces_Click_1(sender As Object, e As EventArgs) Handles btnEleverAcces.Click
 
         Try
 
@@ -719,7 +730,7 @@ Public Class UC_AdminHome
 
             End If
 
-            Dim homeForm As Home =
+            Dim homeForm =
             TryCast(FindForm(), Home)
 
             If homeForm Is Nothing Then
@@ -732,7 +743,7 @@ Public Class UC_AdminHome
 
             End If
 
-            Dim contextePrecedent As String =
+            Dim contextePrecedent =
             homeForm.PushContexteTemporaire(
                 homeForm.BuildAdminContexte("Élévation d'accès")
             )
@@ -746,7 +757,7 @@ Public Class UC_AdminHome
 
                     frmElevation.SetContext(_context)
 
-                    Dim result As DialogResult =
+                    Dim result =
                     frmElevation.ShowDialog(homeForm)
 
                     If result <> DialogResult.OK Then
@@ -771,10 +782,10 @@ Public Class UC_AdminHome
 
             homeForm.UpdateConnectedUserDisplay()
 
-            GestionLog.EcrireLog(
+            EcrireLog(
             $"Élévation appliquée depuis AdminHome ({_userSession.UserName} -> {_userSession.CurrentRole}).",
-            GestionLog.LogLevel.Rapide,
-            GestionLog.LogCategory.Security
+            LogLevel.Rapide,
+            LogCategory.Security
         )
 
             If _context IsNot Nothing Then
@@ -783,10 +794,10 @@ Public Class UC_AdminHome
 
         Catch ex As Exception
 
-            GestionLog.EcrireLog(
+            EcrireLog(
             "Erreur btnEleverAcces_Click.",
-            GestionLog.LogLevel.Succinct,
-            GestionLog.LogCategory.Security,
+            LogLevel.Succinct,
+            LogCategory.Security,
             ex
         )
 

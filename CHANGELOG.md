@@ -1,6 +1,511 @@
 ﻿# 📌 **Althéa - CHANGELOG**
 
->  *Dernière mise à jour : 06/06/2026*
+>  *Dernière mise à jour : 23/07/2026*
+
+## 📅 23/07/2026
+
+### 🧹 Refactorisation : centralisation des helpers d'accès aux données (`DbHelper`)
+
+#### Contexte
+- Les fonctions utilitaires de lecture (`Lire*`) et de conversion vers paramètre SQL (`Valeur*`) étaient **dupliquées à l'identique** dans 4 modules métier (`GestionPatients`, `GestionFamilleContacts`, `GestionSuivisIntervenants`, `GestionTherapeutes`), soit ~21 fonctions redondantes.
+
+#### Nouveau module centralisé
+- **`Core/Database/DbHelper.vb`** (nouveau, `Public Module`) : regroupe 10 fonctions partagées appelables sans qualification depuis toute la couche métier.
+  - Lecture : `LireString`, `LireInt`, `LireBool`, `LireDateNullable`, `LireLongNullable`, `LireULongNullable`.
+  - Écriture : `ValeurOuDBNull`, `ValeurDateOuDBNull`, `ValeurLongOuDBNull`, `ValeurULongOuDBNull`.
+
+#### Suppression des doublons
+- **`Metier/Referentiels/GestionTherapeutes.vb`** : −3 helpers privés (`LireString`, `LireBool`, `ValeurOuDBNull`).
+- **`Metier/Patients/GestionFamilleContacts.vb`** : −6 helpers privés (`LireString`, `LireInt`, `LireBool`, `LireDateNullable`, `ValeurOuDBNull`, `ValeurDateOuDBNull`).
+- **`Metier/Patients/GestionSuivisIntervenants.vb`** : −5 helpers privés (`LireString`, `LireULongNullable`, `LireDateNullable`, `ValeurOuDBNull`, `ValeurDateOuDBNull`) ; `ValeurULongOuDBNull` promu dans `DbHelper`.
+- **`Metier/Patients/GestionPatients.vb`** : −7 helpers privés (`LireString`, `LireInt`, `LireDateNullable`, `LireLongNullable`, `ValeurOuDBNull`, `ValeurDateOuDBNull`, `ValeurLongOuDBNull`).
+
+#### Note technique (VB.NET)
+- Les membres `Private` d'un `Module` restent visibles pour la résolution des appels **non qualifiés** des autres modules : la migration ne pouvait donc pas se faire fichier par fichier. Tous les doublons ont été retirés en une seule passe pour ne laisser qu'un unique candidat `Public` dans `DbHelper`. Aucun site d'appel n'a eu besoin d'être modifié.
+
+#### Build & qualité
+- ✅ Build réussi. Encodage UTF-8 avec BOM conservé sur tous les fichiers `.vb` (nouveau module inclus).
+
+---
+
+## 📅 21/07/2026
+
+### 🩺 P3 - Patients : filtre de statut de suivi (`suivi_en_cours`) et icône d'état dans la liste
+
+#### Brique 1 - Champ `suivi_en_cours` propagé du modèle à la liste
+- **`Metier/Patients/PatientListeItem.vb`** : nouvelle propriété `SuiviEnCours As Boolean` (1 = suivi en cours, 0 = clôturé/archivé).
+- **`Core/Database/Queries/QueryPatients.vb`** : `p.suivi_en_cours` ajouté au `SELECT` et au `GROUP BY` de `SelectPatientsListe`.
+- **`Metier/Patients/GestionPatients.vb`** : mapping `MapListeItem` enrichi (`.SuiviEnCours = LireInt(reader, "suivi_en_cours") <> 0`, robuste pour un `TINYINT(1)`). La valeur par défaut à la création reste gérée par la base (`DEFAULT 1`, aucun champ fourni à l'INSERT applicatif).
+
+#### Brique 2 - Filtre de suivi à 3 états dans `UC_PatientHome`
+- **`UI/Controls/Patients/UC_PatientHome.vb`** + **`.Designer.vb`** : remplacement de la case `chkAvecDossiersActifs` (basée sur `NbDossiersActifs`, inopérante tant que les dossiers ne sont pas implémentés) par une **ComboBox `cboFiltreSuivi`** à choix exclusif : **« Suivi en cours »** (défaut, `suivi_en_cours = 1`), **« Suivi clôturé / archivé »** (`= 0`), **« Tous »** (sans filtre de statut). Constantes d'index `FiltreSuiviEnCours` / `FiltreSuiviCloture` / `FiltreSuiviTous` ; remplissage via `InitialiserFiltres()`.
+- **`AppliquerFiltres()`** : filtrage en mémoire par `Select Case` sur le statut, cumulable avec la recherche texte. Le bouton **Réinitialiser** revient à l'état par défaut (texte vide + « Suivi en cours »).
+- **Mini-pile D-Q15** : `CreerEcranCourant()` / `RestaurerFiltre()` / `AppliquerFiltreInitial()` migrés de `Boolean` (dossiers actifs) vers un index entier (statut de suivi), avec garde de bornes à la réinjection.
+
+#### Brique 3 - Colonne icône de statut dans la grille
+- **`UI/Controls/Patients/UC_PatientHome.Designer.vb`** : colonnes `colNbDossiers` / `colNbDossiersActifs` retirées ; nouvelle colonne image **`colStatutSuivi`** placée en **première position** (largeur 50, non redimensionnable, centrée, `NullValue = Nothing`).
+- **`dgvPatients_CellFormatting`** (V1.1.0) : rendu de l'icône selon `PatientListeItem.SuiviEnCours` via `UtilsIcons.IconPatientEnCours()` / `IconPatientNonEnCours()`.
+- **`My Project/Resources.resx`** + **`Resources.Designer.vb`** : déclaration des icônes `patientEncours_20` et `patientNonEncours_20` (depuis `Assets/Tech_Ico`).
+- **`Utils/UI/UtilsIcons.vb`** : helpers `IconPatientEnCours()` / `IconPatientNonEnCours()` (icônes 20x20).
+
+### RichTextEditor et RichTextEditorSimple
+- Changement des icones dans la boîte à outil deouis /Assets/Editor_ico (export PDF / Word, copier/coller, gras/italique/souligné, puces, alignement etc..) - 24x24 ou 22x22 selon l'outil dans RichTextEditor ou 18x18 dans RichTextEditorSimple.
+- ajout d'un outil "Couleur" dans RichTextEditorSimple
+
+#### Documentation
+- **`Docs/UI/Documentation_technique_UI_Althea.md`** : section `UC_PatientHome` actualisée (responsabilités, variables privées, contrôles, colonnes, méthodes et points d'attention) pour refléter le filtre de suivi et la colonne d'état.
+
+#### Build & qualité
+- ✅ Build réussi. Encodage UTF-8 avec BOM conservé sur tous les fichiers `.vb` modifiés.
+
+---
+
+## 📅 19/07/2026
+
+### 🤝 I2 - Onglet Intervenants : flux thérapeute « friendly » + harmonisation du contexte UI des modales
+
+#### Brique 1 - Ajout / consultation des thérapeutes depuis `IntervenantEdition`
+- **`UI/Forms/Home.vb`** : ajout de `OuvrirCreationTherapeuteModal()` - ouvre directement `TherapeuteEdition` en création (avec gating de droits/élévation et injection du contexte UI partagé), puis retourne le `Therapeute` créé (ou `Nothing`). Évite le détour par l'écran de liste.
+- **`UI/Forms/Patients/IntervenantEdition.vb`** + **`.Designer.vb`** : le bouton `[+]` (`btnAjouterTherapeute`) ouvre désormais **directement** la création d'un thérapeute et présélectionne le thérapeute créé dans le combo. Ajout d'un second bouton **`btnVoirTherapeutes`** (icône `recherche_24` via `UtilsButtons.InitDiversIconButton`) qui ouvre la **liste** `UC_Therapeutes` pour consulter / compléter une fiche, puis recharge le combo en préservant la sélection. Le bouton « voir liste » reste actif même en consultation (consultation pure, non destructive).
+- **`UI/Forms/Communs/ReferentielModalHost.vb`** : ajout d'une barre d'actions basse (`DockStyle.Bottom`) avec un bouton **« Fermer »** (style standard sauge, `Tag = fermer_normal`) pour un retour explicite vers l'écran appelant lorsqu'aucun enregistrement n'est effectué (parcours / consultation d'un référentiel en contexte). Bouton ancré à droite et repositionné dynamiquement au redimensionnement ; touche **Échap** (`CancelButton`) ; `DialogResult.Cancel` à la fermeture. L'enregistrement réussi continue de fermer automatiquement la fenêtre.
+
+#### Brique 2 - Harmonisation du contexte UI des modales (`ttMain` / `stsStatus`)
+- **Constat d'audit** : les `UserControls` (`UC_*`) utilisent déjà tous le contexte partagé `UserControlContext` (`_context`). Les `ToolTip` / `ErrorProvider` locaux restants ne subsistent que dans `Home` (propriétaire des composants partagés), dans les forms autonomes de connexion / sécurité (`Login`, `ChangePassword`, `ElevationAcces`, `ConfigurationConnexion` - ouvertes hors contexte Home) et dans les 4 modales `ShowDialog`.
+- **`UI/Forms/Patients/ContactEdition.vb`**, **`IntervenantEdition.vb`**, **`TherapeuteEdition.vb`** : implémentent désormais `IContextAwareForm` (champ `_context` + `SetContext`). L'initialisation des infobulles est déplacée du constructeur vers un handler `Load` (le contexte n'est injecté qu'après construction). Les infobulles passent par un helper `DefinirToolTip` qui privilégie `_context.SetToolTip` avec **repli** sur le `ToolTip` local si aucun contexte n'est injecté. Ajout d'un message de statut de confirmation à l'enregistrement (`_context.SetStatus`), affiché dans la barre de statut partagée de `Home`.
+- **`UI/Forms/Utilisateur/UtilisateurEdition.vb`** : ses infobulles passent par le même helper `DefinirToolTip` (déjà `IContextAwareForm`, init en `Load`).
+- **`errProvider` conservé local** dans les 4 modales : les icônes d'erreur doivent se positionner sur la fenêtre modale elle-même, pas sur `Home` en arrière-plan (`ContainerControl` distinct).
+- **`UI/Controls/Patients/UC_PatientFiche.vb`** + **`UI/Controls/Referentiels/UC_Therapeutes.vb`** : injection de `SetContext(_context)` avant `ShowDialog` aux points d'ouverture des modales (`ContactEdition`, `IntervenantEdition`, `TherapeuteEdition`), pour que les infobulles et le statut transitent par le contexte partagé.
+
+#### Build & qualité
+- ✅ Build réussi. Encodage UTF-8 avec BOM conservé sur tous les fichiers `.vb` modifiés.
+
+---
+
+## 📅 18/06/2026
+
+### 🧭 P2 - Patients : navigation contextuelle, périmètre des actions et consultation d'abord
+
+#### Brique 1 - Fil d'Ariane dynamique de la fiche patient
+- **`UC_PatientFiche.vb`** : ajout de `RafraichirContexteNavigation()` - met à jour l'en-tête de navigation de `Home` (`UserControlContext.SetHeader`) au format `Patients > {patient} > {onglet}`. Le segment patient vaut « Nouveau patient » tant qu'aucun `id_patient` n'est obtenu ; le segment onglet provient de `tabFiche.SelectedTab.Text`. N'écrit pas dans `stsStatus` (réservé aux messages d'action).
+
+#### Brique 2 - Périmètre des actions « niveau fiche »
+- **`UC_PatientFiche.vb`** : ajout de `AppliquerVisibiliteActionsFiche()` - les boutons maîtres (Nouveau / Modifier / Enregistrer / Annuler) ne s'affichent que sur l'onglet **Identité**, selon le mode (consultation/édition), pour éviter la confusion d'un double panneau d'actions. Le bouton **`btnFermer`** est renommé « Retour liste » et reste visible sur tous les onglets.
+
+#### Brique 3 - Édition locale de l'anamnèse
+- **`Core/Database/Queries/QueryPatients.vb`** + **`Metier/Patients/GestionPatients.vb`** : ajout d'une mise à jour ciblée `UpdateAnamnesePatient(idPatient, anamneseRtf, anamneseTxt)` (colonnes `anamnese_rtf` / `anamnese_txt` uniquement), sur le modèle de `UpdatePhotoPatient`.
+- **`UC_PatientFiche.vb`** + **`.Designer.vb`** : panneau local `pnlAnamneseActions` (Modifier / Enregistrer / Annuler) et `AppliquerModeAnamnese()` - cycle d'édition local indépendant du mode global. L'édition locale n'est proposée qu'en **consultation** d'un patient enregistré ; en Création / Modification globale, l'anamnèse est éditable directement (flux global) et le panneau local reste masqué. Suivi des modifications locales (`_modeEditionAnamnese`) avec avertissement sur « Retour liste » si des changements sont en attente ; le changement d'onglet n'avertit pas (persistance conservée).
+
+#### Brique 4 - Consultation d'abord pour les dialogues Contacts / Intervenants
+- **`UI/Forms/Patients/ContactEdition.vb`** + **`.Designer.vb`** : ajout des boutons **`btnModifier`** / **`btnFermer`** dans `pnlAction`, du champ `_consultation` et des méthodes `AppliquerMode()` / `DefinirEtatChamps(editable)`. Le constructeur reçoit un paramètre `Optional ouvrirEnConsultation As Boolean = False`. En consultation, tous les champs et boutons annexes (`[+]` lien/rôle, copie d'adresse) sont verrouillés ; le commentaire passe en `ReadOnlyMode`. Icônes des nouveaux boutons chargées au runtime via `UtilsButtons.InitStandardButton` (Assets `modifier_normal` / `fermer_normal`, sans modification des `.resx`).
+- **`UI/Forms/Patients/IntervenantEdition.vb`** + **`.Designer.vb`** : même refactor consultation-first. Les champs snapshot (`txtNomProfessionnel`, `txtSpecialite`, `txtLieu`, `txtTelephone`) restent `ReadOnly` en permanence (trace pilotée par la sélection du thérapeute), seuls les vrais contrôles de saisie (`cboTherapeute`, `cboRole`, dates, commentaire) et les boutons `[+]` sont verrouillés/déverrouillés selon le mode.
+- **`UC_PatientFiche.vb`** : `OuvrirEditionContact` et `OuvrirEditionIntervenant` propagent `ouvrirEnConsultation` au dialogue. Le **double-clic** sur une grille ouvre en consultation (`ouvrirEnConsultation:=True`) ; les boutons **Ajouter** (création) et **Modifier** de la grille conservent l'ouverture directe en édition.
+- **Tooltips** : `btnModifier` (« Passer en modification… ») et `btnFermer` (« Fermer la consultation sans modifier. ») renseignés sur les deux dialogues.
+
+#### Documentation
+- **`Docs/UI/Documentation_technique_UI_Althea.md`** : sections `ContactEdition` et `IntervenantEdition` enrichies (rôle général, contrôles `btnModifier`/`btnFermer`, méthodes `AppliquerMode`/`DefinirEtatChamps`, point d'attention « consultation d'abord »).
+- **`Docs/UI/Process_Althea.md`** : processus Contacts / Intervenants complétés avec le cycle consultation → Modifier → édition.
+- **`Docs/Rules/ARCHITECTURE_DECISIONS.md`** : ADR-10 étendu (modes d'édition distincts généralisés aux dialogues modaux patients via le motif « consultation d'abord »).
+
+#### Build & qualité
+- ✅ Build réussi. Encodage UTF-8 avec BOM conservé sur tous les fichiers `.vb` modifiés.
+
+---
+
+## 📅 15/06/2026
+
+### 🤝 I1 - Réseau d'intervenants du patient + référentiel Thérapeutes (migration v2.4 - lots 1 & 2)
+
+#### Migration de schéma - Référentiel Thérapeutes et liaison N-N
+- **Table `therapeutes`** (référentiel *entité riche*) : identité complète (nom, prénom, spécialité), coordonnées country-aware (téléphone, e-mail, adresse, code postal, localité, pays), `actif` (soft-delete) et `commentaire`.
+- **Table `ref_role_legal`** : référentiel des rôles légaux des contacts (autorité parentale, représentant légal, …), `code` (max 30) / `libellé`, `ordre_affichage`, `actif` - rôle minimum d'accès `SuperUser`.
+- **Table de liaison N-N `autres_suivis_patient`** (D-Q1bis) : rattache un patient à un thérapeute du référentiel, avec rôle d'intervenant (`ref_roles_intervenant`, optionnel), identité texte libre (nom/praticien, spécialité, lieu), période de suivi (dates début/fin optionnelles) et commentaire enrichi (RTF + texte).
+- **Table `famille_contacts`** : contacts de l'entourage du patient (lien `ref_liens_patient`, rôle légal `ref_role_legal`, coordonnées country-aware, commentaire enrichi).
+
+#### Brique 1 - Couche métier référentiel Thérapeutes
+- **`Metier/Referentiels/Therapeute.vb`** : modèle métier riche (identité, coordonnées, `Actif`, commentaire).
+- **`Metier/Referentiels/GestionTherapeutes.vb`** : service CRUD complet (liste actifs/tous, recherche, insertion, mise à jour, soft-delete, suppression physique conditionnelle, test d'usage).
+- **`Core/Database/Queries/QueryTherapeutes.vb`** : requêtes SQL centralisées (SELECT, INSERT, UPDATE, soft-delete, DELETE, COUNT usage).
+
+#### Brique 2 - Référentiel Rôles légaux
+- **`Metier/Referentiels/RoleLegal.vb` + `GestionRoleLegal.vb`** : modèle et service (unicité code/libellé, soft-delete prioritaire).
+- **`UI/Controls/Referentiels/UC_RoleLegal.vb`** : UserControl héritant de `UC_ReferentielBase` (métadonnées + 6 points d'extension Données) - 11ᵉ tuile du hub `UC_ReferentielHome`.
+
+#### Brique 3 - Écran de liste Thérapeutes (entité riche)
+- **`UI/Controls/Referentiels/UC_Therapeutes.vb`** : écran de liste dédié (ne dérive **pas** de `UC_ReferentielBase`) - recherche/filtre en mémoire, filtre « inactifs », CRUD, soft-delete prioritaire, suppression physique uniquement si non référencé.
+- **`UI/Forms/Therapeute/TherapeuteEdition.vb`** : Form modale d'édition (identité, coordonnées country-aware via `UtilsTelephone`/`UtilsValidation`, état actif, commentaire).
+- Intégrée au hub Référentiels (`UC_ReferentielHome` : 9 → **11 tuiles**) et accessible via le bouton `[+]` d'`IntervenantEdition`.
+
+#### Brique 4 - Contacts famille (onglet Famille de la fiche patient)
+- **`Metier/Patients/FamilleContact.vb` + `GestionFamilleContacts.vb`** : modèle et service de persistance des contacts.
+- **`UI/Forms/Patients/ContactEdition.vb`** : Form modale (combos Lien + Rôle légal avec boutons `[+]`, coordonnées country-aware, commentaire enrichi `UC_RichTextEditorSimple`, copie de l'adresse patient).
+- **`UC_PatientFiche.vb`** : onglet **Famille / Contacts** branché (grille `dgvContacts`, recherche, CRUD délégué à `ContactEdition`).
+
+#### Brique 5 - Réseau d'intervenants (onglet Intervenants de la fiche patient)
+- **`Metier/Patients/SuiviIntervenant.vb` + `GestionSuivisIntervenants.vb`** : modèle et service de la liaison N-N `autres_suivis_patient`.
+- **`UI/Forms/Patients/IntervenantEdition.vb`** : Form modale - **thérapeute obligatoire** (sentinelle `IdTherapeuteNonSelectionne = 0`), rôle optionnel (`IdRoleNonPrecise = 0`), auto-remplissage nom/spécialité/lieu depuis le thérapeute choisi (`AppliquerSnapshotTherapeute`, neutralisé pendant le chargement par `_chargementEnCours`), période de suivi, commentaire enrichi, boutons `[+]` (thérapeute + rôle).
+- **`UC_PatientFiche.vb`** : onglet **Intervenants** branché (grille `dgvIntervenants`, recherche, CRUD délégué à `IntervenantEdition`).
+
+#### Refactor phase 2 - Harmonisation patients/référentiels
+- **Activation progressive** (D-Q14) consolidée dans `UC_PatientFiche` : les onglets Famille/Contacts, Intervenants et Dossiers ne s'activent qu'après obtention de l'`id_patient`.
+- **Mini-pile de navigation** (D-Q15) : `UC_PatientHome` conserve et restaure le filtre de recherche au retour depuis la fiche (`CreerEcranCourant`, `RestaurerFiltre`, `AppliquerFiltreInitial`).
+- **Réutilisation du pipeline référentiel** : les boutons `[+]` de `ContactEdition` et `IntervenantEdition` passent par `Home.OuvrirReferentielModal` (gestion des droits + élévation), avec rechargement de combo et auto-sélection au retour.
+- **Country-aware généralisé** : téléphone (`UtilsTelephone`) et e-mail (`UtilsValidation`) validés selon le pays sur les trois Forms (`ContactEdition`, `IntervenantEdition`, `TherapeuteEdition`).
+
+#### Documentation
+- **`Docs/UI/Documentation_technique_UI_Althea.md`** : tableau de synthèse complété (7 écrans : `UC_PatientHome`, `UC_PatientFiche`, `ContactEdition`, `IntervenantEdition`, `TherapeuteEdition`, `UC_Therapeutes`, `UC_RoleLegal`) + sections détaillées correspondantes ; hub Référentiels recompté (11 tuiles / 10 référentiels concrets).
+- **`Docs/UI/Process_Althea.md`** : ajout des Processus 11 (Gestion des patients), 12 (Contacts famille), 13 (Réseau d'intervenants) et 14 (Référentiel des thérapeutes), chacun avec son diagramme Mermaid.
+
+#### Build & qualité
+- ✅ Build réussi. Encodage UTF-8 avec BOM conservé sur tous les fichiers `.vb` créés/modifiés.
+
+---
+
+## 📅 14/06/2026
+
+### 🏥 C1 - Patients : anamnèse, photo d'identité et export documentaire (migration v2.3 - lot 3)
+
+#### Migration de schéma v2.3.0 lot 3 - Anamnèse patient (BD-15)
+- **Création de `Docs/Database/Migration/migration_v2.3.0_lot3_anamnese.sql`** : ajout de `patients.anamnese_rtf` et `patients.anamnese_txt` (MEDIUMTEXT, après `alerte_txt`) ; versionnement `tec_meta_schema` → 2.3.0.
+- **Création de `Docs/Database/Migration/migration_v2.3.0_lot3_anamnese_ROLLBACK.sql`** : rollback correspondant.
+- **Mise à jour de `Docs/Database/Database_technique.md`** : ajout de `anamnese_rtf` / `anamnese_txt` dans la définition de la table `patients` (après `alerte_txt`).
+- ✅ **Migration appliquée** en base de développement. Paramètres `PATH_GENERAL` et `PATH_DOCUMENT` déjà présents dans `tec_parametres` (groupe `PATHS`) - aucun ajout requis.
+
+#### Brique 2 - Refactoring CheminsPatientHelper (chemins déterministes par code patient)
+- **`Utils/Helpers/CheminsPatientHelper.vb`** - refactoring complet : les fonctions utilisent désormais `code_patient` (ex. `PA000003`) à la place de `id_patient`, conformément à la convention choisie (plus parlant, ADR-20).
+  - Ajout de `GetSousDossierDocuments()`, `GetDossierDocuments()`, `FormaterCodePatient(idPatient)`.
+  - `GetDossierPatient(codePatient)` reconstruit `{PATH_GENERAL}\{PATH_DOCUMENT}\{code_patient}`.
+  - `AssurerDossierPatient(codePatient)` crée le dossier à la demande.
+  - `GetNomFichierPhotoIdentite(extension)` : nom déterministe `Identite.ext` (minuscule, sans timestamp).
+  - `GetCheminFichierPatient(codePatient, nomFichier)` : chemin complet depuis le nom seul.
+- **`UC_PatientFiche.vb`** : `AfficherPhoto` mis à jour pour utiliser `_patient.CodePatient`.
+
+#### Brique 3 - Extension du modèle Patient pour l'anamnèse
+- **`Metier/Patients/Patient.vb`** : ajout des propriétés `AnamneseRtf` et `AnamneseTxt` (double format, règle §21 de `Rules.md`).
+- **`Core/Database/Queries/QueryPatients.vb`** : `SelectPatientById`, `InsertPatient`, `UpdatePatient` intègrent `anamnese_rtf` / `anamnese_txt`. `SelectPatientsListe` inchangé (performance).
+- **`Metier/Patients/GestionPatients.vb`** : `AjouterParametresPatient` lie `@anamnese_rtf`/`@anamnese_txt` ; `MapPatient` lit les nouvelles colonnes.
+
+#### Brique 4 - Onglet Anamnèse dans UC_PatientFiche
+- **`UC_PatientFiche.Designer.vb`** : ajout de l'onglet `tabPageAnamnese` (position 2, entre *Identité* et *Famille*), contenant `grpAnamnese` (`Dock=Fill`) avec un `UC_RichTextEditor` complet (`rteAnamnese`).
+- **`UC_PatientFiche.vb`** :
+  - `SetContext` propage le contexte à `rteAnamnese`.
+  - `RemplirChamps` : `rteAnamnese.ChargerContenu(patient.AnamneseRtf, patient.AnamneseTxt)`.
+  - `ViderChamps` : `rteAnamnese.RtfContent = String.Empty`.
+  - `AppliquerMode` : `rteAnamnese.ReadOnlyMode = Not editable`.
+  - `AlimenterPatientDepuisChamps` : sérialise `AnamneseRtf` / `AnamneseTxt`.
+  - **Correctif** : `AppliquerMode` ne force le retour sur *Identité* qu'en **Création** ; en **Modification**, l'onglet courant est conservé.
+- **`UI/Controls/Communs/UC_RichTextEditor.vb`** : ajout de `ChargerContenu(rtfContent, txtFallback)` - symétrique de `UC_RichTextEditorSimple`.
+
+#### Brique 5 - Upload de la photo d'identité
+- **`UC_PatientFiche.Designer.vb`** : ajout du bouton `btnUploadPhoto` (« Photo... ») dans le bandeau, sous le code patient ; style plat vert cohérent avec les boutons d'action existants.
+- **`UC_PatientFiche.vb`** :
+  - Constante `ExtensionsPhotoAutorisees` : `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tif`, `.tiff`.
+  - Tooltip sur `btnUploadPhoto` (formats acceptés).
+  - `btnUploadPhoto.Enabled` lié à `patientEnregistre` dans `AppliquerMode`.
+  - Handler `btnUploadPhoto_Click` : `OpenFileDialog` filtré → validation défensive d'extension (`Array.IndexOf`) → `AssurerDossierPatient` → copie vers `Identite.ext` (nom déterministe, `overwrite:=True`) → `UpdatePhotoPatient` (MAJ `patients.photo_fichier`) → `_patient.PhotoFichier` → `AfficherPhoto`.
+  - Helpers privés : `SelectionnerFichierPhoto()` et `ExtensionPhotoEstAutorisee(extension)`.
+
+#### Brique 6a - Export contextuel de l'anamnèse (PDF + Word) par délégation
+- **`UI/Controls/Communs/UC_RichTextEditor.vb`** - ajout du mécanisme d'export délégué (ADR-21) :
+  - `ExportFormat` (enum `Pdf`/`Word`).
+  - `ExportRequestedEventArgs` : `Format`, `NomFichierInitial`, `DestinationPath` (rempli par le conteneur).
+  - `ExportCompletedEventArgs` : `Format`, `DestinationPath`, `Success`.
+  - Événements publics `ExportRequested` et `ExportCompleted`.
+  - Méthode commune `DemanderExport` : lève `ExportRequested` → si `DestinationPath` fourni, export direct (`ExporterPDF`/`ExporterWord`) + lève `ExportCompleted` → sinon fallback `SaveFileDialog` (comportement générique préservé).
+  - Les boutons `btnExportPDF_Click` / `btnExportWord_Click` délèguent à `DemanderExport`.
+- **`UC_PatientFiche.vb`** :
+  - `rteAnamnese_ExportRequested` : calcule le chemin `…\Documents\PA000003\anamnese_PA000003_20260614_153000.pdf` (horodaté, dossier assuré par `AssurerDossierPatient`). Uniquement pour un patient enregistré - sinon fallback dialogue.
+  - `rteAnamnese_ExportCompleted` : ouvre le fichier exporté via `Process.Start` (`UseShellExecute = True`).
+  - Abonnement déclaratif via `Handles` (`Friend WithEvents`).
+
+#### Ancres de traçabilité documentaire (règle différée - brique Documents)
+- **`UC_PatientFiche.vb`** : ajout de commentaires `TODO` aux deux points de matérialisation de fichiers (export anamnèse et upload photo), documentant la règle : « tout document créé ou uploadé doit avoir une trace dans `documents` + modèle + niveau ».
+- **`Docs/Todo/ToDo.md §D1`** : formalisé en exigence de tête de section (règle, décision niveau Enum vs paramètre, points d'ancrage code).
+
+#### Build & qualité
+- ✅ Build réussi après chaque brique. Encodage UTF-8 avec BOM normalisé sur tous les fichiers `.vb` modifiés (`UC_PatientFiche.vb`, `UC_PatientFiche.Designer.vb`, `UC_RichTextEditor.vb`, `Patient.vb`, `QueryPatients.vb`, `GestionPatients.vb`, `CheminsPatientHelper.vb`).
+
+---
+
+## 📅 13/06/2026
+
+### 🏥 C1 - Patients : contacts famille - rôle légal (migration v2.2 - lot 2)
+
+#### Migration de schéma v2.2.0 lot 2 - Rôle légal des contacts (BD-14 / D-Q18)
+- **Création de `Docs/Database/Migration/migration_v2.2.0_lot2_role_legal.sql`** :
+  - Création de la table référentielle `ref_role_legal` (`id_role_legal` AUTO_INCREMENT, `code_role_legal` VARCHAR 30 unique, `libelle_role_legal` VARCHAR 100 unique, `actif`, `ordre_affichage`). Seed initial : Autorité parentale, Représentant légal, Personne autorisée, Contact d'urgence.
+  - `famille_contacts` : ajout de `id_role_legal` (FK NOT NULL → `ref_role_legal`), reprise des 4 anciens booléens vers la valeur de priorité décroissante (autorite_parentale > representant_legal > personne_autorisee > contact_urgence, repli sur Contact d'urgence), puis suppression des 4 colonnes booléennes cumulables.
+  - Versionnement dans `tec_meta_schema` → 2.2.0.
+- **Création de `Docs/Database/Migration/migration_v2.2.0_lot2_role_legal_ROLLBACK.sql`** : script de rollback (recréation des 4 booléens depuis `id_role_legal`, suppression de la FK et de `ref_role_legal`).
+- **Mise à jour de `Docs/Database/Database_technique.md`** : ajout de `ref_role_legal` dans la liste des référentiels, nouvelle section dédiée, remplacement des 4 booléens par `id_role_legal` dans la définition de `famille_contacts`.
+- ✅ **Migration appliquée** en base de développement.
+
+#### Brique A - Référentiel « Rôles légaux » (.NET)
+- **Création de `Metier/Referentiels/RoleLegal.vb`** : DTO calqué sur `LienPatient` - `IdRoleLegal` (ULong), `CodeRoleLegal`, `LibelleRoleLegal`, `Actif`, `OrdreAffichage`.
+- **Création de `Core/Database/Queries/QueryRoleLegal.vb`** : module SQL calqué sur `QueryLiensPatient` - `SelectRolesLegauxActifs`, `SelectRolesLegauxTous`, `SelectCountCodeRoleLegal`, `SelectCountLibelleRoleLegal`, `SelectCountUsageRoleLegal` (compte les usages dans `famille_contacts`), `UpdateRoleLegal`, `DesactiverRoleLegal`, `SupprimerRoleLegal`, `InsertRoleLegal`.
+- **Création de `Metier/Referentiels/GestionRoleLegal.vb`** : module métier calqué sur `GestionLiensPatient` - `GetRolesLegauxActifs()`, `GetRolesLegaux(afficherInactifs)`, `InsertRoleLegal`, `UpdateRoleLegal`, `DesactiverRoleLegal`, `SupprimerRoleLegal`, `CodeRoleLegalExiste`, `LibelleRoleLegalExiste`, `RoleLegalEstUtilise`.
+- **Création de `UI/Controls/Referentiels/UC_RoleLegal.vb`** : écran référentiel code-only héritant `UC_ReferentielBase` - métadonnées (titre « Rôles légaux », fil d'Ariane `Référentiels > Rôles légaux`, rôle minimum `SuperUser`, longueur max code 30), branchement complet sur `GestionRoleLegal` (`ChargerElements`, `CodeExisteDeja`, `LibelleExisteDeja`, `InsererElement`, `MettreAJourElement`, `DefinirActivation`).
+- **Modification de `UI/Controls/Referentiels/UC_ReferentielHome.Designer.vb`** : `tblMenu` étendu de 3 à 4 lignes (4×25 %) ; ajout du bouton `btnRoleLegal` (cellule (0,3), Tag `roleLegal_normal`, texte « Rôles légaux / Contacts »).
+- **Modification de `UI/Controls/Referentiels/UC_ReferentielHome.vb`** : `btnRoleLegal` intégré à `ActiverReferentielsDisponibles`, `DesactiverTousLesReferentiels` et au bloc `InitLargeIconButton` ; ajout du handler `btnRoleLegal_Click` naviguant vers `New UC_RoleLegal()` via `Home.NavigateToReferentielView`.
+- ✅ **Jalon de test 1** - build brique A réussi.
+
+#### Brique B - Refonte du stack contacts vers le rôle légal unique
+- **Modification de `Metier/Patients/FamilleContact.vb`** : suppression des 4 propriétés booléennes (`AutoriteParentale`, `RepresentantLegal`, `PersonneAutorisee`, `ContactUrgence`) ; ajout de `IdRoleLegal` (ULong, FK obligatoire) et `LibelleRoleLegal` (String, alimenté par jointure).
+- **Modification de `Core/Database/Queries/QueryFamilleContacts.vb`** :
+  - `SelectContactsParPatient` et `SelectContactById` : colonnes booléennes remplacées par `fc.id_role_legal` + `LEFT JOIN ref_role_legal rl` → `rl.libelle_role_legal`.
+  - `InsertContact` et `UpdateContact` : paramètres `@autorite_parentale/…` remplacés par `@id_role_legal`.
+- **Modification de `Metier/Patients/GestionFamilleContacts.vb`** :
+  - `AjouterParametresContact` : 4 `AddWithValue` booléens remplacés par `AddWithValue("@id_role_legal", contact.IdRoleLegal)`.
+  - `MapContact` : lecture des 4 booléens remplacée par `IdRoleLegal` + `LibelleRoleLegal`.
+- **Modification de `UI/Forms/Patients/ContactEdition.Designer.vb`** : `grpRoles` (renommé « Rôle légal ») - suppression des 4 `CheckBox` ; ajout de `lblRoleLegal`, `cboRoleLegal` (ComboBox DropDownList) et `btnAjouterRole` (`[+]`), calqués sur le modèle `lblLien/cboLien/btnAjouterLien`.
+- **Modification de `UI/Forms/Patients/ContactEdition.vb`** :
+  - Constante `CodeRoleParDefaut = "AUTORITE_PARENTALE"` (présélection à la création).
+  - Nouvelles méthodes `ChargerRolesLegaux(idASelectionner)` et `SelectionnerRoleParDefaut()` - calquées sur leurs équivalents pour le lien.
+  - `InitialiserCombos` : charge `cboRoleLegal`, masque `btnAjouterRole` si `_homeForm` est absent.
+  - `InitialiserFenetre` : appelle `SelectionnerRoleParDefaut()` en mode création.
+  - `RemplirChamps` : charge le rôle via `ChargerRolesLegaux(contact.IdRoleLegal)`.
+  - `ValiderSaisie` : validation bloquante si `cboRoleLegal.SelectedValue Is Nothing` (FK NOT NULL).
+  - `Enregistrer` : `contact.IdRoleLegal = CULng(cboRoleLegal.SelectedValue)`.
+  - Nouveau handler `btnAjouterRole_Click` : ouvre `UC_RoleLegal` en modal, recharge le combo avec auto-sélection du nouvel élément - calqué sur `btnAjouterLien_Click`.
+- **Modification de `UI/Controls/Patients/UC_PatientFiche.Designer.vb`** : grille `dgvContacts` - 4 `DataGridViewCheckBoxColumn` remplacées par une seule `DataGridViewTextBoxColumn` `colContactRole` (`DataPropertyName = "LibelleRoleLegal"`, `HeaderText = "Rôle légal"`).
+- **Modification de `UI/Controls/Patients/UC_PatientFiche.vb`** : `CorrespondRechercheContact` - `contact.LibelleRoleLegal` ajouté aux champs de recherche en mémoire.
+- ✅ **Jalon de test 2** - build final réussi ; balayage global : aucun usage résiduel des 4 anciennes propriétés booléennes dans la solution.
+- ✅ Encodage UTF-8 BOM appliqué sur les 4 fichiers créés (`RoleLegal.vb`, `QueryRoleLegal.vb`, `GestionRoleLegal.vb`, `UC_RoleLegal.vb`).
+
+---
+
+## 📅 12/06/2026
+
+### 🏥 C1 - Patients : fiche patient (UC_PatientFiche) - itération 3 (téléphone & pays)
+
+#### Brique réutilisable de gestion du téléphone (UtilsTelephone)
+- **Création de `Utils/UI/UtilsTelephone.vb`** : module statique de normalisation, formatage et validation du téléphone par pays (BE, FR, LU, DE, NL), réutilisable dans tout l'applicatif.
+  - `DeduirePays(libellePays)` / `NormaliserLibellePays(libellePays)` - déduction du pays depuis le libellé (gère les variantes Belgique/Belgium/België…).
+  - `LibellesPays()` / `LibellePaysParDefaut()` - liste canonique des pays pour les ComboBox.
+  - `NormaliserE164(saisie, libellePays)` - normalisation en format E.164 pour le stockage.
+  - `FormaterAffichage(saisie, libellePays)` - masque lisible (groupes par pays) à l'affichage.
+  - `Valider(saisie, libellePays, ByRef messageErreur)` - contrôle de conformité aux règles nationales ; repli sur `UtilsValidation.IsValidTelephone` si le pays est indéterminé.
+
+#### Sélecteur de pays par ComboBox (UC_PatientFiche)
+- **`UC_PatientFiche.Designer.vb`** : `txtPays` (TextBox) remplacé par `cboPays` (ComboBox `DropDownList`) dans le groupe Coordonnées.
+- **`UC_PatientFiche.vb`** :
+  - `InitialiserCombos()` charge `cboPays` depuis `UtilsTelephone.LibellesPays()`.
+  - `SelectionnerPays(libellePays)` canonicalise les anciens libellés / variantes localisées.
+  - `RemplirChamps()` sélectionne le pays canonique et formate le téléphone via `UtilsTelephone.FormaterAffichage`.
+  - `AlimenterPatientDepuisChamps()` stocke `cboPays.Text` et normalise le téléphone via `UtilsTelephone.NormaliserE164`.
+  - `DefinirEtatChampsIdentite()` active/désactive `cboPays` selon le mode.
+  - Handlers `txtTelephone_Leave` et `cboPays_SelectedIndexChanged` - re-formatent le téléphone à l'édition et au changement de pays.
+
+#### Affichage du téléphone dans la liste (UC_PatientHome)
+- **`UC_PatientHome.vb`** : ajout de `dgvPatients_CellFormatting` - formate la colonne téléphone via `UtilsTelephone.FormaterAffichage` au rendu uniquement (la source de données reste inchangée, stockée en canonique).
+
+#### Correction du reset des champs (UC_PatientFiche)
+- **`UC_PatientFiche.vb`** : `ViderChamps()` réinitialise désormais correctement la date de naissance (`dtpDateNaissance.Value = Date.Today`, `Checked = False`) et la situation familiale (`ReinitialiserSituationFamiliale()`), qui ne se réinitialisaient pas.
+
+#### Build et validation
+- ✅ Génération réussie ; encodage UTF-8 BOM rétabli sur les fichiers modifiés.
+
+
+
+### 🏥 C1 - Patients : fiche patient (UC_PatientFiche) - itération 2
+
+#### Validations réutilisables (UtilsValidation)
+- **Extension de `Utils/UI/UtilsValidation.vb`** : ajout de deux fonctions de validation centralisées.
+  - `IsValidTelephone(value, ByRef messageErreur)` - validation souple (6-15 chiffres, séparateurs courants autorisés) ; champ optionnel accepté vide.
+  - `IsValidEmail(value, ByRef messageErreur)` - validation regex format `nom@domaine.ext` ; champ optionnel accepté vide.
+
+#### Verrouillage réel des onglets dépendants (D-Q14)
+- **`UC_PatientFiche.vb`** : ajout du handler `tabFiche_Selecting` - annule la sélection des onglets Famille, Intervenants, Dossiers tant que `_idPatient <= 0`. Corrige le comportement WinForms où `TabPage.Enabled = False` grise le contenu mais ne bloque pas le clic.
+
+#### Âge calculé à la volée
+- **`UC_PatientFiche.Designer.vb`** : ajout de `lblAge` positionné à droite de `dtpDateNaissance`.
+- **`UC_PatientFiche.vb`** : ajout des méthodes `RafraichirAge()` et `CalculerAge(dateNaissance, reference)` ; handler `dtpDateNaissance_ValueChanged` recalcule l'affichage à chaque modification.
+
+#### Pays par défaut « Belgique »
+- **`UC_PatientFiche.vb`** : `ViderChamps()` initialise `txtPays` à `PaysParDefaut = "Belgique"` en création.
+
+#### Validations bloquantes et messages explicites
+- **`UC_PatientFiche.vb`** : réécriture de `ValiderSaisie()` - chaque champ invalide est signalé via `ErrorProvider` ; un message récapitulatif explicite est posé dans le statut Home (`SetStatus("Veuillez corriger : ...")`). Le premier champ fautif reçoit le focus. Champs validés : Nom (obligatoire), Prénom (obligatoire), Téléphone (format souple), E-mail (format), NISS (unicité).
+- **`UC_PatientFiche.vb`** : `Enregistrer()` ne pose plus de message générique pour ne pas écraser le message explicite de `ValiderSaisie()`.
+
+#### Intégration de l'alerte / notes thérapeute (D-Q12)
+- **`UC_PatientFiche.Designer.vb`** : ajout de `grpAlerte` (GroupBox « Alerte / Notes », ancré `Top|Bottom|Left|Right`) contenant `rteAlerte` (`UC_RichTextEditorSimple` en `Dock.Fill`) en bas de l'onglet Identité. La zone s'étire verticalement avec la fenêtre.
+- **`UC_PatientFiche.vb`** :
+  - `RemplirChamps()` - utilise la nouvelle méthode `rteAlerte.ChargerContenu(rtf, txt)` (robuste, force `CreateControl()` pour fiabiliser le chargement RTF au premier affichage).
+  - `ViderChamps()` - réinitialise l'éditeur.
+  - `AlimenterPatientDepuisChamps()` - écrit `patient.AlerteRtf` et `patient.AlerteTxt` depuis l'éditeur.
+  - `DefinirEtatChampsIdentite()` - active/désactive `rteAlerte.ReadOnlyMode` selon le mode (consultation/édition).
+  - `SetContext()` - propage le contexte UI à `rteAlerte.SetContext()` pour les infobulles.
+- **`UC_RichTextEditorSimple.vb`** : ajout de la méthode publique `ChargerContenu(rtfContent, txtFallback)` - force `CreateControl()` avant l'affectation RTF pour éviter la perte silencieuse du contenu quand le handle n'est pas encore créé.
+
+#### Bandeau d'alerte/notes redesigné (D-Q12)
+- **`UC_PatientFiche.Designer.vb`** : `lblAlerte` (Label, texte brut, orange) remplacé par `rtbAlerte` (`RichTextBox`, lecture seule, ascenseur vertical automatique, fond crème sobre). Le formatage RTF de la note est préservé à l'affichage.
+- **`UC_PatientFiche.vb`** : `AfficherAlerte(alerteRtf, alerteTxt)` - charge le contenu RTF dans `rtbAlerte` via `RichTextEditorHelper.ChargerContenu` ; affiche « Aucune note. » en gris si aucun contenu. Suppression de la coloration orange (les notes ne sont pas des alertes critiques).
+
+#### Build et validation
+- ✅ Génération réussie sans erreur après l'ensemble des corrections de l'itération 2.
+
+
+
+## 📅 11/06/2026
+
+### 🏥 C0 - Briques transverses cœur métier
+
+#### Lookup scalaire de paramètre applicatif
+- **Extension de `Core/Database/Queries/QueryParametres.vb`** : ajout de `SelectValeurParametreByCle` - requête SQL retournant la valeur d'un paramètre actif par sa clé (ex. `PATH_GENERAL`).
+- **Extension de `Metier/Parametres/GestionParametres.vb`** : ajout de `GetValeurParametre(cle)` - lecture d'une valeur scalaire depuis `tec_parametres` ; utilisé par les helpers nécessitant la racine de données.
+
+#### Helper de chemins déterministes pour les fichiers patients (D-Q13)
+- **Création de `Utils/Helpers/CheminsPatientHelper.vb`** : module statique calculant les chemins fichiers patients de manière déterministe à partir du paramètre `PATH_GENERAL`.
+  - `GetRacineDonnees()` - lit `PATH_GENERAL` via `GestionParametres`
+  - `GetDossierPatients()` - racine + `Patients\`
+  - `GetDossierPatient(idPatient)` - dossier individuel zéro-paddé à 6 chiffres (`Patients\000001\`)
+  - `AssurerDossierPatient(idPatient)` - crée le dossier si absent
+  - `GetNomFichierPhotoIdentite(extension)` - retourne `Identite.<ext>`
+  - `GetCheminFichierPatient(idPatient, nomFichier)` - chemin complet d'un fichier quelconque du dossier
+
+#### Mini-pile de navigation (D-Q15)
+- **Création de `UI/Navigation/NavigationEntry.vb`** : payload d'une entrée d'historique - porte la fabrique de vue (`Func(Of UserControl)`), le bouton menu, le libellé de contexte et un état de filtre optionnel.
+- **Extension de `UI/Navigation/NavigationManager.vb`** : ajout de `CanNavigateBack`, `NavigateAndPush`, `NavigateBack`, `ClearHistory` - gestion d'une `Stack(Of NavigationEntry)` permettant un retour contextuel avec restauration du filtre. Fichier converti de Windows-1252 en UTF-8 BOM (correction d'encodage).
+- **Extension de `UI/Forms/Home.vb`** : ajout de `NavigateAvecHistorique`, `NavigateRetour` (avec restauration du filtre et re-sélection du bouton menu) ; `NavigateTo` réinitialise désormais l'historique à chaque navigation racine.
+
+#### Hôte modal générique de référentiel (D-Q17)
+- **Création de `UI/Forms/Communs/ReferentielModalHost.vb`** : Form modale hébergeant n'importe quel `UC_Ref<X>` existant en `Dock.Fill`, avec son propre contexte UI local (`UserSession` + `ToolTip` + `ErrorProvider`). Aucune logique de sécurité dupliquée.
+- **Extension de `UI/Forms/Home.vb`** : ajout de `OuvrirReferentielModal(vueReferentiel, titre)` - point d'entrée unique pour déclencher un référentiel en contexte modal depuis n'importe quel UC métier.
+
+### 🏥 C1 - Patients : migration de schéma
+
+#### Migration v2.1.0 - Lot 1 Patients
+- **Création de `Docs/Database/Migration/migration_v2.1.0_lot1_patients.sql`** :
+  - `patients.alerte` renommé `alerte_rtf` (LONGTEXT) + ajout `alerte_txt` (LONGTEXT) pour double stockage RTF/texte brut (D-Q12)
+  - Ajout de `patients.photo_fichier` VARCHAR(255) - nom seul du fichier, chemin reconstruit (D-Q13)
+  - Suppression de `dossiers.prescripteur` VARCHAR - remplacé par le réseau N-N `autres_suivis_patient` (BD-13)
+  - Enrichissement commentaires `famille_contacts` et `autres_suivis_patient` : colonnes `commentaire_rtf` + `commentaire_txt` (BD-8)
+  - Versionnement dans `tec_meta_schema` → 2.1.0
+- **Création de `Docs/Database/Migration/migration_v2.1.0_lot1_patients_ROLLBACK.sql`** : script de rollback correspondant.
+- **Mise à jour de `Docs/Database/Database_technique.md`** : synchronisation de la documentation de schéma avec tous les changements ci-dessus.
+- ✅ **Migration appliquée** en base de développement.
+
+### 🏥 C1 - Patients : couche métier
+
+#### Modèles et requêtes SQL
+- **Création de `Metier/Patients/Patient.vb`** : DTO complet patient - identité, coordonnées, situation familiale, `PhotoFichier`, `AlerteRtf`, `AlerteTxt` ; helpers `NomComplet`, `AAlerte`.
+- **Création de `Metier/Patients/PatientListeItem.vb`** : modèle léger pour l'écran de liste - ajoute `NbDossiers`, `NbDossiersActifs`, `DateModification` ; helpers `NomComplet`, `AAlerte`, `APhoto`.
+- **Création de `Core/Database/Queries/QueryPatients.vb`** : module SQL patients - `SelectPatientsListe` (avec compteurs de dossiers via LEFT JOIN), `SelectPatientById`, requêtes INSERT/UPDATE/DELETE, vérifications unicité NISS et doublon nom+prénom+naissance.
+
+#### Service métier
+- **Création de `Metier/Patients/GestionPatients.vb`** : module CRUD patients.
+  - `GetPatients()` → `List(Of PatientListeItem)` triée par `date_modification DESC`
+  - `GetPatientById(id)` → `Patient` complet
+  - `CreatePatient(patient)`, `UpdatePatient(patient)`, `UpdatePhotoPatient(id, nomFichier)`, `DeletePatient(id)`
+  - Validations : `NissExiste`, `DoublonExiste` (nom+prénom+naissance), `PeutSupprimerPatient`
+  - Mappers privés `MapPatient` / `MapListeItem` ; helpers SQL `LireString`, `LireInt`, `LireDateNullable`, `LireLongNullable`, `ValeurOuDBNull`
+
+### 🏥 C1 - Patients : écran d'accueil (UC_PatientHome)
+
+#### Nouveau UserControl
+- **Création de `UI/Controls/Patients/UC_PatientHome.vb`** et **`UC_PatientHome.Designer.vb`** : premier écran du cœur métier patients.
+  - Implémente `IContextAwareUserControl` - contexte UI injecté par `Home` via `SetContext()`
+  - **Grille** `dgvPatients` liée par `DataPropertyName` à `PatientListeItem` (13 colonnes : Code, Nom, Prénom, Naissance, NISS, Téléphone, Email, Dossiers, Actifs, Alerte ☑, Photo ☑, Modifié le + Id masqué)
+  - **Recherche multi-champs en mémoire** : nom, prénom, NISS, code, téléphone, email - insensible à la casse, protégée contre les valeurs `Nothing`
+  - **Filtre « Avec dossiers actifs »** : restreint aux patients avec `NbDossiersActifs > 0`
+  - **Boutons** : Nouveau, Modifier, Ouvrir, Actualiser, Rechercher, Réinitialiser (via `UtilsButtons.InitStandardButton` + Tags)
+  - **Double-clic** sur une ligne et touche **Entrée** dans le champ de recherche déclenchent la recherche
+  - Boutons Nouveau/Modifier/Ouvrir : placeholders « à venir » (UC_PatientFiche, lot suivant)
+  - `ErrorProvider` et `ToolTip` **supprimés du Designer** - délégués entièrement au contexte UI partagé de `Home` (`_context.SetToolTip`, `_context.SetError`)
+
+#### Câblage navigation
+- **Modification de `UI/Forms/Home.vb`** - `btnPatients_Click` : navigue désormais vers `New UC_PatientHome()` via `NavigateTo(..., btnPatients, "Patients")` ; le contexte UI est injecté automatiquement par `NavigationManager`.
+
+#### Données de test
+- **Création de `Docs/Database/Seeds/seed_patients_dev.sql`** : 10 patients fictifs couvrant les cas représentatifs (alerte + photo, photo seule, alerte seule, données minimales, NISS NULL, adresse complète, situation familiale variée, mutualité, adulte, gaucher). Tri `date_modification DESC` de J à J-9. Requête de vérification intégrée.
+
+#### Build et validation
+- ✅ Génération réussie sans erreur après l'ensemble du lot C0 + C1 couche métier + UC_PatientHome
+
+---
+
+## 📅 09/06/2026
+
+### 🖊️ Composant UC_RichTextEditorSimple
+
+#### Nouveau composant UI réutilisable (variante allégée)
+- **Création de `UI/Controls/Communs/UC_RichTextEditorSimple.vb`** : Version compacte de `UC_RichTextEditor` destinée aux zones de commentaires et notes courtes embarquées dans d'autres UserControls ou Forms (référentiels, fiches patient, dossiers…).
+  - **Toolbar minimale (7 boutons)** : Gras, Italique, Souligné, Annuler, Rétablir, Effacer formatage, Insérer date/heure
+  - **Raccourcis clavier standards** : Ctrl+B, Ctrl+I, Ctrl+U natifs
+  - **Sauvegarde double format** : `RtfContent` (formatage) + `TextContent` (texte brut pour recherche full-text SQL), identique à la version complète
+  - **Mode lecture seule** (`ReadOnlyMode`) masquant la toolbar
+  - **Affichage/masquage toolbar** (`ShowToolbar`)
+  - **Événement `ContentChanged`** : notification des modifications au parent
+  - **Contexte optionnel** : implémente `IContextAwareUserControl` de façon optionnelle - fonctionne sans contexte si le parent ne l'injecte pas
+  - **Réutilise `RichTextEditorHelper` à 100 %** : aucune logique dupliquée
+  - **Taille entièrement pilotée par le parent** (Dock / Anchor)
+
+#### Différences avec UC_RichTextEditor (complet)
+| Fonctionnalité | UC_RichTextEditor | UC_RichTextEditorSimple |
+|---|---|---|
+| Police / taille | ✅ 9 polices, 14 tailles | ❌ Non |
+| Alignement, puces, retraits | ✅ | ❌ Non |
+| Couleurs texte / fond | ✅ | ❌ Non |
+| Couper / Copier / Coller | ✅ boutons toolbar | ✅ raccourcis OS natifs uniquement |
+| Impression Win32 | ✅ | ❌ Non |
+| Export PDF / Word | ✅ Syncfusion | ❌ Non |
+| Double format RTF + TXT | ✅ | ✅ |
+| Mode ReadOnly | ✅ | ✅ |
+| Contexte UI partagé | ✅ obligatoire | ✅ optionnel |
+| Taille | Fixe (grande) | Pilotée par le parent |
+
+#### Cas d'usage cibles
+- **Champ `commentaire`** dans les référentiels enrichis (`famille_contacts`, `autres_suivis_patient`)
+- **Notes courtes** dans les fiches patient, dossiers, séances
+- **Tout champ de texte libre** nécessitant du formatage basique sans l'overhead de la version complète
+
+---
+
+## 📅 08/06/2026
+
+### 🗂️ Module complet de gestion des référentiels
+
+#### Architecture générique
+- **Création de `UI/Controls/Referentiels/UC_ReferentielBase.vb`** : Classe de base héritable pour tous les écrans de gestion de référentiels (`ref_*`). Centralise : chargement, modes (consultation/création/modification), CRUD via points d'extension, validation (unicité code + libellé), droits, journalisation, activation/désactivation (soft-delete).
+  - **Points d'extension Overridable** : `ChargerElements`, `CodeExisteDeja`, `LibelleExisteDeja`, `InsererElement`, `MettreAJourElement`, `DefinirActivation`
+  - **Hooks champ supplémentaire** : `ConfigurerChampSupplementaire`, `AfficherChampSupplementaire`, `ViderChampSupplementaire`, `ActiverChampSupplementaire`, `ValiderChampSupplementaire` - permettent à une classe dérivée d'ajouter un champ d'édition sans modifier la base (ex. `tarif_defaut` dans `ref_types_seance`)
+  - **Modèle de présentation générique** : `ReferentielLigne` avec propriété `Tarif As Decimal?` optionnelle pour les référentiels avec montant associé
+  - **Compatibilité Designer** : non `MustInherit`, chaque UC dérivé possède son propre `.Designer.vb`
+
+- **Création de `UI/Controls/Referentiels/UC_ReferentielHome.vb`** : Hub d'accueil de la section Référentiels. Présente 9 tuiles, gère les droits (SuperUser/Admin) et navigue via `Home.NavigateToReferentielView()`.
+
+#### 9 référentiels implémentés (pile complète Query + Modèle + Gestion + UC)
+
+| Référentiel | Table | UC | Code max | Table d'usage |
+|---|---|---|---|---|
+| Domaines | `ref_domaines` | `UC_Domaines` | 10 | `dossiers`, `modeles_documents` |
+| Liens patient | `ref_liens_patient` | `UC_LiensPatient` | 50 | `famille_contacts` |
+| Rôles intervenant | `ref_roles_intervenant` | `UC_RolesIntervenant` | 30 | `autres_suivis_patient` |
+| Situations familiales | `ref_situations_familiales` | `UC_SituationsFamiliales` | 50 | `patients` |
+| Statuts dossier | `ref_statuts_dossier` | `UC_StatutsDossier` | 30 | `dossiers` |
+| Statuts séance | `ref_statuts_seance` | `UC_StatutsSeance` | 30 | `seances` |
+| Types documents | `ref_types_documents` | `UC_TypesDocuments` | 30 | `documents`, `modeles_documents` |
+| Types rendez-vous | `ref_types_rendez_vous` | `UC_TypesRendezVous` | 30 | `rendez_vous` |
+| **Types séance** ⭐ | `ref_types_seance` | `UC_TypesSeance` | 30 | `seances` + **tarif_defaut** |
+
+#### Cas spécial : UC_TypesSeance avec tarif par défaut
+- `ref_types_seance` possède un champ `tarif_defaut decimal(10,2) NOT NULL` absent des autres référentiels
+- Géré via les hooks `ConfigurerChampSupplementaire` / `AfficherChampSupplementaire` : `UC_TypesSeance` greffe dynamiquement un `NumericUpDown` dans `pnlEdition` sans modifier la base commune
+- `ReferentielLigne.Tarif As Decimal?` transporte la valeur entre couches
+
+#### Modules créés par référentiel
+Pour chacun des 9 référentiels (exemple sur `ref_types_seance`) :
+- `Core/Database/Queries/Query<X>.vb` - requêtes SQL (SELECT actifs/tous, COUNT unicité code/libellé, COUNT usage, UPDATE, INSERT, DELETE soft+hard)
+- `Metier/Referentiels/<X>.vb` - modèle métier (id, code, libelle, actif, ordre_affichage [+ tarif pour TypeSeance])
+- `Metier/Referentiels/Gestion<X>.vb` - service CRUD + vérifications unicité + `<X>EstUtilise()`
+- `UI/Controls/Referentiels/UC_<X>.vb` - UserControl concret héritant de `UC_ReferentielBase`
+
+#### Intégration navigation
+- `UC_ReferentielHome` : méthode `ActiverReferentielsDisponibles` active les 9 tuiles ; 7 handlers de clic ajoutés (`btnRolesIntervenant_Click` → `btnTypesSeance_Click`)
+- `Home.NavigateToReferentielView()` : navigation partagée existante, aucune modification nécessaire
+
+#### Build et validation
+- ✅ Génération réussie sans erreur après création de l'ensemble du lot
 
 ---
 
