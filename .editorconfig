@@ -1,0 +1,232 @@
+# -------------------------------------------------------------------------------------------------
+# .editorconfig — Althéa
+# Version : V1.0.0
+# Date    : 25/10/2026
+#
+# Rôle :
+# Conventions d'écriture du projet, lues par Visual Studio (frappe, enregistrement, suggestions de
+# style) et par les analyseurs .NET. Elles voyagent avec le dépôt.
+#
+# Remarques (ADR-57) :
+# - Reprend les réglages exportés de Visual Studio le 22/06/2026 (anciennement « My Project/.editorconfig »,
+#   qui ne s'appliquait qu'à ce dossier), avec l'encodage utf-8-bom pour les .vb.
+# - Pas de règle end_of_line : .gitattributes (* text=auto) range tout en LF dans le dépôt ; une fin de
+#   ligne changée par l'éditeur ne crée aucune différence.
+# - Pas de trim_trailing_whitespace ni d'insert_final_newline : l'éditeur réécrirait des lignes
+#   existantes à chaque enregistrement.
+# - Les suggestions de style ne sont que des propositions (ampoule) : rien n'est appliqué sans action.
+# -------------------------------------------------------------------------------------------------
+
+root = true
+
+# Fichiers XML du projet (vbproj, resx, manifeste…) : indentation de 2, comme Visual Studio les écrit
+[*.{vbproj,slnx,resx,xml,config,manifest,props,targets}]
+indent_size = 2
+indent_style = space
+
+# Fichiers Visual Basic
+[*.vb]
+
+#### Options EditorConfig principales ####
+
+# Encodage : UTF-8 avec BOM (règle du projet ; un fichier sans BOM en reçoit un à son prochain enregistrement)
+charset = utf-8-bom
+
+# Indentation et espacement
+indent_size = 4
+indent_style = space
+tab_width = 4
+
+#### Actions du code .NET ####
+
+# Membres du type
+dotnet_hide_advanced_members = true
+dotnet_member_insertion_location = with_other_members_of_the_same_kind
+dotnet_property_generation_behavior = prefer_throwing_properties
+
+# Recherche de symbole
+dotnet_search_reference_assemblies = true
+
+#### Conventions de codage .NET ####
+
+# Organiser les instructions Using
+dotnet_separate_import_directive_groups = false
+dotnet_sort_system_directives_first = true
+file_header_template = unset
+
+# Préférences de this. et Me.
+dotnet_style_qualification_for_event = false
+dotnet_style_qualification_for_field = false
+dotnet_style_qualification_for_method = false
+dotnet_style_qualification_for_property = false
+
+# Préférences des mots clés de langage par rapport aux types BCL
+dotnet_style_predefined_type_for_locals_parameters_members = true
+dotnet_style_predefined_type_for_member_access = true
+
+# Préférences de parenthèses
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity
+
+# Préférences de modificateur
+dotnet_style_require_accessibility_modifiers = for_non_interface_members
+
+# Préférences de niveau expression
+dotnet_prefer_system_hash_code = true
+dotnet_style_coalesce_expression = true
+dotnet_style_collection_initializer = true
+dotnet_style_explicit_tuple_names = true
+dotnet_style_namespace_match_folder = true
+dotnet_style_null_propagation = true
+dotnet_style_object_initializer = true
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+dotnet_style_prefer_auto_properties = true
+dotnet_style_prefer_collection_expression = when_types_loosely_match
+dotnet_style_prefer_compound_assignment = true
+dotnet_style_prefer_conditional_expression_over_assignment = true
+dotnet_style_prefer_conditional_expression_over_return = true
+dotnet_style_prefer_foreach_explicit_cast_in_source = when_strongly_typed
+dotnet_style_prefer_inferred_anonymous_type_member_names = true
+dotnet_style_prefer_inferred_tuple_names = true
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true
+dotnet_style_prefer_non_hidden_explicit_cast_in_source = true
+dotnet_style_prefer_simplified_boolean_expressions = true
+dotnet_style_prefer_simplified_interpolation = true
+
+# Préférences de champ
+dotnet_style_readonly_field = true
+
+# Préférences de paramètre
+dotnet_code_quality_unused_parameters = all
+
+# Préférences de suppression
+dotnet_remove_unnecessary_suppression_exclusions = none
+
+# Préférences de nouvelle ligne
+dotnet_style_allow_multiple_blank_lines_experimental = true
+dotnet_style_allow_statement_immediately_after_block_experimental = true
+
+#### Conventions de codage VB ####
+
+# Préférences de modificateur
+visual_basic_preferred_modifier_order = partial,default,private,protected,public,friend,notoverridable,overridable,mustoverride,overloads,overrides,mustinherit,notinheritable,static,shared,shadows,readonly,writeonly,dim,const,withevents,widening,narrowing,custom,async,iterator
+
+# Préférences de niveau expression
+visual_basic_style_prefer_isnot_expression = true
+visual_basic_style_prefer_simplified_object_creation = true
+visual_basic_style_unused_value_assignment_preference = unused_local_variable
+visual_basic_style_unused_value_expression_statement_preference = unused_local_variable
+
+#### Styles de nommage ####
+
+# Règles de nommage
+
+dotnet_naming_rule.interface_should_be_commence_par_i.severity = suggestion
+dotnet_naming_rule.interface_should_be_commence_par_i.symbols = interface
+dotnet_naming_rule.interface_should_be_commence_par_i.style = commence_par_i
+
+dotnet_naming_rule.types_should_be_casse_pascal.severity = suggestion
+dotnet_naming_rule.types_should_be_casse_pascal.symbols = types
+dotnet_naming_rule.types_should_be_casse_pascal.style = casse_pascal
+
+dotnet_naming_rule.membres_autres_que_des_champs_should_be_casse_pascal.severity = suggestion
+dotnet_naming_rule.membres_autres_que_des_champs_should_be_casse_pascal.symbols = membres_autres_que_des_champs
+dotnet_naming_rule.membres_autres_que_des_champs_should_be_casse_pascal.style = casse_pascal
+
+# Spécifications de symboles
+
+dotnet_naming_symbols.interface.applicable_kinds = interface
+dotnet_naming_symbols.interface.applicable_accessibilities = public, friend, private, protected, protected_friend, private_protected
+dotnet_naming_symbols.interface.required_modifiers = 
+
+dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
+dotnet_naming_symbols.types.applicable_accessibilities = public, friend, private, protected, protected_friend, private_protected
+dotnet_naming_symbols.types.required_modifiers = 
+
+dotnet_naming_symbols.membres_autres_que_des_champs.applicable_kinds = property, event, method
+dotnet_naming_symbols.membres_autres_que_des_champs.applicable_accessibilities = public, friend, private, protected, protected_friend, private_protected
+dotnet_naming_symbols.membres_autres_que_des_champs.required_modifiers = 
+
+# Styles de nommage
+
+dotnet_naming_style.casse_pascal.required_prefix = 
+dotnet_naming_style.casse_pascal.required_suffix = 
+dotnet_naming_style.casse_pascal.word_separator = 
+dotnet_naming_style.casse_pascal.capitalization = pascal_case
+
+dotnet_naming_style.commence_par_i.required_prefix = I
+dotnet_naming_style.commence_par_i.required_suffix = 
+dotnet_naming_style.commence_par_i.word_separator = 
+dotnet_naming_style.commence_par_i.capitalization = pascal_case
+
+#### Analyseurs .NET (audit D-1, ADR-57) ####
+# Althea.vbproj active le jeu « Recommended » (AnalysisMode) : une règle qui se déclenche est un
+# avertissement, jamais une erreur. Les règles déjà rencontrées dans le code au 25/10/2026 sont
+# ramenées ici au niveau « suggestion » (points sous le code, liste d'erreurs › Messages) : la dette
+# existante ne pollue pas le journal de compilation, et toute autre règle du jeu reste visible.
+# Pour durcir une règle : passer sa ligne à « warning » après avoir corrigé ses cas.
+# Les commentaires sont sur leur propre ligne (pas de commentaire en fin de ligne dans ce format).
+
+[*.vb]
+
+# Écartées : contraires aux conventions du projet
+# Traits de soulignement (constantes MAJUSCULES_SOULIGNEES, gestionnaires btn_Click)
+dotnet_diagnostic.CA1707.severity = none
+# Culture implicite des ToString/Format/Parse : Althéa travaille en culture française, voulu
+dotnet_diagnostic.CA1305.severity = none
+# Nom du paramètre d'une redéfinition (« e » au lieu de « pevent » dans OnPaint…)
+dotnet_diagnostic.CA1725.severity = none
+
+# Fiabilité, comparaisons de textes (cas à revoir en priorité)
+# Type qui possède un champ supprimable sans être IDisposable
+dotnet_diagnostic.CA1001.severity = suggestion
+# Résultat d'un appel ignoré (TryParse non vérifié)
+dotnet_diagnostic.CA1806.severity = suggestion
+# ToUpper/ToLower sans culture précisée
+dotnet_diagnostic.CA1304.severity = suggestion
+# Comparaison ordinale préférable
+dotnet_diagnostic.CA1309.severity = suggestion
+# StartsWith/EndsWith sans StringComparison
+dotnet_diagnostic.CA1310.severity = suggestion
+# Comparaison sans casse par String.Equals(…, StringComparison)
+dotnet_diagnostic.CA1862.severity = suggestion
+
+# Conception et lisibilité
+# Champ d'instance visible (préférer une propriété)
+dotnet_diagnostic.CA1051.severity = suggestion
+# Champ initialisé explicitement à sa valeur par défaut
+dotnet_diagnostic.CA1805.severity = suggestion
+# Membre qui pourrait être Shared
+dotnet_diagnostic.CA1822.severity = suggestion
+# Type privé qui pourrait être NotInheritable
+dotnet_diagnostic.CA1852.severity = suggestion
+# Contains plutôt que IndexOf
+dotnet_diagnostic.CA2249.severity = suggestion
+# ArgumentNullException.ThrowIfNull
+dotnet_diagnostic.CA1510.severity = suggestion
+# ArgumentOutOfRangeException.ThrowIf…
+dotnet_diagnostic.CA1512.severity = suggestion
+
+# Performance (micro-optimisations)
+# Array.Empty plutôt qu'un tableau vide
+dotnet_diagnostic.CA1825.severity = suggestion
+# StringBuilder.Append(Char)
+dotnet_diagnostic.CA1834.severity = suggestion
+# String.Concat sur des Span
+dotnet_diagnostic.CA1845.severity = suggestion
+# AsSpan plutôt que Substring
+dotnet_diagnostic.CA1846.severity = suggestion
+# Dictionary.Remove sans ContainsKey préalable
+dotnet_diagnostic.CA1853.severity = suggestion
+# TryGetValue plutôt que ContainsKey + indexeur
+dotnet_diagnostic.CA1854.severity = suggestion
+# Count > 0 plutôt que Any()
+dotnet_diagnostic.CA1860.severity = suggestion
+# Tableau constant passé en argument
+dotnet_diagnostic.CA1861.severity = suggestion
+# StartsWith(Char) pour un seul caractère
+dotnet_diagnostic.CA1865.severity = suggestion
+# JsonSerializerOptions mis en cache
+dotnet_diagnostic.CA1869.severity = suggestion

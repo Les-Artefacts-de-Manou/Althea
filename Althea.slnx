@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Althea.vbproj" />
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Althea.Tests/Althea.Tests.vbproj" />
+  </Folder>
+</Solution>

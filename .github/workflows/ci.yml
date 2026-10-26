@@ -1,0 +1,92 @@
+# -------------------------------------------------------------------------------------------------
+# Workflow : ci.yml
+# Projet   : Althéa
+# Version  : V1.0.0
+# Date     : 26/10/2026
+# Auteur   : Joëlle (Manou) / Projet Althéa
+#
+# Rôle :
+# Intégration continue (audit D-3, ADR-59) : une fois par jour (s'il y a eu un push dans les
+# dernières 24 heures) et à la demande (bouton « Run workflow »), une machine Windows de GitHub
+# récupère le code de master, compile l'application et le projet de tests (configuration Release,
+# celle qui est livrée), puis lance les tests automatisés. Résultat : onglet « Actions » du dépôt
+# (coche verte ou croix rouge).
+#
+# Remarques :
+# - Aucun secret : la clé Syncfusion n'est lue qu'à l'exécution de l'application, pas à la
+#   compilation ; le test de fumée des requêtes, qui demande la base althea_tests, s'ignore tout
+#   seul (pas de variable ALTHEA_TESTS_CONNEXION ici).
+# - Dépôt privé : minutes gratuites limitées (2 000 par mois), une minute Windows coûte plus qu'une
+#   minute Linux. D'où (décision de Joëlle, 26/10/2026) : pas à chaque push, mais un passage le soir
+#   — 20:30 UTC, soit 21:30 à Bruxelles en hiver et 22:30 en été — sauté sans nouveau commit
+#   depuis 24 h (petit contrôle préalable sur Linux, quelques secondes). La garde au quotidien
+#   reste Tools\test.cmd sur le poste, avant chaque commit (Rules § 3).
+# - Une exécution plus récente annule celle en cours.
+# - Droits minimaux : lecture du code seulement.
+# -------------------------------------------------------------------------------------------------
+
+name: Compilation et tests
+
+on:
+  schedule:
+    - cron: '30 20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nouveautes:
+    name: Nouveau commit depuis 24 h ?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      a_verifier: ${{ steps.controle.outputs.a_verifier }}
+    steps:
+      - name: Récupérer le dernier commit
+        uses: actions/checkout@v5
+
+      - name: Décider
+        id: controle
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "a_verifier=true" >> "$GITHUB_OUTPUT"
+          elif [ $(( $(date +%s) - $(git log -1 --format=%ct) )) -lt 86400 ]; then
+            echo "a_verifier=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "a_verifier=false" >> "$GITHUB_OUTPUT"
+            echo "Aucun commit depuis 24 h : vérification sautée."
+          fi
+
+  compilation-tests:
+    name: Compilation et tests (Windows)
+    needs: nouveautes
+    if: needs.nouveautes.outputs.a_verifier == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      - name: Installer .NET 8
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restaurer les paquets
+        run: dotnet restore Tests/Althea.Tests/Althea.Tests.vbproj
+
+      - name: Compiler l'application et les tests (Release)
+        run: dotnet build Tests/Althea.Tests/Althea.Tests.vbproj --no-restore --configuration Release
+
+      - name: Lancer les tests
+        run: dotnet test Tests/Althea.Tests/Althea.Tests.vbproj --no-build --configuration Release --logger "console;verbosity=normal"
